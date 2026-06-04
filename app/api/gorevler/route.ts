@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         channel: "email" as const,
       };
     })
-    .filter(Boolean);
+    .filter((x): x is NonNullable<typeof x> => x !== null);
 
   if (reminderInserts.length > 0) {
     await supabase.from("reminders").insert(reminderInserts);
