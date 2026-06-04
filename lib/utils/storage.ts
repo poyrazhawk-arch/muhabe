@@ -31,4 +31,11 @@ export async function uploadFile(
 export async function getSignedUrl(path: string, expiresIn = 3600): Promise<string> {
   const { data, error } = await supabase.storage
     .from(BUCKET)
+    .createSignedUrl(path, expiresIn);
+
+  if (error) throw new Error(`URL hatası: ${error.message}`);
+  if (!data?.signedUrl) throw new Error("Signed URL alınamadı");
+
+  return data.signedUrl;
+}
   
