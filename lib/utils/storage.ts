@@ -1,16 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 const BUCKET = "belgeler";
 
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
+
 /**
- * Dosyayı R2'ye yükler ve 7 günlük geçici indirme URL'si döner.
- * file_url olarak signed URL yerine storage path saklıyoruz,
- * görüntüleme sırasında getSignedUrl ile fresh URL üretilir.
+ * Dosyayı Supabase Storage'a yükler ve path döner.
  * Dönüş değeri: storage path (örn: "client-id/timestamp-random.pdf")
  */
 export async function uploadFile(
@@ -18,7 +18,7 @@ export async function uploadFile(
   buffer: Buffer,
   contentType: string
 ): Promise<string> {
-  const { error } = await supabase.storage
+  const { error } = await getSupabase().storage
     .from(BUCKET)
     .upload(path, buffer, { contentType, upsert: false });
 
@@ -29,7 +29,7 @@ export async function uploadFile(
 }
 
 export async function getSignedUrl(path: string, expiresIn = 3600): Promise<string> {
-  const { data, error } = await supabase.storage
+  const { data, error } = await getSupabase().storage
     .from(BUCKET)
     .createSignedUrl(path, expiresIn);
 
