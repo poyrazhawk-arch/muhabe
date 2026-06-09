@@ -11,10 +11,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .from("accountants").select("*").eq("user_id", user.id).single();
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "#f8fafc" }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: "var(--bg)" }}>
       <Sidebar accountant={accountant} />
       <main className="flex-1 overflow-auto">
-        <div className="max-w-6xl mx-auto p-7">{children}</div>
+        <div className="max-w-5xl mx-auto px-8 py-8">{children}</div>
       </main>
     </div>
   );

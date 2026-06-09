@@ -3,6 +3,14 @@
     {
       "path": "/api/cron/hatirlatmalar",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/gorev-olustur",
+      "schedule": "0 8 1 * *"
+    },
+    {
+      "path": "/api/cron/aylik-ozet",
+      "schedule": "0 9 28 * *"
     }
   ]
 }
