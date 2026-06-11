@@ -2,17 +2,34 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
+import Link from "next/link";
 import BelgeIsteButton from "./BelgeIsteButton";
-import { calculateRAG, RAG_LABELS, RAG_COLORS } from "@/lib/utils/rag";
+import { calculateRAG } from "@/lib/utils/rag";
 
-const DOC_DURUM: Record<string, string> = { pending: "Bekliyor", received: "Alındı", approved: "Onaylandı", rejected: "Reddedildi" };
-const DOC_COLOR: Record<string, string> = { pending: "bg-yellow-100 text-yellow-700", received: "bg-blue-100 text-blue-700", approved: "bg-green-100 text-green-700", rejected: "bg-red-100 text-red-700" };
+const DOC_DURUM: Record<string, string> = {
+  pending:  "Bekliyor",
+  received: "Alındı",
+  approved: "Onaylandı",
+  rejected: "Reddedildi",
+};
+const DOC_STYLE: Record<string, React.CSSProperties> = {
+  pending:  { background: "#fffbeb", color: "#d97706", border: "1px solid #fde68a" },
+  received: { background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe" },
+  approved: { background: "#f0fdf4", color: "#15803d", border: "1px solid #bbf7d0" },
+  rejected: { background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca" },
+};
+
+const RAG_STYLE: Record<string, React.CSSProperties> = {
+  red:   { background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca" },
+  amber: { background: "#fffbeb", color: "#d97706", border: "1px solid #fde68a" },
+  green: { background: "#f0fdf4", color: "#15803d", border: "1px solid #bbf7d0" },
+};
+const RAG_LABEL: Record<string, string> = { red: "Kritik", amber: "Dikkat", green: "Tamam" };
 
 export default async function MusteriDetayPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-
   const { data: accountant } = await supabase
     .from("accountants").select("id").eq("user_id", user!.id).single();
 
@@ -23,91 +40,134 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
   const [{ data: documents }, { data: tasks }, { data: tokens }] = await Promise.all([
     supabase.from("documents").select("*").eq("client_id", id).order("created_at", { ascending: false }),
     supabase.from("tasks").select("*").eq("client_id", id).neq("status", "completed").order("due_date"),
-    supabase.from("upload_tokens").select("*").eq("client_id", id).eq("is_active", true).order("created_at", { ascending: false }).limit(3),
+    supabase.from("upload_tokens").select("*").eq("client_id", id).eq("is_active", true)
+      .order("created_at", { ascending: false }).limit(3),
   ]);
 
-  const pendingDocs = documents?.filter(d => d.status === "pending").length ?? 0;
-  const overdueTasks = tasks?.filter(t => new Date(t.due_date) < new Date()).length ?? 0;
-  const rag = calculateRAG(overdueTasks, pendingDocs, 0);
+  const pendingDocs   = documents?.filter(d => d.status === "pending").length ?? 0;
+  const overdueTasks  = tasks?.filter(t => new Date(t.due_date) < new Date()).length ?? 0;
+  const rag           = calculateRAG(overdueTasks, pendingDocs, 0);
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      {/* Başlık */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{client.full_name}</h1>
-          {client.company_name && <p className="text-slate-500 mt-0.5">{client.company_name}</p>}
+    <div className="space-y-5 max-w-3xl animate-fade-up">
+
+      {/* Breadcrumb + Başlık */}
+      <div>
+        <Link href="/dashboard/musteriler" className="inline-flex items-center gap-1 text-[12px] font-medium mb-3"
+          style={{ color: "var(--text-3)" }}>
+          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7"/>
+          </svg>
+          Müşteriler
+        </Link>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>
+              {client.full_name}
+            </h1>
+            {client.company_name && (
+              <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>{client.company_name}</p>
+            )}
+          </div>
+          <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg"
+            style={RAG_STYLE[rag]}>
+            {RAG_LABEL[rag]}
+          </span>
         </div>
-        <span className={`text-sm px-3 py-1 rounded-full border font-medium ${RAG_COLORS[rag]}`}>
-          {RAG_LABELS[rag]}
-        </span>
       </div>
 
       {/* Bilgi kartları */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {client.email && <InfoCard label="E-posta" value={client.email} />}
-        {client.phone && <InfoCard label="Telefon" value={client.phone} />}
-        {client.tax_number && <InfoCard label="Vergi No" value={client.tax_number} />}
-        <InfoCard label="Durum" value={client.status === "active" ? "Aktif" : "Pasif"} />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {[
+          client.email      && { label: "E-posta",     value: client.email },
+          client.phone      && { label: "Telefon",     value: client.phone },
+          client.tax_number && { label: "Vergi No",    value: client.tax_number },
+          { label: "Durum", value: client.status === "active" ? "Aktif" : "Pasif" },
+        ].filter(Boolean).map((item: any) => (
+          <div key={item.label} className="rounded-lg p-3"
+            style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+            <p className="text-[11px] font-medium" style={{ color: "var(--text-3)" }}>{item.label}</p>
+            <p className="text-[12px] font-semibold mt-0.5 truncate" style={{ color: "var(--text-1)" }}>
+              {item.value}
+            </p>
+          </div>
+        ))}
       </div>
 
-      {/* Belge İste */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-slate-900">Belge Talebi</h2>
+      {/* Belge Talebi */}
+      <div className="rounded-xl overflow-hidden"
+        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
+        <div className="px-5 py-3.5 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-2)" }}>
+          <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>Belge Talebi</h2>
           <BelgeIsteButton clientId={id} clientName={client.full_name} />
         </div>
-        {tokens && tokens.length > 0 ? (
-          <div className="space-y-2">
-            {tokens.map((t: any) => {
-              const expired = new Date(t.expires_at) < new Date();
-              const url = `${process.env.NEXT_PUBLIC_APP_URL}/yukle?token=${t.token}`;
-              return (
-                <div key={t.id} className={`flex items-center justify-between p-3 rounded-lg border text-sm ${expired ? "bg-slate-50 border-slate-200 opacity-60" : "bg-blue-50 border-blue-200"}`}>
-                  <div>
-                    <p className="font-medium text-slate-700">{t.document_types.join(", ")}</p>
-                    <p className="text-xs text-slate-400">
-                      {expired ? "Süresi doldu" : `${format(new Date(t.expires_at), "d MMM HH:mm", { locale: tr })}'e kadar geçerli`}
-                      {" · "}{t.used_count}/{t.max_uses} kullanım
-                    </p>
+        <div className="p-4">
+          {tokens && tokens.length > 0 ? (
+            <div className="space-y-2">
+              {tokens.map((t: any) => {
+                const expired = new Date(t.expires_at) < new Date();
+                const url = `${process.env.NEXT_PUBLIC_APP_URL}/yukle?token=${t.token}`;
+                return (
+                  <div key={t.id} className="flex items-center justify-between p-3 rounded-lg"
+                    style={{
+                      background: expired ? "var(--bg)" : "#eff6ff",
+                      border: `1px solid ${expired ? "var(--border)" : "#bfdbfe"}`,
+                      opacity: expired ? 0.6 : 1,
+                    }}>
+                    <div>
+                      <p className="text-[12px] font-semibold" style={{ color: "var(--text-1)" }}>
+                        {t.document_types.join(", ")}
+                      </p>
+                      <p className="text-[11px] mt-0.5" style={{ color: "var(--text-3)" }}>
+                        {expired ? "Süresi doldu" : `${format(new Date(t.expires_at), "d MMM HH:mm", { locale: tr })}'e kadar`}
+                        {" · "}{t.used_count}/{t.max_uses} kullanım
+                      </p>
+                    </div>
+                    {!expired && (
+                      <CopyButton url={url} />
+                    )}
                   </div>
-                  {!expired && (
-                    <button
-                      onClick={() => navigator.clipboard.writeText(url)}
-                      className="text-xs text-blue-600 hover:underline ml-3 shrink-0"
-                    >
-                      Kopyala
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-sm text-slate-400">Henüz belge talebi oluşturulmamış</p>
-        )}
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-[13px] text-center py-4" style={{ color: "var(--text-3)" }}>
+              Henüz belge talebi oluşturulmamış
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Belgeler */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100">
-          <h2 className="font-semibold text-slate-900">Belgeler ({documents?.length ?? 0})</h2>
+      <div className="rounded-xl overflow-hidden"
+        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
+        <div className="px-5 py-3.5" style={{ borderBottom: "1px solid var(--border-2)" }}>
+          <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>
+            Belgeler <span style={{ color: "var(--text-3)" }}>({documents?.length ?? 0})</span>
+          </h2>
         </div>
         {!documents || documents.length === 0 ? (
-          <p className="px-5 py-8 text-center text-slate-400 text-sm">Belge yok</p>
+          <p className="px-5 py-8 text-center text-[13px]" style={{ color: "var(--text-3)" }}>Belge yok</p>
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y" style={{ borderColor: "var(--border-2)" }}>
             {documents.map((doc) => (
               <div key={doc.id} className="px-5 py-3 flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-900">{doc.file_name}</p>
-                  <p className="text-xs text-slate-400">{doc.document_type} · {format(new Date(doc.created_at), "d MMM yyyy", { locale: tr })}</p>
+                  <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>{doc.file_name}</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: "var(--text-3)" }}>
+                    {doc.document_type} · {format(new Date(doc.created_at), "d MMM yyyy", { locale: tr })}
+                  </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${DOC_COLOR[doc.status]}`}>
+                <div className="flex items-center gap-2 shrink-0 ml-3">
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md"
+                    style={DOC_STYLE[doc.status] ?? DOC_STYLE.pending}>
                     {DOC_DURUM[doc.status]}
                   </span>
-                  <a href={`/api/belgeler/indir/${doc.id}`} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline">İndir</a>
+                  <a href={`/api/belgeler/indir/${doc.id}`} target="_blank" rel="noopener noreferrer"
+                    className="text-[12px] font-medium px-2.5 py-1 rounded-lg transition-colors"
+                    style={{ color: "var(--accent)", background: "var(--accent-bg)" }}>
+                    İndir
+                  </a>
                 </div>
               </div>
             ))}
@@ -116,22 +176,26 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
       </div>
 
       {/* Görevler */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100">
-          <h2 className="font-semibold text-slate-900">Aktif Görevler ({tasks?.length ?? 0})</h2>
+      <div className="rounded-xl overflow-hidden"
+        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
+        <div className="px-5 py-3.5" style={{ borderBottom: "1px solid var(--border-2)" }}>
+          <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>
+            Aktif Görevler <span style={{ color: "var(--text-3)" }}>({tasks?.length ?? 0})</span>
+          </h2>
         </div>
         {!tasks || tasks.length === 0 ? (
-          <p className="px-5 py-8 text-center text-slate-400 text-sm">Aktif görev yok</p>
+          <p className="px-5 py-8 text-center text-[13px]" style={{ color: "var(--text-3)" }}>Aktif görev yok</p>
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y" style={{ borderColor: "var(--border-2)" }}>
             {tasks.map((task) => {
               const overdue = new Date(task.due_date) < new Date();
               return (
                 <div key={task.id} className="px-5 py-3 flex items-center justify-between">
-                  <p className="text-sm font-medium text-slate-900">{task.title}</p>
-                  <span className={`text-xs font-medium ${overdue ? "text-red-600" : "text-slate-500"}`}>
+                  <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>{task.title}</p>
+                  <span className="text-[12px] font-medium tabular-nums"
+                    style={{ color: overdue ? "#dc2626" : "var(--text-3)" }}>
                     {format(new Date(task.due_date), "d MMM yyyy", { locale: tr })}
-                    {overdue && " (Gecikti)"}
+                    {overdue && " · Gecikti"}
                   </span>
                 </div>
               );
@@ -143,11 +207,5 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
   );
 }
 
-function InfoCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="text-sm font-medium text-slate-900 mt-0.5 truncate">{value}</p>
-    </div>
-  );
-}
+// Client component for clipboard
+import CopyButton from "./CopyButton";

@@ -62,8 +62,16 @@ export default async function FinansPage() {
           { label: "Gecikmiş",      value: fmt(gecikmiş), color: "#dc2626", bg: "#fef2f2" },
         ].map(({ label, value, color, bg }) => (
           <div key={label} className="rounded-xl p-4"
-            style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
-            <p className="text-[20px] font-bold tracking-tight" style={{ color }}>{value}</p>
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              boxShadow: "var(--shadow-sm)",
+              borderTop: `2px solid ${color}`,
+            }}>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center mb-3" style={{ background: bg }}>
+              <span className="text-[11px] font-bold" style={{ color }}>₺</span>
+            </div>
+            <p className="text-[22px] font-bold tracking-tight tabular-nums" style={{ color: "var(--text-1)" }}>{value}</p>
             <p className="text-[12px] mt-0.5 font-medium" style={{ color: "var(--text-3)" }}>{label}</p>
           </div>
         ))}
@@ -71,7 +79,7 @@ export default async function FinansPage() {
 
       {/* Tablo */}
       <div className="rounded-xl overflow-hidden"
-        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
+        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
         {!fees || fees.length === 0 ? (
           <div className="py-16 text-center">
             <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>Henüz hizmet bedeli eklenmemiş</p>

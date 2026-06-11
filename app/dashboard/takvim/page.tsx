@@ -54,16 +54,16 @@ export default async function TakvimPage() {
           { label: "Geçmiş Tarih", value: overdue.length, color: "#dc2626", bg: "#fef2f2" },
         ].map(({ label, value, color, bg }) => (
           <div key={label} className="rounded-xl p-4"
-            style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
-            <p className="text-2xl font-bold" style={{ color }}>{value}</p>
-            <p className="text-[12px] mt-0.5" style={{ color: "var(--text-3)" }}>{label}</p>
+            style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", borderTop: `2px solid ${color}` }}>
+            <p className="text-[26px] font-bold tracking-tight tabular-nums" style={{ color }}>{value}</p>
+            <p className="text-[12px] mt-0.5 font-medium" style={{ color: "var(--text-3)" }}>{label}</p>
           </div>
         ))}
       </div>
 
       {/* Yaklaşan (60 gün) */}
       <div className="rounded-xl overflow-hidden"
-        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
+        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
         <div className="px-5 py-3.5" style={{ borderBottom: "1px solid var(--border-2)" }}>
           <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>Yaklaşan Beyannameler (60 gün)</h2>
         </div>
@@ -108,7 +108,7 @@ export default async function TakvimPage() {
 
       {/* Bu ay */}
       <div className="rounded-xl overflow-hidden"
-        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
+        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
         <div className="px-5 py-3.5" style={{ borderBottom: "1px solid var(--border-2)" }}>
           <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>
             {format(now, "MMMM yyyy", { locale: tr })} Beyannameleri
