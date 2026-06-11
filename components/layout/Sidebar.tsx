@@ -10,6 +10,7 @@ import {
   ChartBar,
   CalendarCheck,
   Wallet,
+  PaperPlaneTilt,
   SignOut,
 } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
@@ -24,6 +25,7 @@ const navItems = [
   { href: "/dashboard/raporlar",   label: "Raporlar",      Icon: ChartBar      },
   { href: "/dashboard/takvim",     label: "Vergi Takvimi", Icon: CalendarCheck },
   { href: "/dashboard/finans",     label: "Finans",        Icon: Wallet        },
+  { href: "/dashboard/kampanya",   label: "Kampanya",      Icon: PaperPlaneTilt },
 ];
 
 export default function Sidebar({ accountant }: { accountant: Accountant | null }) {
