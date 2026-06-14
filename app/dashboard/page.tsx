@@ -57,7 +57,11 @@ export default async function DashboardPage() {
     .from("accountants").select("id, full_name").eq("user_id", user!.id).single();
   if (!accountant) return <div>Hesap bulunamadı.</div>;
 
-  const [{ data: clients }, { data: allTasks }, { data: pendingDocs }] = await Promise.all([
+  const now2   = new Date();
+  const month2 = now2.getMonth() + 1;
+  const year2  = now2.getFullYear();
+
+  const [{ data: clients }, { data: allTasks }, { data: pendingDocs }, { data: thisMonthFees }] = await Promise.all([
     supabase.from("clients")
       .select("id, full_name, company_name")
       .eq("accountant_id", accountant.id)
@@ -73,6 +77,11 @@ export default async function DashboardPage() {
       .select("id, client_id")
       .eq("accountant_id", accountant.id)
       .eq("status", "pending"),
+    supabase.from("service_fees")
+      .select("amount, status")
+      .eq("accountant_id", accountant.id)
+      .eq("period_month", month2)
+      .eq("period_year", year2),
   ]);
 
   const today          = new Date();
@@ -93,6 +102,12 @@ export default async function DashboardPage() {
     overdue: overdueTasks.length,
     docs:    pendingDocs?.length ?? 0,
   };
+
+  const feeOdenen   = thisMonthFees?.filter(f => f.status === "paid").reduce((s, f) => s + Number(f.amount), 0) ?? 0;
+  const feeBekleyen = thisMonthFees?.filter(f => f.status === "pending").reduce((s, f) => s + Number(f.amount), 0) ?? 0;
+  const feeGecikmiş = thisMonthFees?.filter(f => f.status === "overdue").reduce((s, f) => s + Number(f.amount), 0) ?? 0;
+  const feeToplam   = feeOdenen + feeBekleyen + feeGecikmiş;
+  const fmtTL = (n: number) => n.toLocaleString("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 });
 
   const hour      = today.getHours();
   const greeting  = hour < 12 ? "Günaydın" : hour < 18 ? "İyi günler" : "İyi akşamlar";
@@ -154,6 +169,54 @@ export default async function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* Tahsilat widget */}
+      {feeToplam > 0 && (
+        <div
+          className="rounded-xl p-4"
+          style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>Bu Ay Tahsilatlar</h2>
+              <p className="text-[12px]" style={{ color: "var(--text-3)" }}>
+                {format(today, "MMMM yyyy", { locale: tr })}
+              </p>
+            </div>
+            <Link
+              href="/dashboard/finans"
+              className="text-[12px] font-medium px-2.5 py-1.5 rounded-lg"
+              style={{ color: "var(--accent)", background: "var(--accent-bg)" }}
+            >
+              Detay
+            </Link>
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            {[
+              { label: "Toplam",   value: fmtTL(feeToplam),   color: "#2563eb" },
+              { label: "Ödendi",   value: fmtTL(feeOdenen),   color: "#15803d" },
+              { label: "Bekliyor", value: fmtTL(feeBekleyen), color: "#d97706" },
+              { label: "Gecikmiş", value: fmtTL(feeGecikmiş), color: "#dc2626" },
+            ].map(({ label, value, color }) => (
+              <div key={label}>
+                <p className="text-[18px] font-bold tabular-nums" style={{ color }}>{value}</p>
+                <p className="text-[11px] mt-0.5" style={{ color: "var(--text-3)" }}>{label}</p>
+              </div>
+            ))}
+          </div>
+          {feeToplam > 0 && (
+            <div className="mt-3 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${Math.round((feeOdenen / feeToplam) * 100)}%`,
+                  background: "linear-gradient(90deg, #15803d, #22c55e)",
+                }}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Content row */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">

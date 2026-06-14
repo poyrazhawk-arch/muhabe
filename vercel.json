@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/aylik-ozet",
       "schedule": "0 9 28 * *"
+    },
+    {
+      "path": "/api/cron/tahsilat-hatirlatma",
+      "schedule": "0 9 * * 1"
     }
   ]
 }

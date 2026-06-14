@@ -37,11 +37,12 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
     .from("clients").select("*").eq("id", id).eq("accountant_id", accountant!.id).single();
   if (!client) notFound();
 
-  const [{ data: documents }, { data: tasks }, { data: tokens }] = await Promise.all([
+  const [{ data: documents }, { data: tasks }, { data: tokens }, { data: fees }] = await Promise.all([
     supabase.from("documents").select("*").eq("client_id", id).order("created_at", { ascending: false }),
     supabase.from("tasks").select("*").eq("client_id", id).neq("status", "completed").order("due_date"),
     supabase.from("upload_tokens").select("*").eq("client_id", id).eq("is_active", true)
       .order("created_at", { ascending: false }).limit(3),
+    supabase.from("service_fees").select("*").eq("client_id", id).order("period_year", { ascending: false }).order("period_month", { ascending: false }).limit(12),
   ]);
 
   const pendingDocs   = documents?.filter(d => d.status === "pending").length ?? 0;
@@ -171,6 +172,54 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </div>
+
+      {/* Hizmet Bedelleri */}
+      <div className="rounded-xl overflow-hidden"
+        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
+        <div className="px-5 py-3.5 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-2)" }}>
+          <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>
+            Hizmet Bedelleri <span style={{ color: "var(--text-3)" }}>({fees?.length ?? 0})</span>
+          </h2>
+          <Link href="/dashboard/finans" className="text-[12px] font-medium px-2.5 py-1.5 rounded-lg"
+            style={{ color: "var(--accent)", background: "var(--accent-bg)" }}>
+            Finans
+          </Link>
+        </div>
+        {!fees || fees.length === 0 ? (
+          <p className="px-5 py-8 text-center text-[13px]" style={{ color: "var(--text-3)" }}>
+            Bu müşteri için hizmet bedeli eklenmemiş
+          </p>
+        ) : (
+          <div className="divide-y" style={{ borderColor: "var(--border-2)" }}>
+            {fees.map((fee: any) => {
+              const STATUS_STYLE: Record<string, React.CSSProperties> = {
+                pending: { background: "#fffbeb", color: "#d97706", border: "1px solid #fde68a" },
+                paid:    { background: "#f0fdf4", color: "#15803d", border: "1px solid #bbf7d0" },
+                overdue: { background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca" },
+              };
+              const STATUS_LABEL: Record<string, string> = { pending: "Bekliyor", paid: "Ödendi", overdue: "Gecikmiş" };
+              const ay = format(new Date(fee.period_year, fee.period_month - 1, 1), "MMMM yyyy", { locale: tr });
+              return (
+                <div key={fee.id} className="px-5 py-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>{ay}</p>
+                    {fee.notes && <p className="text-[11px] mt-0.5" style={{ color: "var(--text-3)" }}>{fee.notes}</p>}
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-[13px] font-semibold tabular-nums" style={{ color: "var(--text-1)" }}>
+                      {Number(fee.amount).toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}
+                    </span>
+                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md"
+                      style={STATUS_STYLE[fee.status] ?? STATUS_STYLE.pending}>
+                      {STATUS_LABEL[fee.status] ?? "Bekliyor"}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
