@@ -4,7 +4,7 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Muhasebe — İş Akışı Yönetimi",
+  title: "Ledger — Muhasebe İş Akışı",
   description: "Muhasebeciler için belge toplama, görev takibi ve müşteri yönetimi",
 };
 

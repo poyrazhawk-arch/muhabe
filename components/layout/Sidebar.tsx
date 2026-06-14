@@ -46,7 +46,7 @@ export default function Sidebar({ accountant }: { accountant: Accountant | null 
 
   return (
     <aside
-      className="w-[212px] shrink-0 flex flex-col h-full select-none"
+      className="w-[220px] shrink-0 flex flex-col h-full select-none"
       style={{
         background: "var(--sidebar)",
         borderRight: "1px solid rgba(255,255,255,0.04)",
@@ -64,7 +64,7 @@ export default function Sidebar({ accountant }: { accountant: Accountant | null 
                 d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/>
             </svg>
           </div>
-          <span className="text-[13px] font-semibold text-white tracking-tight">Muhasebe</span>
+          <span className="text-[14px] font-bold text-white tracking-tight">Ledger</span>
         </div>
       </div>
 
