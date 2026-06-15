@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { EnvelopeSimple, Lock, Eye, EyeSlash, User, ArrowRight, Buildings } from "@phosphor-icons/react";
+import { EnvelopeSimple, Lock, Eye, EyeSlash, User, ArrowRight, Buildings, CheckCircle } from "@phosphor-icons/react";
 
 export default function KayitPage() {
   const [form, setForm] = useState({ fullName: "", email: "", password: "", officeName: "" });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
   const supabase = createClient();
   const router = useRouter();
 
@@ -27,37 +28,35 @@ export default function KayitPage() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
+      options: {
+        data: {
+          full_name: form.fullName,
+          office_name: form.officeName || null,
+        },
+        emailRedirectTo: `${location.origin}/auth/callback`,
+      },
     });
 
     if (signUpError) {
-      setError(signUpError.message === "User already registered"
-        ? "Bu e-posta zaten kayıtlı. Giriş yapın."
-        : "Kayıt başarısız. Lütfen tekrar deneyin.");
+      setError(
+        signUpError.message === "User already registered"
+          ? "Bu e-posta zaten kayıtlı. Giriş yapın."
+          : signUpError.message
+      );
       setLoading(false);
       return;
     }
 
-    if (data.user) {
-      const res = await fetch("/api/auth/kayit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: data.user.id,
-          full_name: form.fullName,
-          email: form.email,
-          office_name: form.officeName || null,
-        }),
-      });
-
-      if (!res.ok) {
-        setError("Hesap oluşturulamadı. Lütfen tekrar deneyin.");
-        setLoading(false);
-        return;
-      }
+    // Email confirmation disabled — session exists, go straight to dashboard
+    if (data.session) {
+      router.push("/dashboard");
+      router.refresh();
+      return;
     }
 
-    router.push("/dashboard");
-    router.refresh();
+    // Email confirmation required — show success screen
+    setDone(true);
+    setLoading(false);
   }
 
   const inputBase: React.CSSProperties = {
@@ -122,90 +121,111 @@ export default function KayitPage() {
             <span className="text-[14px] font-bold tracking-tight" style={{ color: "var(--text-1)" }}>Ledger</span>
           </div>
 
-          <h2 className="text-[22px] font-semibold tracking-tight mb-1" style={{ color: "var(--text-1)" }}>
-            Hesap oluştur
-          </h2>
-          <p className="text-[13px] mb-7" style={{ color: "var(--text-3)" }}>
-            Zaten hesabın var mı?{" "}
-            <a href="/auth/giris" className="font-medium" style={{ color: "var(--accent)" }}>Giriş yap</a>
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-3">
-            {/* Ad soyad */}
-            <div>
-              <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Ad Soyad</label>
-              <div className="relative">
-                <User size={14} style={iconStyle} />
-                <input type="text" required value={form.fullName} onChange={set("fullName")}
-                  placeholder="Ahmet Yılmaz" style={inputBase}
-                  onFocus={e => { e.target.style.borderColor = "var(--accent)"; e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.08)"; }}
-                  onBlur={e  => { e.target.style.borderColor = "var(--border)";  e.target.style.boxShadow = "none"; }}/>
+          {done ? (
+            /* Email onay ekranı */
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-5"
+                style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.25)" }}>
+                <CheckCircle size={24} weight="fill" style={{ color: "#22c55e" }} />
               </div>
+              <h2 className="text-[20px] font-semibold tracking-tight mb-2" style={{ color: "var(--text-1)" }}>
+                E-postanızı doğrulayın
+              </h2>
+              <p className="text-[13px] leading-relaxed mb-6" style={{ color: "var(--text-3)" }}>
+                <strong style={{ color: "var(--text-2)" }}>{form.email}</strong> adresine bir doğrulama bağlantısı gönderdik.
+                Bağlantıya tıklayarak hesabınızı etkinleştirin.
+              </p>
+              <a href="/auth/giris"
+                className="inline-flex items-center gap-1.5 text-[13px] font-medium"
+                style={{ color: "var(--accent)" }}>
+                Giriş sayfasına dön
+                <ArrowRight size={13} weight="bold" />
+              </a>
             </div>
+          ) : (
+            <>
+              <h2 className="text-[22px] font-semibold tracking-tight mb-1" style={{ color: "var(--text-1)" }}>
+                Hesap oluştur
+              </h2>
+              <p className="text-[13px] mb-7" style={{ color: "var(--text-3)" }}>
+                Zaten hesabın var mı?{" "}
+                <a href="/auth/giris" className="font-medium" style={{ color: "var(--accent)" }}>Giriş yap</a>
+              </p>
 
-            {/* Ofis adı */}
-            <div>
-              <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
-                Ofis / Büro Adı <span style={{ color: "var(--text-3)" }}>(opsiyonel)</span>
-              </label>
-              <div className="relative">
-                <Buildings size={14} style={iconStyle} />
-                <input type="text" value={form.officeName} onChange={set("officeName")}
-                  placeholder="Yılmaz Mali Müşavirlik" style={inputBase}
-                  onFocus={e => { e.target.style.borderColor = "var(--accent)"; e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.08)"; }}
-                  onBlur={e  => { e.target.style.borderColor = "var(--border)";  e.target.style.boxShadow = "none"; }}/>
-              </div>
-            </div>
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <div>
+                  <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Ad Soyad</label>
+                  <div className="relative">
+                    <User size={14} style={iconStyle} />
+                    <input type="text" required value={form.fullName} onChange={set("fullName")}
+                      placeholder="Ahmet Yılmaz" style={inputBase}
+                      onFocus={e => { e.target.style.borderColor = "var(--accent)"; e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.08)"; }}
+                      onBlur={e  => { e.target.style.borderColor = "var(--border)";  e.target.style.boxShadow = "none"; }}/>
+                  </div>
+                </div>
 
-            {/* E-posta */}
-            <div>
-              <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>E-posta</label>
-              <div className="relative">
-                <EnvelopeSimple size={14} style={iconStyle} />
-                <input type="email" required autoComplete="email" value={form.email} onChange={set("email")}
-                  placeholder="ornek@firma.com" style={inputBase}
-                  onFocus={e => { e.target.style.borderColor = "var(--accent)"; e.target.style.background = "#fff"; e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.08)"; }}
-                  onBlur={e  => { e.target.style.borderColor = "var(--border)";  e.target.style.background = "var(--surface-2)"; e.target.style.boxShadow = "none"; }}/>
-              </div>
-            </div>
+                <div>
+                  <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
+                    Ofis / Büro Adı <span style={{ color: "var(--text-3)" }}>(opsiyonel)</span>
+                  </label>
+                  <div className="relative">
+                    <Buildings size={14} style={iconStyle} />
+                    <input type="text" value={form.officeName} onChange={set("officeName")}
+                      placeholder="Yılmaz Mali Müşavirlik" style={inputBase}
+                      onFocus={e => { e.target.style.borderColor = "var(--accent)"; e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.08)"; }}
+                      onBlur={e  => { e.target.style.borderColor = "var(--border)";  e.target.style.boxShadow = "none"; }}/>
+                  </div>
+                </div>
 
-            {/* Şifre */}
-            <div>
-              <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Şifre</label>
-              <div className="relative">
-                <Lock size={14} style={iconStyle} />
-                <input type={showPw ? "text" : "password"} required minLength={8}
-                  autoComplete="new-password" value={form.password} onChange={set("password")}
-                  placeholder="En az 8 karakter"
-                  style={{ ...inputBase, paddingRight: "40px" }}
-                  onFocus={e => { e.target.style.borderColor = "var(--accent)"; e.target.style.background = "#fff"; e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.08)"; }}
-                  onBlur={e  => { e.target.style.borderColor = "var(--border)";  e.target.style.background = "var(--surface-2)"; e.target.style.boxShadow = "none"; }}/>
-                <button type="button" onClick={() => setShowPw(v => !v)}
-                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--text-3)", background: "none", border: "none", cursor: "pointer" }}>
-                  {showPw ? <EyeSlash size={15} /> : <Eye size={15} />}
+                <div>
+                  <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>E-posta</label>
+                  <div className="relative">
+                    <EnvelopeSimple size={14} style={iconStyle} />
+                    <input type="email" required autoComplete="email" value={form.email} onChange={set("email")}
+                      placeholder="ornek@firma.com" style={inputBase}
+                      onFocus={e => { e.target.style.borderColor = "var(--accent)"; e.target.style.background = "#fff"; e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.08)"; }}
+                      onBlur={e  => { e.target.style.borderColor = "var(--border)";  e.target.style.background = "var(--surface-2)"; e.target.style.boxShadow = "none"; }}/>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Şifre</label>
+                  <div className="relative">
+                    <Lock size={14} style={iconStyle} />
+                    <input type={showPw ? "text" : "password"} required minLength={8}
+                      autoComplete="new-password" value={form.password} onChange={set("password")}
+                      placeholder="En az 8 karakter"
+                      style={{ ...inputBase, paddingRight: "40px" }}
+                      onFocus={e => { e.target.style.borderColor = "var(--accent)"; e.target.style.background = "#fff"; e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.08)"; }}
+                      onBlur={e  => { e.target.style.borderColor = "var(--border)";  e.target.style.background = "var(--surface-2)"; e.target.style.boxShadow = "none"; }}/>
+                    <button type="button" onClick={() => setShowPw(v => !v)}
+                      style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--text-3)", background: "none", border: "none", cursor: "pointer" }}>
+                      {showPw ? <EyeSlash size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="px-3.5 py-2.5 rounded-lg text-[12px]"
+                    style={{ background: "var(--red-bg)", border: "1px solid var(--red-lt)", color: "var(--red)" }}>
+                    {error}
+                  </div>
+                )}
+
+                <button type="submit" disabled={loading}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-[13px] font-semibold text-white transition-all active:scale-[0.98] disabled:opacity-60"
+                  style={{ background: "var(--accent)", boxShadow: "0 1px 3px rgba(37,99,235,0.3), 0 2px 10px rgba(37,99,235,0.15)" }}>
+                  {loading ? "Hesap oluşturuluyor..." : (<>Hesap oluştur <ArrowRight size={14} weight="bold" /></>)}
                 </button>
-              </div>
-            </div>
+              </form>
 
-            {error && (
-              <div className="px-3.5 py-2.5 rounded-lg text-[12px]"
-                style={{ background: "var(--red-bg)", border: "1px solid var(--red-lt)", color: "var(--red)" }}>
-                {error}
-              </div>
-            )}
-
-            <button type="submit" disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-[13px] font-semibold text-white transition-all active:scale-[0.98] disabled:opacity-60"
-              style={{ background: "var(--accent)", boxShadow: "0 1px 3px rgba(37,99,235,0.3), 0 2px 10px rgba(37,99,235,0.15)" }}>
-              {loading ? "Hesap oluşturuluyor..." : (<>Hesap oluştur <ArrowRight size={14} weight="bold" /></>)}
-            </button>
-          </form>
-
-          <p className="text-[11px] mt-5 text-center leading-relaxed" style={{ color: "var(--text-3)" }}>
-            Kayıt olarak{" "}
-            <span className="underline underline-offset-2 cursor-pointer">kullanım koşullarını</span>{" "}
-            kabul etmiş olursunuz.
-          </p>
+              <p className="text-[11px] mt-5 text-center leading-relaxed" style={{ color: "var(--text-3)" }}>
+                Kayıt olarak{" "}
+                <span className="underline underline-offset-2 cursor-pointer">kullanım koşullarını</span>{" "}
+                kabul etmiş olursunuz.
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>
