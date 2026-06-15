@@ -159,7 +159,10 @@ export default function GirisPage() {
               Giriş yap
             </h2>
             <p className="text-[13px] mb-7" style={{ color: "var(--text-3)" }}>
-              E-posta ve şifrenizle devam edin.
+              E-posta ve şifrenizle devam edin.{" "}
+              <a href="/auth/kayit" className="font-medium" style={{ color: "var(--accent)" }}>
+                Hesap oluştur
+              </a>
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-3">
