@@ -63,33 +63,35 @@ export default async function MusterilerPage() {
       </div>
 
       <div className="rounded-xl overflow-hidden"
-        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
+        style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
 
         {!clients || clients.length === 0 ? (
-          <div className="py-16 text-center">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3"
-              style={{ background: "#f1f5f9" }}>
+          <div className="py-20 text-center">
+            <div
+              className="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-4"
+              style={{ background: "var(--surface-3)", border: "1px solid var(--border)" }}
+            >
               <svg className="w-5 h-5" style={{ color: "var(--text-3)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6}
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                   d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
               </svg>
             </div>
-            <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>Henüz müşteri eklenmemiş</p>
-            <p className="text-[12px] mt-1 mb-4" style={{ color: "var(--text-3)" }}>İlk müşterinizi ekleyerek başlayın</p>
+            <p className="text-[13px] font-semibold mb-1" style={{ color: "var(--text-1)" }}>Henüz müşteri eklenmemiş</p>
+            <p className="text-[12px] mb-5" style={{ color: "var(--text-3)" }}>İlk müşterinizi ekleyerek başlayın</p>
             <Link href="/dashboard/musteriler/yeni"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-semibold text-white"
-              style={{ background: "var(--accent)" }}>
-              Müşteri Ekle
+              style={{ background: "var(--accent)", boxShadow: "0 2px 8px rgba(37,99,235,0.28)" }}>
+              Müşteri ekle
             </Link>
           </div>
         ) : (
           <table className="w-full">
-            <thead style={{ background: "#fafbfc", borderBottom: "1px solid var(--border)" }}>
-              <tr>
-                {["Müşteri", "Firma", "İletişim", "RAG", "Durum", ""].map((h, i) => (
+            <thead style={{ borderBottom: "1px solid var(--border)" }}>
+              <tr style={{ background: "var(--surface-2)" }}>
+                {["Müşteri", "Firma", "İletişim", "Durum", "RAG", ""].map((h, i) => (
                   <th key={i}
-                    className={`px-5 py-3 text-[11px] font-semibold uppercase tracking-wider ${i === 5 ? "text-right" : "text-left"}`}
-                    style={{ color: "var(--text-3)", letterSpacing: "0.06em" }}>
+                    className={`px-5 py-2.5 text-[10.5px] font-semibold uppercase tracking-[0.07em] ${i === 5 ? "text-right" : "text-left"}`}
+                    style={{ color: "var(--text-3)" }}>
                     {h}
                   </th>
                 ))}
@@ -98,12 +100,23 @@ export default async function MusterilerPage() {
             <tbody>
               {clientsWithRAG.map((client, idx) => (
                 <tr key={client.id}
-                  className="group transition-colors hover:bg-slate-50/60"
-                  style={{ borderTop: idx > 0 ? "1px solid var(--border-2)" : "none" }}>
+                  className="group transition-colors"
+                  style={{
+                    borderTop: "1px solid var(--border-2)",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-2)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                >
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
-                        style={{ background: "#dbeafe", color: "#1d4ed8" }}>
+                      <div
+                        className="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-bold shrink-0"
+                        style={{
+                          background: "var(--accent-bg)",
+                          color: "var(--accent)",
+                          border: "1px solid var(--accent-lt)",
+                        }}
+                      >
                         {client.full_name.charAt(0)}
                       </div>
                       <span className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>
@@ -112,32 +125,38 @@ export default async function MusterilerPage() {
                     </div>
                   </td>
                   <td className="px-5 py-3 text-[13px]" style={{ color: "var(--text-2)" }}>
-                    {client.company_name ?? "-"}
+                    {client.company_name ?? <span style={{ color: "var(--text-3)" }}>—</span>}
                   </td>
                   <td className="px-5 py-3">
-                    <p className="text-[13px]" style={{ color: "var(--text-2)" }}>{client.email ?? "-"}</p>
+                    <p className="text-[13px]" style={{ color: "var(--text-2)" }}>{client.email ?? "—"}</p>
                     {client.phone && (
                       <p className="text-[11px] mt-0.5" style={{ color: "var(--text-3)" }}>{client.phone}</p>
                     )}
                   </td>
                   <td className="px-5 py-3">
-                    {(() => {
-                      const rag = client.rag as RAGStatus;
-                      return (
-                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md"
-                          style={{ background: RAG_CFG[rag].bg, color: RAG_CFG[rag].color, border: `1px solid ${RAG_CFG[rag].border}` }}>
-                          {RAG_LABELS[rag]}
-                        </span>
-                      );
-                    })()}
+                    <div className="flex items-center gap-1.5">
+                      <div
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{ background: client.status === "active" ? "var(--green)" : "var(--text-3)" }}
+                      />
+                      <span className="text-[12px] font-medium" style={{ color: client.status === "active" ? "var(--green)" : "var(--text-3)" }}>
+                        {client.status === "active" ? "Aktif" : "Pasif"}
+                      </span>
+                    </div>
                   </td>
                   <td className="px-5 py-3">
-                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md"
-                      style={client.status === "active"
-                        ? { background: "#f0fdf4", color: "#15803d", border: "1px solid #bbf7d0" }
-                        : { background: "#f8fafc", color: "#94a3b8", border: "1px solid #e2e8f0" }}>
-                      {client.status === "active" ? "Aktif" : "Pasif"}
-                    </span>
+                    {(() => {
+                      const rag = client.rag as RAGStatus;
+                      const dot = RAG_CFG[rag];
+                      return (
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full" style={{ background: dot.color }} />
+                          <span className="text-[12px] font-medium" style={{ color: dot.color }}>
+                            {RAG_LABELS[rag]}
+                          </span>
+                        </div>
+                      );
+                    })()}
                   </td>
                   <td className="px-5 py-3 text-right">
                     <Link href={`/dashboard/musteriler/${client.id}`}

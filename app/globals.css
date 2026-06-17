@@ -4,27 +4,28 @@
   --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), "JetBrains Mono", monospace;
 
-  /* Backgrounds */
-  --bg:        #f1f4f9;
+  /* ─── Backgrounds ─── */
+  --bg:        #f5f6f8;      /* warm-neutral, not cold blue-gray */
   --surface:   #ffffff;
-  --surface-2: #f8f9fc;
+  --surface-2: #fafbfd;
+  --surface-3: #f0f2f5;      /* pressed/inset states */
 
-  /* Borders */
-  --border:    #e2e7ef;
-  --border-2:  #eceff6;
+  /* ─── Borders ─── */
+  --border:    #e3e7ee;      /* slightly more contrast for depth */
+  --border-2:  #eaecf3;
 
-  /* Typography */
-  --text-1:    #0d1117;
-  --text-2:    #4b5563;
-  --text-3:    #9ca3af;
+  /* ─── Typography ─── */
+  --text-1:    #0e1523;      /* near-black, slight indigo cast */
+  --text-2:    #3d4d63;      /* slate-blue mid */
+  --text-3:    #8496ac;      /* muted for labels */
 
-  /* Accent */
+  /* ─── Accent — keep blue for finance trust ─── */
   --accent:    #2563eb;
-  --accent-bg: #eff6ff;
+  --accent-bg: #eef3fd;
   --accent-lt: #dbeafe;
   --accent-dk: #1d4ed8;
 
-  /* Semantic colors */
+  /* ─── Semantic ─── */
   --green:     #16a34a;
   --green-bg:  #f0fdf4;
   --green-lt:  #bbf7d0;
@@ -34,56 +35,103 @@
   --red:       #dc2626;
   --red-bg:    #fef2f2;
   --red-lt:    #fecaca;
-  --purple:    #7c3aed;
-  --purple-bg: #f5f3ff;
+  --purple:    #6d28d9;
+  --purple-bg: #f4f0ff;
   --purple-lt: #ddd6fe;
 
-  /* Sidebar */
-  --sidebar:   #0d1421;
+  /* ─── Sidebar — deep indigo-navy ─── */
+  --sidebar:       #08111f;
+  --sidebar-item:  #3d5168;      /* inactive nav text */
+  --sidebar-hover: rgba(255,255,255,0.05);
+  --sidebar-active-bg: rgba(59,130,246,0.08);
+  --sidebar-border:    rgba(255,255,255,0.06);
 
-  /* Elevations */
-  --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.09), 0 2px 6px rgba(0,0,0,0.05);
+  /* ─── Tinted shadows (blue-tinted, not pure black) ─── */
+  --shadow-xs: 0 1px 2px rgba(15,25,60,0.05);
+  --shadow-sm: 0 1px 3px rgba(15,25,60,0.07), 0 1px 2px rgba(15,25,60,0.04);
+  --shadow-md: 0 4px 14px rgba(15,25,60,0.08), 0 2px 4px rgba(15,25,60,0.04);
+  --shadow-lg: 0 8px 28px rgba(15,25,60,0.10), 0 2px 6px rgba(15,25,60,0.05);
+
+  /* ─── Metric display ─── */
+  --metric-xl: 32px;
+  --metric-md: 22px;
 }
+
+/* ═══ Base ════════════════════════════════════════════════════════ */
 
 body {
   background: var(--bg);
   color: var(--text-1);
   font-family: var(--font-sans);
-  font-size: 14px;
-  line-height: 1.5;
-  letter-spacing: -0.01em;
+  font-size: 13.5px;
+  line-height: 1.55;
+  letter-spacing: -0.008em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 * { box-sizing: border-box; }
 
-h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.3; }
-h2 { font-size: 15px; font-weight: 600; letter-spacing: -0.015em; }
-h3 { font-size: 13px; font-weight: 600; }
+/* ─── Typography scale ─── */
+h1 {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+}
+h2 {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+h3 {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+p { text-wrap: pretty; }
 
+/* Metric numbers — tabular, tight */
+.metric {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Label text — small-caps style */
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* ─── Table ─── */
 table { border-collapse: collapse; width: 100%; }
 th { text-align: left; }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 5px; height: 5px; }
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-2); }
 
-/* Focus ring */
+/* ─── Focus ring ─── */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
-/* Animations */
+/* ─── Smooth scroll ─── */
+html { scroll-behavior: smooth; }
+
+/* ═══ Animations ══════════════════════════════════════════════════ */
+
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes fadeIn {
@@ -91,23 +139,58 @@ th { text-align: left; }
   to   { opacity: 1; }
 }
 @keyframes slideIn {
-  from { opacity: 0; transform: translateX(-6px); }
+  from { opacity: 0; transform: translateX(-5px); }
   to   { opacity: 1; transform: translateX(0); }
 }
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
 
-.animate-fade-up  { animation: fadeUp  0.28s cubic-bezier(0.16,1,0.3,1) both; }
-.animate-fade-in  { animation: fadeIn  0.2s ease-out both; }
-.animate-slide-in { animation: slideIn 0.22s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-fade-up  { animation: fadeUp  0.24s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-fade-in  { animation: fadeIn  0.18s ease-out both; }
+.animate-slide-in { animation: slideIn 0.2s  cubic-bezier(0.16,1,0.3,1) both; }
 
-/* Card base */
+/* Staggered children */
+.stagger > * { animation: fadeUp 0.24s cubic-bezier(0.16,1,0.3,1) both; }
+.stagger > *:nth-child(1) { animation-delay: 0ms;  }
+.stagger > *:nth-child(2) { animation-delay: 40ms; }
+.stagger > *:nth-child(3) { animation-delay: 80ms; }
+.stagger > *:nth-child(4) { animation-delay: 120ms; }
+
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--border-2) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+/* ═══ Card system ══════════════════════════════════════════════════ */
+
+/* Default card — only border, no shadow */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: var(--shadow-sm);
 }
 
-/* Print */
+/* Elevated card — shadow, no border */
+.card-elevated {
+  background: var(--surface);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+}
+
+/* Inset card — for secondary panels */
+.card-inset {
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  border-radius: 8px;
+}
+
+/* ═══ Print ════════════════════════════════════════════════════════ */
+
 @media print {
   @page { margin: 1.5cm; }
   body { background: white !important; }

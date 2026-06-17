@@ -15,38 +15,12 @@ type StatKey = "clients" | "today" | "overdue" | "docs";
 const STAT_DEFS: Array<{
   key: StatKey;
   label: string;
-  accent: string;
-  accentBg: string;
-  icon: string;
+  dotColor: string;
 }> = [
-  {
-    key: "clients",
-    label: "Aktif Müşteri",
-    accent: "#2563eb",
-    accentBg: "#eff6ff",
-    icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z",
-  },
-  {
-    key: "today",
-    label: "Bugün Yapılacak",
-    accent: "#d97706",
-    accentBg: "#fffbeb",
-    icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
-  },
-  {
-    key: "overdue",
-    label: "Geciken Görev",
-    accent: "#dc2626",
-    accentBg: "#fef2f2",
-    icon: "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-  },
-  {
-    key: "docs",
-    label: "Bekleyen Belge",
-    accent: "#7c3aed",
-    accentBg: "#f5f3ff",
-    icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
-  },
+  { key: "clients", label: "Aktif müşteri",   dotColor: "#3b82f6" },
+  { key: "today",   label: "Bugün yapılacak", dotColor: "#f59e0b" },
+  { key: "overdue", label: "Geciken görev",   dotColor: "#ef4444" },
+  { key: "docs",    label: "Bekleyen belge",  dotColor: "#8b5cf6" },
 ];
 
 export default async function DashboardPage() {
@@ -141,31 +115,39 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {STAT_DEFS.map(({ key, label, accent, accentBg, icon }) => (
+      {/* Stat cards — metric-forward, no decorative borders */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 stagger">
+        {STAT_DEFS.map(({ key, label, dotColor }) => (
           <div
             key={key}
-            className="rounded-xl p-4 transition-transform duration-150 hover:-translate-y-px"
+            className="rounded-xl px-5 py-4 transition-all duration-150 hover:-translate-y-px hover:shadow-md"
             style={{
               background: "var(--surface)",
               border: "1px solid var(--border)",
-              boxShadow: "var(--shadow-sm)",
-              borderTop: `2px solid ${accent}`,
             }}
           >
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center mb-3"
-              style={{ background: accentBg }}
+            <p className="text-[11px] font-semibold tracking-widest uppercase mb-2.5" style={{ color: "var(--text-3)" }}>
+              {label}
+            </p>
+            <p
+              className="tabular-nums leading-none"
+              style={{
+                fontSize: "34px",
+                fontWeight: 700,
+                letterSpacing: "-0.04em",
+                color: stats[key] > 0 && (key === "overdue") ? "var(--red)"
+                     : stats[key] > 0 && (key === "today") ? "var(--amber)"
+                     : "var(--text-1)",
+              }}
             >
-              <svg className="w-3.5 h-3.5" style={{ color: accent }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d={icon}/>
-              </svg>
-            </div>
-            <p className="text-[26px] font-bold tracking-tight tabular-nums" style={{ color: "var(--text-1)" }}>
               {stats[key]}
             </p>
-            <p className="text-[12px] font-medium mt-0.5" style={{ color: "var(--text-3)" }}>{label}</p>
+            <div className="flex items-center gap-1.5 mt-3 pt-3" style={{ borderTop: "1px solid var(--border-2)" }}>
+              <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dotColor }} />
+              <p className="text-[11px]" style={{ color: "var(--text-3)" }}>
+                {key === "clients" ? "toplam aktif" : key === "today" ? "son tarih bugün" : key === "overdue" ? "önlem gerekiyor" : "inceleme bekliyor"}
+              </p>
+            </div>
           </div>
         ))}
       </div>
