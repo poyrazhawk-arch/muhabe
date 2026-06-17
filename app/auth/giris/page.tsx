@@ -193,9 +193,14 @@ export default function GirisPage() {
 
               {/* Şifre */}
               <div>
-                <label htmlFor="password" className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
-                  Şifre
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label htmlFor="password" className="text-[12px] font-medium" style={{ color: "var(--text-2)" }}>
+                    Şifre
+                  </label>
+                  <a href="/auth/sifremi-unuttum" className="text-[11px] font-medium" style={{ color: "var(--accent)" }}>
+                    Şifremi unuttum
+                  </a>
+                </div>
                 <div className="relative">
                   <Lock
                     size={14}

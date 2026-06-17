@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Lock, CheckCircle, ArrowRight } from "@phosphor-icons/react";
 
@@ -12,6 +13,7 @@ export default function SifremiGuncellePage() {
   const [error,     setError]     = useState("");
 
   const supabase = createClient();
+  const router   = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -21,8 +23,16 @@ export default function SifremiGuncellePage() {
     setLoading(true);
     setError("");
     const { error } = await supabase.auth.updateUser({ password });
-    if (error) setError(error.message);
-    else setDone(true);
+    if (error) {
+      setError(error.message === "Auth session missing"
+        ? "Oturum süresi dolmuş. Lütfen şifre sıfırlama e-postasını tekrar isteyin."
+        : error.message
+      );
+    } else {
+      setDone(true);
+      // 2 saniye sonra giriş sayfasına yönlendir
+      setTimeout(() => router.push("/auth/giris"), 2000);
+    }
     setLoading(false);
   }
 
@@ -69,9 +79,9 @@ export default function SifremiGuncellePage() {
             >
               <Lock size={20} weight="duotone" style={{ color: "var(--accent)" }} />
             </div>
-            <h2 className="text-[22px] font-semibold tracking-tight mb-1" style={{ color: "var(--text-1)" }}>Şifre Belirle</h2>
+            <h2 className="text-[22px] font-semibold tracking-tight mb-1" style={{ color: "var(--text-1)" }}>Yeni şifre belirle</h2>
             <p className="text-[13px] mb-7" style={{ color: "var(--text-3)" }}>
-              Magic link yerine şifre ile giriş yapın.
+              Hesabınız için yeni bir şifre oluşturun.
             </p>
 
             <div
@@ -128,8 +138,7 @@ export default function SifremiGuncellePage() {
             </div>
 
             <p className="text-[11px] mt-4 text-center" style={{ color: "var(--text-3)" }}>
-              Bu sayfa sadece giriş yapmış kullanıcılar için çalışır.
-              Önce magic link ile bir kez giriş yapın, ardından şifre belirleyin.
+              Şifrenizi değiştirdikten sonra yeni şifrenizle giriş yapabilirsiniz.
             </p>
           </div>
         )}
