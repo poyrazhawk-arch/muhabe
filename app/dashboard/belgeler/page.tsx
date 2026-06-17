@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { format } from "date-fns";
-import { tr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import {
   Files,
   FileText,
@@ -12,10 +12,10 @@ import {
 import BelgeOnayButton from "./BelgeOnayButton";
 
 const DURUM: Record<string, { label: string; bg: string; color: string; border: string }> = {
-  pending:  { label: "Bekliyor",   bg: "var(--amber-bg)", color: "var(--amber)", border: "var(--amber-lt)" },
-  received: { label: "Alındı",     bg: "var(--accent-bg)", color: "var(--accent)", border: "var(--accent-lt)" },
-  approved: { label: "Onaylandı",  bg: "var(--green-bg)", color: "var(--green)", border: "var(--green-lt)" },
-  rejected: { label: "Reddedildi", bg: "var(--red-bg)", color: "var(--red)", border: "var(--red-lt)" },
+  pending:  { label: "Pending",  bg: "var(--amber-bg)", color: "var(--amber)", border: "var(--amber-lt)" },
+  received: { label: "Received", bg: "var(--accent-bg)", color: "var(--accent)", border: "var(--accent-lt)" },
+  approved: { label: "Approved", bg: "var(--green-bg)", color: "var(--green)", border: "var(--green-lt)" },
+  rejected: { label: "Rejected", bg: "var(--red-bg)", color: "var(--red)", border: "var(--red-lt)" },
 };
 
 function DocIcon({ mime }: { mime: string }) {
@@ -50,9 +50,9 @@ export default async function BelgelerPage() {
     <div className="space-y-5 animate-fade-up">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Belgeler</h1>
+          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Documents</h1>
           <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>
-            {documents?.length ?? 0} belge · {bekleyen} bekleyen · {onaylanan} onaylı
+            {documents?.length ?? 0} documents · {bekleyen} pending · {onaylanan} approved
           </p>
         </div>
       </div>
@@ -69,14 +69,14 @@ export default async function BelgelerPage() {
             >
               <Files size={22} style={{ color: "var(--text-3)" }} weight="duotone" />
             </div>
-            <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>Henüz belge yüklenmemiş</p>
-            <p className="text-[12px] mt-1" style={{ color: "var(--text-3)" }}>Müşteri sayfasından belge talebi oluşturun</p>
+            <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>No documents uploaded yet</p>
+            <p className="text-[12px] mt-1" style={{ color: "var(--text-3)" }}>Create a document request from a client page</p>
           </div>
         ) : (
           <table className="w-full">
             <thead style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--border)" }}>
               <tr>
-                {["Dosya", "Müşteri", "Tür", "Tarih", "Durum", ""].map((h, i) => (
+                {["File", "Client", "Type", "Date", "Status", ""].map((h, i) => (
                   <th
                     key={i}
                     className={`px-5 py-3 text-[11px] font-semibold uppercase tracking-wider ${i === 5 ? "text-right" : "text-left"}`}
@@ -121,7 +121,7 @@ export default async function BelgelerPage() {
                       {doc.document_type}
                     </td>
                     <td className="px-5 py-3 text-[13px] tabular-nums" style={{ color: "var(--text-3)" }}>
-                      {format(new Date(doc.created_at), "d MMM yyyy", { locale: tr })}
+                      {format(new Date(doc.created_at), "d MMM yyyy", { locale: enUS })}
                     </td>
                     <td className="px-5 py-3">
                       <span
@@ -141,7 +141,7 @@ export default async function BelgelerPage() {
                           style={{ color: "var(--accent)", background: "var(--accent-bg)", border: "1px solid var(--accent-lt)" }}
                         >
                           <DownloadSimple size={12} weight="bold" />
-                          İndir
+                          Download
                         </a>
                         {doc.status === "received" && <BelgeOnayButton belgeId={doc.id} />}
                       </div>

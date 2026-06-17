@@ -1,15 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { format, isPast, isToday } from "date-fns";
-import { tr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { ClipboardText, Plus } from "@phosphor-icons/react/dist/ssr";
 import GorevTamamlaButton from "./GorevTamamlaButton";
 
 const ONCELIK: Record<string, { label: string; bg: string; color: string; border: string }> = {
-  critical: { label: "Kritik",  bg: "var(--red-bg)",   color: "var(--red)",   border: "var(--red-lt)"   },
-  high:     { label: "Yüksek", bg: "#fff7ed",          color: "#ea580c",      border: "#fed7aa"          },
-  normal:   { label: "Normal", bg: "var(--surface-2)", color: "var(--text-3)", border: "var(--border)"   },
-  low:      { label: "Düşük",  bg: "var(--surface-2)", color: "var(--text-3)", border: "var(--border)"   },
+  critical: { label: "Critical", bg: "var(--red-bg)",   color: "var(--red)",   border: "var(--red-lt)"   },
+  high:     { label: "High",     bg: "#fff7ed",          color: "#ea580c",      border: "#fed7aa"          },
+  normal:   { label: "Normal",   bg: "var(--surface-2)", color: "var(--text-3)", border: "var(--border)"   },
+  low:      { label: "Low",      bg: "var(--surface-2)", color: "var(--text-3)", border: "var(--border)"   },
 };
 
 export default async function GorevlerPage() {
@@ -31,11 +31,11 @@ export default async function GorevlerPage() {
     <div className="space-y-5 animate-fade-up">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Görevler</h1>
+          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Tasks</h1>
           <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>
-            {tasks?.length ?? 0} aktif
-            {geciken > 0 && <span style={{ color: "var(--red)" }}> · {geciken} gecikmiş</span>}
-            {bugun > 0 && <span style={{ color: "var(--amber)" }}> · {bugun} bugün</span>}
+            {tasks?.length ?? 0} active
+            {geciken > 0 && <span style={{ color: "var(--red)" }}> · {geciken} overdue</span>}
+            {bugun > 0 && <span style={{ color: "var(--amber)" }}> · {bugun} today</span>}
           </p>
         </div>
         <Link
@@ -44,7 +44,7 @@ export default async function GorevlerPage() {
           style={{ background: "var(--accent)", boxShadow: "0 2px 8px rgba(37,99,235,0.28)" }}
         >
           <Plus size={14} weight="bold" />
-          Yeni Görev
+          New Task
         </Link>
       </div>
 
@@ -60,14 +60,14 @@ export default async function GorevlerPage() {
             >
               <ClipboardText size={22} style={{ color: "var(--text-3)" }} weight="duotone" />
             </div>
-            <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>Aktif görev yok</p>
-            <p className="text-[12px] mt-1" style={{ color: "var(--text-3)" }}>Yeni görev ekleyerek takibi başlatın</p>
+            <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>No active tasks</p>
+            <p className="text-[12px] mt-1" style={{ color: "var(--text-3)" }}>Add a new task to start tracking</p>
           </div>
         ) : (
           <table className="w-full">
             <thead style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--border)" }}>
               <tr>
-                {["Görev", "Müşteri", "Son Tarih", "Öncelik", ""].map((h, i) => (
+                {["Task", "Client", "Due Date", "Priority", ""].map((h, i) => (
                   <th
                     key={i}
                     className={`px-5 py-3 text-[11px] font-semibold uppercase tracking-wider ${i === 4 ? "text-right" : "text-left"}`}
@@ -116,14 +116,14 @@ export default async function GorevlerPage() {
                           className="text-[13px] font-medium tabular-nums"
                           style={{ color: overdue ? "var(--red)" : todayT ? "var(--amber)" : "var(--text-2)" }}
                         >
-                          {format(due, "d MMM yyyy", { locale: tr })}
+                          {format(due, "d MMM yyyy", { locale: enUS })}
                         </span>
                         {overdue && (
                           <span
                             className="text-[10px] font-bold px-1.5 py-0.5 rounded"
                             style={{ background: "var(--red-bg)", color: "var(--red)" }}
                           >
-                            Gecikti
+                            Overdue
                           </span>
                         )}
                         {todayT && (
@@ -131,7 +131,7 @@ export default async function GorevlerPage() {
                             className="text-[10px] font-bold px-1.5 py-0.5 rounded"
                             style={{ background: "var(--amber-bg)", color: "var(--amber)" }}
                           >
-                            Bugün
+                            Today
                           </span>
                         )}
                       </div>

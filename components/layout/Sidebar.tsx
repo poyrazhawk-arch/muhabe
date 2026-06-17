@@ -21,25 +21,25 @@ import { cn } from "@/lib/utils/cn";
 const NAV_GROUPS = [
   {
     items: [
-      { href: "/dashboard",              label: "Genel Bakış",   Icon: HouseSimple    },
-      { href: "/dashboard/musteriler",   label: "Müşteriler",    Icon: Users          },
-      { href: "/dashboard/belgeler",     label: "Belgeler",      Icon: Files          },
-      { href: "/dashboard/gorevler",     label: "Görevler",      Icon: ClipboardText  },
+      { href: "/dashboard",              label: "Overview",      Icon: HouseSimple    },
+      { href: "/dashboard/musteriler",   label: "Clients",       Icon: Users          },
+      { href: "/dashboard/belgeler",     label: "Documents",     Icon: Files          },
+      { href: "/dashboard/gorevler",     label: "Tasks",         Icon: ClipboardText  },
     ],
   },
   {
-    label: "Araçlar",
+    label: "Tools",
     items: [
-      { href: "/dashboard/takvim",       label: "Vergi Takvimi", Icon: CalendarCheck  },
-      { href: "/dashboard/finans",       label: "Finans",        Icon: Wallet         },
-      { href: "/dashboard/raporlar",     label: "Raporlar",      Icon: ChartBar       },
+      { href: "/dashboard/takvim",       label: "Tax Calendar",  Icon: CalendarCheck  },
+      { href: "/dashboard/finans",       label: "Finance",       Icon: Wallet         },
+      { href: "/dashboard/raporlar",     label: "Reports",       Icon: ChartBar       },
     ],
   },
   {
-    label: "Büyüt",
+    label: "Grow",
     items: [
-      { href: "/dashboard/kampanya",     label: "Kampanya",      Icon: PaperPlaneTilt },
-      { href: "/dashboard/otomasyonlar", label: "Otomasyonlar",  Icon: Robot          },
+      { href: "/dashboard/kampanya",     label: "Campaign",      Icon: PaperPlaneTilt },
+      { href: "/dashboard/otomasyonlar", label: "Automations",   Icon: Robot          },
     ],
   },
 ];
@@ -49,7 +49,7 @@ export default function Sidebar({ accountant }: { accountant: Accountant | null 
   const router   = useRouter();
   const supabase = createClient();
 
-  async function handleCikis() {
+  async function handleSignOut() {
     await supabase.auth.signOut();
     router.push("/auth/giris");
   }
@@ -172,7 +172,7 @@ export default function Sidebar({ accountant }: { accountant: Accountant | null 
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[12px] font-semibold text-white truncate leading-tight">
-              {accountant?.full_name ?? "Kullanıcı"}
+              {accountant?.full_name ?? "User"}
             </p>
             <p className="text-[10px] truncate mt-0.5" style={{ color: "#2d4861" }}>
               {accountant?.email}
@@ -180,7 +180,7 @@ export default function Sidebar({ accountant }: { accountant: Accountant | null 
           </div>
         </div>
         <button
-          onClick={handleCikis}
+          onClick={handleSignOut}
           className="w-full flex items-center gap-2 px-3 py-[7px] rounded-lg text-[12px] font-medium transition-all duration-100"
           style={{ color: "#2d4861" }}
           onMouseEnter={e => {
@@ -193,7 +193,7 @@ export default function Sidebar({ accountant }: { accountant: Accountant | null 
           }}
         >
           <SignOut size={13} />
-          Çıkış yap
+          Sign out
         </button>
       </div>
     </aside>

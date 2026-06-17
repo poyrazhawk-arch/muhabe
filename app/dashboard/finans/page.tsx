@@ -1,13 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { format } from "date-fns";
-import { tr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import OdemeButon from "./OdemeButon";
 import YeniFeeForm from "./YeniFeeForm";
 
 const STATUS: Record<string, { label: string; bg: string; color: string; border: string }> = {
-  pending:  { label: "Bekliyor", bg: "#fffbeb", color: "#d97706", border: "#fde68a" },
-  paid:     { label: "Ödendi",   bg: "#f0fdf4", color: "#15803d", border: "#bbf7d0" },
-  overdue:  { label: "Gecikmiş", bg: "#fef2f2", color: "#dc2626", border: "#fecaca" },
+  pending:  { label: "Pending", bg: "#fffbeb", color: "#d97706", border: "#fde68a" },
+  paid:     { label: "Paid",    bg: "#f0fdf4", color: "#15803d", border: "#bbf7d0" },
+  overdue:  { label: "Overdue", bg: "#fef2f2", color: "#dc2626", border: "#fecaca" },
 };
 
 export default async function FinansPage() {
@@ -39,15 +39,15 @@ export default async function FinansPage() {
   const bekleyen  = thisMonth.filter(f => f.status === "pending").reduce((s, f) => s + Number(f.amount), 0);
   const gecikmiş  = thisMonth.filter(f => f.status === "overdue").reduce((s, f) => s + Number(f.amount), 0);
 
-  const fmt = (n: number) => n.toLocaleString("tr-TR", { style: "currency", currency: "TRY" });
+  const fmt = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
   return (
     <div className="space-y-6 animate-fade-up">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Finans</h1>
+          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Finance</h1>
           <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>
-            Hizmet bedeli ve tahsilat takibi
+            Service fee and collection tracking
           </p>
         </div>
         <YeniFeeForm clients={clients ?? []} />
@@ -56,10 +56,10 @@ export default async function FinansPage() {
       {/* Özet kartlar */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "Bu Ay Toplam",  value: fmt(toplam),   color: "#2563eb", bg: "#eff6ff" },
-          { label: "Ödenen",        value: fmt(odenen),   color: "#15803d", bg: "#f0fdf4" },
-          { label: "Bekleyen",      value: fmt(bekleyen), color: "#d97706", bg: "#fffbeb" },
-          { label: "Gecikmiş",      value: fmt(gecikmiş), color: "#dc2626", bg: "#fef2f2" },
+          { label: "This Month Total", value: fmt(toplam),   color: "#2563eb", bg: "#eff6ff" },
+          { label: "Paid",             value: fmt(odenen),   color: "#15803d", bg: "#f0fdf4" },
+          { label: "Pending",          value: fmt(bekleyen), color: "#d97706", bg: "#fffbeb" },
+          { label: "Overdue",          value: fmt(gecikmiş), color: "#dc2626", bg: "#fef2f2" },
         ].map(({ label, value, color, bg }) => (
           <div key={label} className="rounded-xl p-4"
             style={{
@@ -89,7 +89,7 @@ export default async function FinansPage() {
           <table className="w-full">
             <thead style={{ background: "#fafbfc", borderBottom: "1px solid var(--border)" }}>
               <tr>
-                {["Müşteri", "Dönem", "Tutar", "Son Tarih", "Durum", ""].map((h, i) => (
+                {["Client", "Period", "Amount", "Due Date", "Status", ""].map((h, i) => (
                   <th key={i} className={`px-5 py-3 text-[11px] font-semibold uppercase tracking-wider ${i === 5 ? "text-right" : "text-left"}`}
                     style={{ color: "var(--text-3)", letterSpacing: "0.06em" }}>{h}</th>
                 ))}

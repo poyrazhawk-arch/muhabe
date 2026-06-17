@@ -3,14 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { EnvelopeSimple, Lock, Eye, EyeSlash, User, ArrowRight, Buildings, CheckCircle } from "@phosphor-icons/react";
+import { EnvelopeSimple, Lock, Eye, EyeSlash, User, ArrowRight, Buildings } from "@phosphor-icons/react";
 
 export default function KayitPage() {
   const [form, setForm] = useState({ fullName: "", email: "", password: "", officeName: "" });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [done, setDone] = useState(false);
   const supabase = createClient();
   const router = useRouter();
 
@@ -47,16 +46,15 @@ export default function KayitPage() {
       return;
     }
 
-    // Email confirmation disabled — session exists, go straight to dashboard
     if (data.session) {
       router.push("/dashboard");
       router.refresh();
       return;
     }
 
-    // Email confirmation required — show success screen
-    setDone(true);
-    setLoading(false);
+    // Email confirmation disabled in Supabase — redirect to login
+    router.push("/auth/giris");
+    router.refresh();
   }
 
   const inputBase: React.CSSProperties = {
@@ -121,29 +119,7 @@ export default function KayitPage() {
             <span className="text-[14px] font-bold tracking-tight" style={{ color: "var(--text-1)" }}>Ledger</span>
           </div>
 
-          {done ? (
-            /* Email onay ekranı */
-            <div className="text-center">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-5"
-                style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.25)" }}>
-                <CheckCircle size={24} weight="fill" style={{ color: "#22c55e" }} />
-              </div>
-              <h2 className="text-[20px] font-semibold tracking-tight mb-2" style={{ color: "var(--text-1)" }}>
-                E-postanızı doğrulayın
-              </h2>
-              <p className="text-[13px] leading-relaxed mb-6" style={{ color: "var(--text-3)" }}>
-                <strong style={{ color: "var(--text-2)" }}>{form.email}</strong> adresine bir doğrulama bağlantısı gönderdik.
-                Bağlantıya tıklayarak hesabınızı etkinleştirin.
-              </p>
-              <a href="/auth/giris"
-                className="inline-flex items-center gap-1.5 text-[13px] font-medium"
-                style={{ color: "var(--accent)" }}>
-                Giriş sayfasına dön
-                <ArrowRight size={13} weight="bold" />
-              </a>
-            </div>
-          ) : (
-            <>
+          <>
               <h2 className="text-[22px] font-semibold tracking-tight mb-1" style={{ color: "var(--text-1)" }}>
                 Hesap oluştur
               </h2>
@@ -224,8 +200,7 @@ export default function KayitPage() {
                 <span className="underline underline-offset-2 cursor-pointer">kullanım koşullarını</span>{" "}
                 kabul etmiş olursunuz.
               </p>
-            </>
-          )}
+          </>
         </div>
       </div>
     </div>

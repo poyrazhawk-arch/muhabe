@@ -1,13 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { calculateRAG } from "@/lib/utils/rag";
 import { format, isToday, isThisWeek, isPast } from "date-fns";
-import { tr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import Link from "next/link";
 
 const RAG_CFG: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  red:   { label: "Kritik",  color: "#dc2626", bg: "#fef2f2", border: "#fecaca" },
-  amber: { label: "Dikkat",  color: "#d97706", bg: "#fffbeb", border: "#fde68a" },
-  green: { label: "Tamam",   color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
+  red:   { label: "Critical", color: "#dc2626", bg: "#fef2f2", border: "#fecaca" },
+  amber: { label: "Warning",  color: "#d97706", bg: "#fffbeb", border: "#fde68a" },
+  green: { label: "OK",       color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
 };
 
 type StatKey = "clients" | "today" | "overdue" | "docs";
@@ -17,10 +17,10 @@ const STAT_DEFS: Array<{
   label: string;
   dotColor: string;
 }> = [
-  { key: "clients", label: "Aktif müşteri",   dotColor: "#3b82f6" },
-  { key: "today",   label: "Bugün yapılacak", dotColor: "#f59e0b" },
-  { key: "overdue", label: "Geciken görev",   dotColor: "#ef4444" },
-  { key: "docs",    label: "Bekleyen belge",  dotColor: "#8b5cf6" },
+  { key: "clients", label: "Active clients",  dotColor: "#3b82f6" },
+  { key: "today",   label: "Due today",       dotColor: "#f59e0b" },
+  { key: "overdue", label: "Overdue tasks",   dotColor: "#ef4444" },
+  { key: "docs",    label: "Pending docs",    dotColor: "#8b5cf6" },
 ];
 
 export default async function DashboardPage() {
@@ -29,7 +29,7 @@ export default async function DashboardPage() {
 
   const { data: accountant } = await supabase
     .from("accountants").select("id, full_name").eq("user_id", user!.id).single();
-  if (!accountant) return <div>Hesap bulunamadı.</div>;
+  if (!accountant) return <div>Account not found.</div>;
 
   const now2   = new Date();
   const month2 = now2.getMonth() + 1;
@@ -81,10 +81,10 @@ export default async function DashboardPage() {
   const feeBekleyen = thisMonthFees?.filter(f => f.status === "pending").reduce((s, f) => s + Number(f.amount), 0) ?? 0;
   const feeGecikmiş = thisMonthFees?.filter(f => f.status === "overdue").reduce((s, f) => s + Number(f.amount), 0) ?? 0;
   const feeToplam   = feeOdenen + feeBekleyen + feeGecikmiş;
-  const fmtTL = (n: number) => n.toLocaleString("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 });
+  const fmtTL = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
   const hour      = today.getHours();
-  const greeting  = hour < 12 ? "Günaydın" : hour < 18 ? "İyi günler" : "İyi akşamlar";
+  const greeting  = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
   const firstName = accountant.full_name?.split(" ")[0] ?? "";
 
   return (
@@ -94,7 +94,7 @@ export default async function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[12px] font-medium" style={{ color: "var(--text-3)" }}>
-            {format(today, "d MMMM yyyy, EEEE", { locale: tr })}
+            {format(today, "d MMMM yyyy, EEEE", { locale: enUS })}
           </p>
           <h1 className="text-[20px] font-semibold mt-0.5 tracking-tight" style={{ color: "var(--text-1)" }}>
             {greeting}, {firstName}
@@ -111,7 +111,7 @@ export default async function DashboardPage() {
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4"/>
           </svg>
-          Yeni Görev
+          New Task
         </Link>
       </div>
 
@@ -145,7 +145,7 @@ export default async function DashboardPage() {
             <div className="flex items-center gap-1.5 mt-3 pt-3" style={{ borderTop: "1px solid var(--border-2)" }}>
               <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dotColor }} />
               <p className="text-[11px]" style={{ color: "var(--text-3)" }}>
-                {key === "clients" ? "toplam aktif" : key === "today" ? "son tarih bugün" : key === "overdue" ? "önlem gerekiyor" : "inceleme bekliyor"}
+                {key === "clients" ? "total active" : key === "today" ? "due today" : key === "overdue" ? "action required" : "needs review"}
               </p>
             </div>
           </div>
@@ -160,9 +160,9 @@ export default async function DashboardPage() {
         >
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>Bu Ay Tahsilatlar</h2>
+              <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>This Month's Collections</h2>
               <p className="text-[12px]" style={{ color: "var(--text-3)" }}>
-                {format(today, "MMMM yyyy", { locale: tr })}
+                {format(today, "MMMM yyyy", { locale: enUS })}
               </p>
             </div>
             <Link
@@ -170,15 +170,15 @@ export default async function DashboardPage() {
               className="text-[12px] font-medium px-2.5 py-1.5 rounded-lg"
               style={{ color: "var(--accent)", background: "var(--accent-bg)" }}
             >
-              Detay
+              Details
             </Link>
           </div>
           <div className="grid grid-cols-4 gap-3">
             {[
-              { label: "Toplam",   value: fmtTL(feeToplam),   color: "#2563eb" },
-              { label: "Ödendi",   value: fmtTL(feeOdenen),   color: "#15803d" },
-              { label: "Bekliyor", value: fmtTL(feeBekleyen), color: "#d97706" },
-              { label: "Gecikmiş", value: fmtTL(feeGecikmiş), color: "#dc2626" },
+              { label: "Total",   value: fmtTL(feeToplam),   color: "#2563eb" },
+              { label: "Paid",    value: fmtTL(feeOdenen),   color: "#15803d" },
+              { label: "Pending", value: fmtTL(feeBekleyen), color: "#d97706" },
+              { label: "Overdue", value: fmtTL(feeGecikmiş), color: "#dc2626" },
             ].map(({ label, value, color }) => (
               <div key={label}>
                 <p className="text-[18px] font-bold tabular-nums" style={{ color }}>{value}</p>
@@ -213,9 +213,9 @@ export default async function DashboardPage() {
             style={{ borderBottom: "1px solid var(--border-2)" }}
           >
             <div>
-              <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>Müşteri Durumu</h2>
+              <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>Client Status</h2>
               <p className="text-[12px] mt-0.5" style={{ color: "var(--text-3)" }}>
-                {clients?.length ?? 0} aktif müşteri
+                {clients?.length ?? 0} active clients
               </p>
             </div>
             <Link
@@ -223,17 +223,17 @@ export default async function DashboardPage() {
               className="text-[12px] font-medium px-2.5 py-1.5 rounded-lg transition-colors"
               style={{ color: "var(--accent)", background: "var(--accent-bg)" }}
             >
-              Tümü
+              All
             </Link>
           </div>
 
           <div className="divide-y max-h-[280px] overflow-auto" style={{ borderColor: "var(--border-2)" }}>
             {clientsWithRAG.length === 0 ? (
               <div className="px-5 py-10 text-center">
-                <p className="text-[13px]" style={{ color: "var(--text-3)" }}>Henüz müşteri eklenmemiş</p>
+                <p className="text-[13px]" style={{ color: "var(--text-3)" }}>No clients yet</p>
                 <Link href="/dashboard/musteriler/yeni"
                   className="text-[12px] mt-2 inline-block font-medium" style={{ color: "var(--accent)" }}>
-                  Müşteri ekle
+                  Add client
                 </Link>
               </div>
             ) : clientsWithRAG.map(client => {
@@ -265,7 +265,7 @@ export default async function DashboardPage() {
                   <div className="flex items-center gap-2 shrink-0 ml-3">
                     {client.overdueCount > 0 && (
                       <span className="text-[11px] font-medium tabular-nums" style={{ color: "var(--red)" }}>
-                        {client.overdueCount} geciken
+                        {client.overdueCount} overdue
                       </span>
                     )}
                     <span
@@ -287,15 +287,15 @@ export default async function DashboardPage() {
           style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}
         >
           <div className="px-5 py-3.5" style={{ borderBottom: "1px solid var(--border-2)" }}>
-            <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>Bu Hafta</h2>
+            <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>This Week</h2>
             <p className="text-[12px] mt-0.5" style={{ color: "var(--text-3)" }}>
-              {tasksDueWeek.length} görev
+              {tasksDueWeek.length} tasks
             </p>
           </div>
           <div className="p-2 space-y-px max-h-[280px] overflow-auto">
             {tasksDueWeek.length === 0 ? (
               <p className="px-3 py-8 text-center text-[13px]" style={{ color: "var(--text-3)" }}>
-                Bu hafta görev yok
+                No tasks this week
               </p>
             ) : tasksDueWeek.map((task: any) => {
               const overdue   = isPast(new Date(task.due_date)) && !isToday(new Date(task.due_date));
@@ -323,7 +323,7 @@ export default async function DashboardPage() {
                     className="text-[11px] shrink-0 font-medium tabular-nums"
                     style={{ color: overdue ? "var(--red)" : todayTask ? "var(--amber)" : "var(--text-3)" }}
                   >
-                    {format(new Date(task.due_date), "d MMM", { locale: tr })}
+                    {format(new Date(task.due_date), "d MMM", { locale: enUS })}
                   </span>
                 </div>
               );

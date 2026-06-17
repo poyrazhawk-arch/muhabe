@@ -17,9 +17,9 @@ export function calculateRAG(
 }
 
 export const RAG_LABELS: Record<RAGStatus, string> = {
-  red: "Kritik",
-  amber: "Dikkat",
-  green: "İyi",
+  red: "Critical",
+  amber: "Warning",
+  green: "OK",
 };
 
 export const RAG_COLORS: Record<RAGStatus, string> = {

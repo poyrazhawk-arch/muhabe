@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { format, isBefore, addDays } from "date-fns";
-import { tr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { generateTaxCalendar, getUpcomingDeadlines } from "@/lib/utils/taxCalendar";
 
 const BEYANNAME_COLOR: Record<string, { bg: string; color: string; border: string }> = {

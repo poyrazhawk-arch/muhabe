@@ -41,7 +41,13 @@ export default function GirisPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      setError("E-posta veya şifre hatalı.");
+      if (error.message.toLowerCase().includes("email not confirmed")) {
+        setError("E-posta adresiniz doğrulanmamış. Gelen kutunuzu kontrol edin.");
+      } else if (error.message.toLowerCase().includes("invalid login credentials") || error.message.toLowerCase().includes("invalid credentials")) {
+        setError("E-posta veya şifre hatalı.");
+      } else {
+        setError(error.message);
+      }
       setLoading(false);
     } else {
       router.push("/dashboard");

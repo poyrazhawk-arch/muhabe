@@ -28,7 +28,8 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isAuthPage   = path.startsWith("/auth");
   const isUploadPage = path.startsWith("/yukle");
-  const isPublicPage = isAuthPage || isUploadPage || path === "/";
+  const isApiRoute   = path.startsWith("/api");
+  const isPublicPage = isAuthPage || isUploadPage || isApiRoute || path === "/";
 
   // Şifre güncelleme sayfası: session gerektirir, auth sayfası gibi davranmamalı
   const isPasswordReset = path === "/auth/sifremi-guncelle";

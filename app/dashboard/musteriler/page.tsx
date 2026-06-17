@@ -44,9 +44,9 @@ export default async function MusterilerPage() {
     <div className="space-y-5 animate-fade-up">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Müşteriler</h1>
+          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Clients</h1>
           <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>
-            {aktif} aktif{pasif > 0 ? ` · ${pasif} pasif` : ""}
+            {aktif} active{pasif > 0 ? ` · ${pasif} passive` : ""}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -57,7 +57,7 @@ export default async function MusterilerPage() {
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4"/>
             </svg>
-            Yeni Müşteri
+            New Client
           </Link>
         </div>
       </div>
@@ -76,19 +76,19 @@ export default async function MusterilerPage() {
                   d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
               </svg>
             </div>
-            <p className="text-[13px] font-semibold mb-1" style={{ color: "var(--text-1)" }}>Henüz müşteri eklenmemiş</p>
-            <p className="text-[12px] mb-5" style={{ color: "var(--text-3)" }}>İlk müşterinizi ekleyerek başlayın</p>
+            <p className="text-[13px] font-semibold mb-1" style={{ color: "var(--text-1)" }}>No clients yet</p>
+            <p className="text-[12px] mb-5" style={{ color: "var(--text-3)" }}>Add your first client to get started</p>
             <Link href="/dashboard/musteriler/yeni"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-semibold text-white"
               style={{ background: "var(--accent)", boxShadow: "0 2px 8px rgba(37,99,235,0.28)" }}>
-              Müşteri ekle
+              Add client
             </Link>
           </div>
         ) : (
           <table className="w-full">
             <thead style={{ borderBottom: "1px solid var(--border)" }}>
               <tr style={{ background: "var(--surface-2)" }}>
-                {["Müşteri", "Firma", "İletişim", "Durum", "RAG", ""].map((h, i) => (
+                {["Client", "Company", "Contact", "Status", "RAG", ""].map((h, i) => (
                   <th key={i}
                     className={`px-5 py-2.5 text-[10.5px] font-semibold uppercase tracking-[0.07em] ${i === 5 ? "text-right" : "text-left"}`}
                     style={{ color: "var(--text-3)" }}>
@@ -140,7 +140,7 @@ export default async function MusterilerPage() {
                         style={{ background: client.status === "active" ? "var(--green)" : "var(--text-3)" }}
                       />
                       <span className="text-[12px] font-medium" style={{ color: client.status === "active" ? "var(--green)" : "var(--text-3)" }}>
-                        {client.status === "active" ? "Aktif" : "Pasif"}
+                        {client.status === "active" ? "Active" : "Passive"}
                       </span>
                     </div>
                   </td>
@@ -162,7 +162,7 @@ export default async function MusterilerPage() {
                     <Link href={`/dashboard/musteriler/${client.id}`}
                       className="inline-flex items-center gap-1 text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors"
                       style={{ color: "var(--accent)", background: "var(--accent-bg)" }}>
-                      Detay
+                      View
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7"/>
                       </svg>

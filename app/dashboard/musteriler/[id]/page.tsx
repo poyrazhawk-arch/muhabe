@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
-import { tr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import Link from "next/link";
 import BelgeIsteButton from "./BelgeIsteButton";
 import { calculateRAG } from "@/lib/utils/rag";
