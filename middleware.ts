@@ -25,9 +25,13 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  const isAuthPage = request.nextUrl.pathname.startsWith("/auth");
-  const isUploadPage = request.nextUrl.pathname.startsWith("/yukle");
-  const isPublicPage = isAuthPage || isUploadPage || request.nextUrl.pathname === "/";
+  const path = request.nextUrl.pathname;
+  const isAuthPage   = path.startsWith("/auth");
+  const isUploadPage = path.startsWith("/yukle");
+  const isPublicPage = isAuthPage || isUploadPage || path === "/";
+
+  // Şifre güncelleme sayfası: session gerektirir, auth sayfası gibi davranmamalı
+  const isPasswordReset = path === "/auth/sifremi-guncelle";
 
   if (!user && !isPublicPage) {
     const url = request.nextUrl.clone();
@@ -35,7 +39,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && isAuthPage) {
+  // Loggedın kullanıcıyı auth sayfalarından uzaklaştır —
+  // ama şifre güncelleme sayfasını kapsama (recovery session gerekiyor)
+  if (user && isAuthPage && !isPasswordReset) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
