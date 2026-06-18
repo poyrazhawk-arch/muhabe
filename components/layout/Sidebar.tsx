@@ -18,31 +18,19 @@ import { createClient } from "@/lib/supabase/client";
 import type { Accountant } from "@/types";
 import { cn } from "@/lib/utils/cn";
 
-const NAV_GROUPS = [
-  {
-    items: [
-      { href: "/dashboard",              label: "Overview",      Icon: HouseSimple    },
-      { href: "/dashboard/musteriler",   label: "Clients",       Icon: Users          },
-      { href: "/dashboard/belgeler",     label: "Documents",     Icon: Files          },
-      { href: "/dashboard/gorevler",     label: "Tasks",         Icon: ClipboardText  },
-    ],
-  },
-  {
-    label: "Tools",
-    items: [
-      { href: "/dashboard/takvim",       label: "Tax Calendar",  Icon: CalendarCheck  },
-      { href: "/dashboard/finans",       label: "Finance",       Icon: Wallet         },
-      { href: "/dashboard/raporlar",     label: "Reports",       Icon: ChartBar       },
-    ],
-  },
-  {
-    label: "Grow",
-    items: [
-      { href: "/dashboard/kampanya",     label: "Campaign",      Icon: PaperPlaneTilt },
-      { href: "/dashboard/otomasyonlar", label: "Automations",   Icon: Robot          },
-    ],
-  },
+const NAV_ITEMS = [
+  { href: "/dashboard",              label: "Overview",     Icon: HouseSimple    },
+  { href: "/dashboard/musteriler",   label: "Clients",      Icon: Users          },
+  { href: "/dashboard/belgeler",     label: "Documents",    Icon: Files          },
+  { href: "/dashboard/gorevler",     label: "Tasks",        Icon: ClipboardText  },
+  { href: "/dashboard/takvim",       label: "Tax Calendar", Icon: CalendarCheck  },
+  { href: "/dashboard/finans",       label: "Finance",      Icon: Wallet         },
+  { href: "/dashboard/raporlar",     label: "Reports",      Icon: ChartBar       },
+  { href: "/dashboard/kampanya",     label: "Campaign",     Icon: PaperPlaneTilt },
+  { href: "/dashboard/otomasyonlar", label: "Automations",  Icon: Robot          },
 ];
+
+const DIVIDER_AFTER = 3; // divider after Tasks (index 3)
 
 export default function Sidebar({ accountant }: { accountant: Accountant | null }) {
   const pathname = usePathname();
@@ -60,103 +48,103 @@ export default function Sidebar({ accountant }: { accountant: Accountant | null 
 
   return (
     <aside
-      className="w-[216px] shrink-0 flex flex-col h-full select-none"
+      className="w-[60px] shrink-0 flex flex-col h-full select-none"
       style={{
         background: "linear-gradient(180deg, #0b1526 0%, #08111f 100%)",
         borderRight: "1px solid rgba(255,255,255,0.05)",
       }}
     >
-      {/* ── Logo ─── */}
-      <div className="px-4 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-        <div className="flex items-center gap-2.5">
-          <div
-            className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-            style={{
-              background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-              boxShadow: "0 2px 8px rgba(37,99,235,0.4)",
-            }}
-          >
-            <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[14px] font-bold text-white tracking-tight">Ledger</span>
-            <span
-              className="text-[9px] font-semibold px-1.5 py-0.5 rounded tracking-wider"
-              style={{ background: "rgba(59,130,246,0.15)", color: "#60a5fa", border: "1px solid rgba(59,130,246,0.2)" }}
-            >
-              BETA
-            </span>
-          </div>
+      {/* ── Logo mark ───────────────────────────────────── */}
+      <div
+        className="flex items-center justify-center py-4 shrink-0"
+        style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+      >
+        <div
+          className="w-7 h-7 rounded-lg flex items-center justify-center"
+          style={{ background: "#2563eb" }}
+        >
+          <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
         </div>
       </div>
 
-      {/* ── Nav ─── */}
-      <nav className="flex-1 px-2 py-3 overflow-auto space-y-4">
-        {NAV_GROUPS.map((group, gi) => (
-          <div key={gi}>
-            {group.label && (
-              <p
-                className="px-3 mb-1.5 text-[9.5px] font-semibold tracking-[0.1em] uppercase"
-                style={{ color: "rgba(255,255,255,0.28)" }}
-              >
-                {group.label}
-              </p>
-            )}
-            <div className="space-y-px">
-              {group.items.map(({ href, label, Icon }) => {
-                const isActive = href === "/dashboard"
-                  ? pathname === "/dashboard"
-                  : pathname.startsWith(href);
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={cn(
-                      "relative flex items-center gap-2.5 px-3 py-[6px] rounded-lg text-[13px] font-medium transition-all duration-150",
-                    )}
-                    style={
-                      isActive
-                        ? { background: "rgba(59,130,246,0.12)", color: "#93c5fd" }
-                        : { color: "#5a7a9a" }
+      {/* ── Nav ─────────────────────────────────────────── */}
+      <nav className="flex-1 flex flex-col gap-px py-3 px-2 overflow-hidden">
+        {NAV_ITEMS.map(({ href, label, Icon }, idx) => {
+          const isActive = href === "/dashboard"
+            ? pathname === "/dashboard"
+            : pathname.startsWith(href);
+
+          return (
+            <div key={href}>
+              {idx === DIVIDER_AFTER && (
+                <div className="my-2 mx-1" style={{ height: "1px", background: "rgba(255,255,255,0.05)" }} />
+              )}
+              <div className="relative group">
+                <Link
+                  href={href}
+                  className={cn(
+                    "flex items-center justify-center w-full py-[9px] rounded-lg transition-all duration-150"
+                  )}
+                  style={
+                    isActive
+                      ? { background: "rgba(59,130,246,0.13)", color: "#93c5fd" }
+                      : { color: "#4a6a87" }
+                  }
+                  onMouseEnter={e => {
+                    if (!isActive) {
+                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
+                      (e.currentTarget as HTMLElement).style.color = "#7aabc8";
                     }
-                    onMouseEnter={e => {
-                      if (!isActive) {
-                        (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
-                        (e.currentTarget as HTMLElement).style.color = "#8aafc8";
-                      }
-                    }}
-                    onMouseLeave={e => {
-                      if (!isActive) {
-                        (e.currentTarget as HTMLElement).style.background = "transparent";
-                        (e.currentTarget as HTMLElement).style.color = "#5a7a9a";
-                      }
-                    }}
-                  >
-                    <Icon
-                      size={15}
-                      weight={isActive ? "fill" : "regular"}
-                      style={{ color: isActive ? "#60a5fa" : "currentColor", flexShrink: 0 }}
-                    />
-                    {label}
-                  </Link>
-                );
-              })}
+                  }}
+                  onMouseLeave={e => {
+                    if (!isActive) {
+                      (e.currentTarget as HTMLElement).style.background = "transparent";
+                      (e.currentTarget as HTMLElement).style.color = "#4a6a87";
+                    }
+                  }}
+                >
+                  <Icon
+                    size={18}
+                    weight={isActive ? "fill" : "regular"}
+                    style={{ flexShrink: 0 }}
+                  />
+                </Link>
+
+                {/* Tooltip */}
+                <div
+                  className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2.5 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-100"
+                  style={{
+                    background: "#0e1523",
+                    color: "#c8d8e8",
+                    fontSize: "12px",
+                    fontWeight: 500,
+                    padding: "5px 10px",
+                    borderRadius: "7px",
+                    whiteSpace: "nowrap",
+                    boxShadow: "0 4px 14px rgba(0,0,0,0.4)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  {label}
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </nav>
 
-      {/* ── User ─── */}
-      <div className="px-2 pb-3 pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-        <div
-          className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg mb-1"
-          style={{ background: "rgba(255,255,255,0.03)" }}
-        >
+      {/* ── User ────────────────────────────────────────── */}
+      <div
+        className="flex flex-col items-center gap-1.5 px-2 py-3 shrink-0"
+        style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+      >
+        {/* Avatar */}
+        <div className="relative group">
           <div
-            className="w-[26px] h-[26px] rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold cursor-default"
             style={{
               background: "linear-gradient(135deg, #1a3254, #142844)",
               color: "#7db3e8",
@@ -165,31 +153,59 @@ export default function Sidebar({ accountant }: { accountant: Accountant | null 
           >
             {initials}
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-[12px] font-semibold text-white truncate leading-tight">
-              {accountant?.full_name ?? "User"}
-            </p>
-            <p className="text-[10px] truncate mt-0.5" style={{ color: "#3d6080" }}>
-              {accountant?.email}
-            </p>
+          {/* Name tooltip */}
+          <div
+            className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2.5 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-100"
+            style={{
+              background: "#0e1523",
+              color: "#c8d8e8",
+              fontSize: "12px",
+              fontWeight: 500,
+              padding: "5px 10px",
+              borderRadius: "7px",
+              whiteSpace: "nowrap",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.4)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
+          >
+            {accountant?.full_name ?? "User"}
           </div>
         </div>
-        <button
-          onClick={handleSignOut}
-          className="w-full flex items-center gap-2 px-3 py-[7px] rounded-lg text-[12px] font-medium transition-all duration-100"
-          style={{ color: "#2d4861" }}
-          onMouseEnter={e => {
-            (e.currentTarget as HTMLButtonElement).style.color = "#fca5a5";
-            (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.07)";
-          }}
-          onMouseLeave={e => {
-            (e.currentTarget as HTMLButtonElement).style.color = "#2d4861";
-            (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-          }}
-        >
-          <SignOut size={13} />
-          Sign out
-        </button>
+
+        {/* Sign out */}
+        <div className="relative group">
+          <button
+            onClick={handleSignOut}
+            className="flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-150"
+            style={{ color: "#2d4861" }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLButtonElement).style.color = "#fca5a5";
+              (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.08)";
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLButtonElement).style.color = "#2d4861";
+              (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+            }}
+          >
+            <SignOut size={15} />
+          </button>
+          <div
+            className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2.5 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-100"
+            style={{
+              background: "#0e1523",
+              color: "#c8d8e8",
+              fontSize: "12px",
+              fontWeight: 500,
+              padding: "5px 10px",
+              borderRadius: "7px",
+              whiteSpace: "nowrap",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.4)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
+          >
+            Sign out
+          </div>
+        </div>
       </div>
     </aside>
   );

@@ -93,12 +93,13 @@ export default async function DashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[12px] font-medium" style={{ color: "var(--text-3)" }}>
-            {format(today, "EEEE, d MMMM yyyy", { locale: enUS })}
-          </p>
-          <h1 className="mt-1 tracking-[-0.025em] font-bold" style={{ fontSize: "26px", color: "var(--text-1)", lineHeight: 1.2 }}>
-            {greeting}, {firstName}
+          <h1 className="tracking-[-0.025em] font-bold" style={{ fontSize: "26px", lineHeight: 1.2 }}>
+            <span style={{ color: "var(--text-1)" }}>{greeting}, </span>
+            <span style={{ color: "var(--accent)" }}>{firstName}</span>
           </h1>
+          <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>
+            Here&apos;s a quick look at how things are going.
+          </p>
         </div>
         <Link
           href="/dashboard/gorevler/yeni"
