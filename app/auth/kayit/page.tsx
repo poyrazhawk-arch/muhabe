@@ -24,36 +24,38 @@ export default function KayitPage() {
     setLoading(true);
     setError("");
 
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-      options: {
-        data: {
-          full_name: form.fullName,
-          office_name: form.officeName || null,
-        },
-        emailRedirectTo: `${location.origin}/auth/callback`,
-      },
+    // Admin API — creates user with email already confirmed, no verification email sent
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: form.email,
+        password: form.password,
+        fullName: form.fullName,
+        officeName: form.officeName,
+      }),
     });
 
-    if (signUpError) {
-      setError(
-        signUpError.message === "User already registered"
-          ? "Bu e-posta zaten kayıtlı. Giriş yapın."
-          : signUpError.message
-      );
+    if (!res.ok) {
+      const json = await res.json();
+      setError(json.error ?? "An error occurred.");
       setLoading(false);
       return;
     }
 
-    if (data.session) {
-      router.push("/dashboard");
-      router.refresh();
+    // Sign in immediately after account creation
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: form.email,
+      password: form.password,
+    });
+
+    if (signInError) {
+      setError(signInError.message);
+      setLoading(false);
       return;
     }
 
-    // Email confirmation disabled in Supabase — redirect to login
-    router.push("/auth/giris");
+    router.push("/dashboard");
     router.refresh();
   }
 
