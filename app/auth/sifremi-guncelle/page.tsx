@@ -17,15 +17,15 @@ export default function SifremiGuncellePage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (password !== password2) { setError("Şifreler eşleşmiyor."); return; }
-    if (password.length < 8)    { setError("Şifre en az 8 karakter olmalı."); return; }
+    if (password !== password2) { setError("Passwords do not match."); return; }
+    if (password.length < 8)    { setError("Password must be at least 8 characters."); return; }
 
     setLoading(true);
     setError("");
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
       setError(error.message === "Auth session missing"
-        ? "Oturum süresi dolmuş. Lütfen şifre sıfırlama e-postasını tekrar isteyin."
+        ? "Session expired. Please request a new password reset link."
         : error.message
       );
     } else {
@@ -49,97 +49,77 @@ export default function SifremiGuncellePage() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center p-8" style={{ background: "var(--bg)" }}>
+    <div className="min-h-[100dvh] flex items-center justify-center p-8" style={{ background: "#f8f9fb" }}>
       <div className="w-full max-w-[360px]">
         {done ? (
           <div className="text-center animate-fade-up">
-            <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
-              style={{ background: "var(--green-bg)", border: "1px solid var(--green-lt)" }}
-            >
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
+              style={{ background: "var(--green-bg)", border: "1px solid var(--green-lt)" }}>
               <CheckCircle size={28} weight="fill" style={{ color: "var(--green)" }} />
             </div>
-            <h2 className="text-[18px] font-semibold mb-2" style={{ color: "var(--text-1)" }}>Şifre güncellendi</h2>
+            <h2 className="text-[18px] font-semibold mb-2" style={{ color: "var(--text-1)" }}>Password updated</h2>
             <p className="text-[13px]" style={{ color: "var(--text-3)" }}>
-              Artık e-posta + şifre ile giriş yapabilirsiniz.
+              You can now sign in with your new password.
             </p>
-            <a
-              href="/auth/giris"
+            <a href="/auth/giris"
               className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-semibold text-white"
-              style={{ background: "var(--accent)" }}
-            >
-              Giriş yap <ArrowRight size={13} weight="bold" />
+              style={{ background: "var(--accent)" }}>
+              Sign in <ArrowRight size={13} weight="bold" />
             </a>
           </div>
         ) : (
           <div className="animate-fade-up">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center mb-5"
-              style={{ background: "var(--accent-bg)", border: "1px solid var(--accent-lt)" }}
-            >
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-5"
+              style={{ background: "var(--accent-bg)", border: "1px solid var(--accent-lt)" }}>
               <Lock size={20} weight="duotone" style={{ color: "var(--accent)" }} />
             </div>
-            <h2 className="text-[22px] font-semibold tracking-tight mb-1" style={{ color: "var(--text-1)" }}>Yeni şifre belirle</h2>
+            <h2 className="text-[22px] font-semibold tracking-tight mb-1" style={{ color: "var(--text-1)" }}>
+              Set new password
+            </h2>
             <p className="text-[13px] mb-7" style={{ color: "var(--text-3)" }}>
-              Hesabınız için yeni bir şifre oluşturun.
+              Create a new password for your account.
             </p>
 
-            <div
-              className="rounded-xl p-5"
-              style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}
-            >
+            <div className="rounded-xl p-5"
+              style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
               <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
-                  <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Yeni Şifre</label>
-                  <input
-                    type="password"
-                    required
-                    minLength={8}
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="En az 8 karakter"
-                    style={inputBase}
+                  <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
+                    New password
+                  </label>
+                  <input type="password" required minLength={8}
+                    value={password} onChange={e => setPassword(e.target.value)}
+                    placeholder="Min. 8 characters"
+                    className="input-base"
                     onFocus={e => { e.target.style.borderColor = "var(--accent)"; e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.08)"; }}
-                    onBlur={e  => { e.target.style.borderColor = "var(--border)";  e.target.style.boxShadow = "none"; }}
-                  />
+                    onBlur={e => { e.target.style.borderColor = "var(--border)"; e.target.style.boxShadow = "none"; }} />
                 </div>
                 <div>
-                  <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Şifre Tekrar</label>
-                  <input
-                    type="password"
-                    required
-                    value={password2}
-                    onChange={e => setPassword2(e.target.value)}
-                    placeholder="Aynı şifreyi girin"
-                    style={inputBase}
+                  <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
+                    Confirm password
+                  </label>
+                  <input type="password" required
+                    value={password2} onChange={e => setPassword2(e.target.value)}
+                    placeholder="Repeat your password"
+                    className="input-base"
                     onFocus={e => { e.target.style.borderColor = "var(--accent)"; e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.08)"; }}
-                    onBlur={e  => { e.target.style.borderColor = "var(--border)";  e.target.style.boxShadow = "none"; }}
-                  />
+                    onBlur={e => { e.target.style.borderColor = "var(--border)"; e.target.style.boxShadow = "none"; }} />
                 </div>
 
                 {error && (
-                  <div
-                    className="px-3.5 py-2.5 rounded-lg text-[12px]"
-                    style={{ background: "var(--red-bg)", border: "1px solid var(--red-lt)", color: "var(--red)" }}
-                  >
+                  <div className="px-3.5 py-2.5 rounded-lg text-[12px]"
+                    style={{ background: "var(--red-bg)", border: "1px solid var(--red-lt)", color: "var(--red)" }}>
                     {error}
                   </div>
                 )}
 
-                <button
-                  type="submit"
-                  disabled={loading}
+                <button type="submit" disabled={loading}
                   className="w-full py-2.5 rounded-lg text-[13px] font-semibold text-white transition-all active:scale-[0.98] disabled:opacity-60"
-                  style={{ background: "var(--accent)" }}
-                >
-                  {loading ? "Kaydediliyor..." : "Şifreyi Kaydet"}
+                  style={{ background: "var(--accent)" }}>
+                  {loading ? "Saving…" : "Save password"}
                 </button>
               </form>
             </div>
-
-            <p className="text-[11px] mt-4 text-center" style={{ color: "var(--text-3)" }}>
-              Şifrenizi değiştirdikten sonra yeni şifrenizle giriş yapabilirsiniz.
-            </p>
           </div>
         )}
       </div>

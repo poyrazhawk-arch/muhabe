@@ -100,7 +100,7 @@ export default function Sidebar({ accountant }: { accountant: Accountant | null 
             {group.label && (
               <p
                 className="px-3 mb-1.5 text-[9.5px] font-semibold tracking-[0.1em] uppercase"
-                style={{ color: "rgba(255,255,255,0.18)" }}
+                style={{ color: "rgba(255,255,255,0.28)" }}
               >
                 {group.label}
               </p>
@@ -115,28 +115,23 @@ export default function Sidebar({ accountant }: { accountant: Accountant | null 
                     key={href}
                     href={href}
                     className={cn(
-                      "relative flex items-center gap-2.5 py-[6px] rounded-lg text-[13px] font-medium transition-all duration-100",
-                      isActive ? "pl-[10px] pr-3" : "px-3"
+                      "relative flex items-center gap-2.5 px-3 py-[6px] rounded-lg text-[13px] font-medium transition-all duration-150",
                     )}
                     style={
                       isActive
-                        ? {
-                            background: "rgba(59,130,246,0.09)",
-                            color: "#93c5fd",
-                            borderLeft: "2px solid #3b82f6",
-                          }
-                        : { color: "#46637f" }
+                        ? { background: "rgba(59,130,246,0.12)", color: "#93c5fd" }
+                        : { color: "#5a7a9a" }
                     }
                     onMouseEnter={e => {
                       if (!isActive) {
                         (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
-                        (e.currentTarget as HTMLElement).style.color = "#7a9cbf";
+                        (e.currentTarget as HTMLElement).style.color = "#8aafc8";
                       }
                     }}
                     onMouseLeave={e => {
                       if (!isActive) {
                         (e.currentTarget as HTMLElement).style.background = "transparent";
-                        (e.currentTarget as HTMLElement).style.color = "#46637f";
+                        (e.currentTarget as HTMLElement).style.color = "#5a7a9a";
                       }
                     }}
                   >
@@ -174,7 +169,7 @@ export default function Sidebar({ accountant }: { accountant: Accountant | null 
             <p className="text-[12px] font-semibold text-white truncate leading-tight">
               {accountant?.full_name ?? "User"}
             </p>
-            <p className="text-[10px] truncate mt-0.5" style={{ color: "#2d4861" }}>
+            <p className="text-[10px] truncate mt-0.5" style={{ color: "#3d6080" }}>
               {accountant?.email}
             </p>
           </div>

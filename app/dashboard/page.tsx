@@ -94,9 +94,9 @@ export default async function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[12px] font-medium" style={{ color: "var(--text-3)" }}>
-            {format(today, "d MMMM yyyy, EEEE", { locale: enUS })}
+            {format(today, "EEEE, d MMMM yyyy", { locale: enUS })}
           </p>
-          <h1 className="text-[20px] font-semibold mt-0.5 tracking-tight" style={{ color: "var(--text-1)" }}>
+          <h1 className="mt-1 tracking-[-0.025em] font-bold" style={{ fontSize: "26px", color: "var(--text-1)", lineHeight: 1.2 }}>
             {greeting}, {firstName}
           </h1>
         </div>
@@ -122,17 +122,17 @@ export default async function DashboardPage() {
             key={key}
             className="rounded-xl px-5 py-4 transition-all duration-150 hover:-translate-y-px hover:shadow-md"
             style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
+              background: key === "overdue" && stats[key] > 0 ? "var(--red-bg)" : "var(--surface)",
+              border: `1px solid ${key === "overdue" && stats[key] > 0 ? "var(--red-lt)" : "var(--border)"}`,
             }}
           >
-            <p className="text-[11px] font-semibold tracking-widest uppercase mb-2.5" style={{ color: "var(--text-3)" }}>
+            <p className="text-[11px] font-medium mb-3" style={{ color: "var(--text-3)" }}>
               {label}
             </p>
             <p
               className="tabular-nums leading-none"
               style={{
-                fontSize: "34px",
+                fontSize: "36px",
                 fontWeight: 700,
                 letterSpacing: "-0.04em",
                 color: stats[key] > 0 && (key === "overdue") ? "var(--red)"

@@ -4,13 +4,13 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Ledger — Muhasebe İş Akışı",
-  description: "Muhasebeciler için belge toplama, görev takibi ve müşteri yönetimi",
+  title: "Ledger — Accounting Practice Management",
+  description: "Document collection, task tracking, and client management for professional accountants",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="tr" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body>{children}</body>
     </html>
   );
