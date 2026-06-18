@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 const RECURRENCE = [
-  { value: "monthly",   label: "Her Ay" },
-  { value: "quarterly", label: "Her Çeyrek" },
-  { value: "yearly",    label: "Yıllık" },
+  { value: "monthly",   label: "Monthly" },
+  { value: "quarterly", label: "Quarterly" },
+  { value: "yearly",    label: "Yearly" },
 ];
 
 export default function SablonForm() {
@@ -50,7 +50,7 @@ export default function SablonForm() {
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4"/>
         </svg>
-        Şablon Ekle
+        Add Template
       </button>
 
       {open && (
@@ -59,36 +59,36 @@ export default function SablonForm() {
           <div className="w-full max-w-md rounded-2xl p-6"
             style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
             <h2 className="text-[15px] font-semibold mb-4" style={{ color: "var(--text-1)" }}>
-              Görev Şablonu Ekle
+              Add Task Template
             </h2>
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
-                <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Şablon Adı</label>
+                <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Template name</label>
                 <input required value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
-                  placeholder="KDV Beyannamesi Hazırlama" style={inputStyle}/>
+                  placeholder="VAT Return Preparation" style={inputStyle}/>
               </div>
               <div>
-                <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Açıklama (opsiyonel)</label>
+                <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Description (optional)</label>
                 <input value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                  placeholder="Kısa açıklama..." style={inputStyle}/>
+                  placeholder="Short description…" style={inputStyle}/>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Tekrar</label>
+                  <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Recurrence</label>
                   <select value={form.recurrence_type} onChange={e => setForm(p => ({ ...p, recurrence_type: e.target.value }))}
                     style={inputStyle}>
                     {RECURRENCE.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Son Tarih (Gün)</label>
+                  <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Due day of month</label>
                   <input type="number" min="1" max="31" value={form.due_day}
                     onChange={e => setForm(p => ({ ...p, due_day: e.target.value }))}
                     placeholder="26" style={inputStyle}/>
                 </div>
               </div>
               <div>
-                <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Kaç gün önceden oluşturulsun?</label>
+                <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Days in advance to create</label>
                 <input type="number" min="1" max="30" value={form.advance_days}
                   onChange={e => setForm(p => ({ ...p, advance_days: e.target.value }))}
                   style={inputStyle}/>
@@ -97,12 +97,12 @@ export default function SablonForm() {
                 <button type="button" onClick={() => setOpen(false)}
                   className="flex-1 py-2 rounded-lg text-[13px] font-medium"
                   style={{ background: "var(--bg)", color: "var(--text-2)", border: "1px solid var(--border)" }}>
-                  İptal
+                  Cancel
                 </button>
                 <button type="submit" disabled={loading}
                   className="flex-1 py-2 rounded-lg text-[13px] font-semibold text-white disabled:opacity-50"
                   style={{ background: "var(--accent)" }}>
-                  {loading ? "Kaydediliyor..." : "Kaydet"}
+                  {loading ? "Saving…" : "Save"}
                 </button>
               </div>
             </form>

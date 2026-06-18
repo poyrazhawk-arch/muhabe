@@ -44,14 +44,14 @@ export default function OtomasyonTetikle({
         {status === "loading" ? (
           <>
             <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            Çalışıyor...
+            Running…
           </>
         ) : status === "done" ? (
-          "✓ Tamamlandı"
+          "✓ Done"
         ) : status === "error" ? (
-          "Hata oluştu"
+          "Error occurred"
         ) : (
-          "Manuel Çalıştır"
+          "Run now"
         )}
       </button>
       {sonuc && status === "done" && (

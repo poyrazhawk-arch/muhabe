@@ -40,18 +40,18 @@ export default async function TakvimPage() {
   return (
     <div className="space-y-6 animate-fade-up">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Vergi Takvimi</h1>
+        <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Tax Calendar</h1>
         <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>
-          {year} yılı Türk vergi ve beyanname takvimi
+          {year} Turkish tax filing calendar
         </p>
       </div>
 
       {/* Özet */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Bu Ay Beyanname", value: thisMonth.length, color: "#2563eb", bg: "#eff6ff" },
-          { label: "Önümüzdeki 60 Gün", value: upcoming.length, color: "#d97706", bg: "#fffbeb" },
-          { label: "Geçmiş Tarih", value: overdue.length, color: "#dc2626", bg: "#fef2f2" },
+          { label: "This Month", value: thisMonth.length, color: "#2563eb", bg: "#eff6ff" },
+          { label: "Next 60 Days", value: upcoming.length, color: "#d97706", bg: "#fffbeb" },
+          { label: "Past Due", value: overdue.length, color: "#dc2626", bg: "#fef2f2" },
         ].map(({ label, value, color, bg }) => (
           <div key={label} className="rounded-xl p-4"
             style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", borderTop: `2px solid ${color}` }}>
@@ -65,11 +65,11 @@ export default async function TakvimPage() {
       <div className="rounded-xl overflow-hidden"
         style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
         <div className="px-5 py-3.5" style={{ borderBottom: "1px solid var(--border-2)" }}>
-          <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>Yaklaşan Beyannameler (60 gün)</h2>
+          <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>Upcoming Filings (60 days)</h2>
         </div>
         {upcoming.length === 0 ? (
           <p className="px-5 py-10 text-center text-[13px]" style={{ color: "var(--text-3)" }}>
-            Önümüzdeki 60 günde beyanname yok
+            No filings in the next 60 days
           </p>
         ) : (
           <div className="divide-y" style={{ borderColor: "var(--border-2)" }}>
@@ -88,7 +88,7 @@ export default async function TakvimPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-[13px] tabular-nums" style={{ color: "var(--text-2)" }}>
-                      {format(due, "d MMMM yyyy", { locale: tr })}
+                      {format(due, "d MMMM yyyy", { locale: enUS })}
                     </span>
                     <span className="text-[12px] font-semibold px-2 py-0.5 rounded-md"
                       style={{
@@ -96,7 +96,7 @@ export default async function TakvimPage() {
                         color: urgent ? "#dc2626" : "#64748b",
                         border: urgent ? "1px solid #fecaca" : "1px solid #e2e8f0",
                       }}>
-                      {daysLeft} gün
+                      {daysLeft}d left
                     </span>
                   </div>
                 </div>
@@ -111,7 +111,7 @@ export default async function TakvimPage() {
         style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
         <div className="px-5 py-3.5" style={{ borderBottom: "1px solid var(--border-2)" }}>
           <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>
-            {format(now, "MMMM yyyy", { locale: tr })} Beyannameleri
+            {format(now, "MMMM yyyy", { locale: enUS })} Filings
           </h2>
         </div>
         <div className="divide-y" style={{ borderColor: "var(--border-2)" }}>
@@ -128,11 +128,11 @@ export default async function TakvimPage() {
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="text-[13px] tabular-nums" style={{ color: "var(--text-2)" }}>
-                    {format(due, "d MMMM", { locale: tr })}
+                    {format(due, "d MMMM", { locale: enUS })}
                   </span>
                   {passed && (
                     <span className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: "#f0fdf4", color: "#15803d" }}>
-                      Geçti
+                      Done
                     </span>
                   )}
                 </div>

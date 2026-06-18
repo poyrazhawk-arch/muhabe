@@ -25,9 +25,9 @@ export default async function RaporlarPage() {
     <div className="space-y-5 animate-fade-up">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Raporlar</h1>
+          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Reports</h1>
           <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>
-            {clients?.length ?? 0} aktif müşteri · aylık özet ve dönem kapanış raporları
+            {clients?.length ?? 0} active clients · monthly summaries and period-close reports
           </p>
         </div>
       </div>
@@ -37,15 +37,15 @@ export default async function RaporlarPage() {
         {[
           {
             icon: CalendarBlank,
-            title: "Aylık Özet",
-            desc: "Tamamlanan görevler, belgeler ve beyanname durumu",
+            title: "Monthly Summary",
+            desc: "Completed tasks, documents, and filing status",
             color: "#2563eb",
             bg: "var(--accent-bg)",
           },
           {
             icon: ClipboardText,
-            title: "Dönem Kapanış",
-            desc: "Vergi dönemi kapanış kontrolü ve eksik belgeler",
+            title: "Period Close",
+            desc: "Tax period closure check and missing documents",
             color: "#7c3aed",
             bg: "var(--purple-bg)",
           },
@@ -85,10 +85,10 @@ export default async function RaporlarPage() {
           >
             <ChartBar size={22} style={{ color: "var(--text-3)" }} weight="duotone" />
           </div>
-          <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>Henüz müşteri yok</p>
+          <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>No clients yet</p>
           <p className="text-[12px] mt-1" style={{ color: "var(--text-3)" }}>
-            <Link href="/dashboard/musteriler/yeni" style={{ color: "var(--accent)" }}>Müşteri ekleyin</Link>
-            {" "}ve raporlar burada görünür
+            <Link href="/dashboard/musteriler/yeni" style={{ color: "var(--accent)" }}>Add a client</Link>
+            {" "}and reports will appear here
           </p>
         </div>
       ) : (
@@ -142,7 +142,7 @@ export default async function RaporlarPage() {
                     style={{ color: "var(--accent)", background: "var(--accent-bg)", border: "1px solid var(--accent-lt)" }}
                   >
                     <CalendarBlank size={12} weight="bold" />
-                    Aylık
+                    Monthly
                   </Link>
                   <Link
                     href={`/dashboard/raporlar/musteri/${client.id}?tip=kapanis`}
@@ -150,7 +150,7 @@ export default async function RaporlarPage() {
                     style={{ color: "var(--text-2)", background: "var(--surface-2)", border: "1px solid var(--border)" }}
                   >
                     <ClipboardText size={12} weight="bold" />
-                    Kapanış
+                    Period Close
                   </Link>
                 </div>
               </div>

@@ -24,7 +24,7 @@ export default function YeniMusteriPage() {
       router.refresh();
     } else {
       const json = await res.json();
-      setError(json.hata ?? "Bir hata oluştu");
+      setError(json.hata ?? "Something went wrong.");
       setLoading(false);
     }
   }
@@ -37,24 +37,24 @@ export default function YeniMusteriPage() {
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7"/>
           </svg>
-          Müşteriler
+          Clients
         </Link>
-        <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Yeni Müşteri</h1>
-        <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>Müşteri bilgilerini doldurun</p>
+        <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>New Client</h1>
+        <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>Fill in the client details below</p>
       </div>
 
       <div className="rounded-xl p-6"
         style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Field name="full_name"    label="Ad Soyad"       required placeholder="Ahmet Yılmaz" />
-          <Field name="company_name" label="Firma Adı"               placeholder="ABC Ltd. Şti." />
-          <Field name="tax_number"   label="Vergi Numarası"           placeholder="1234567890" />
-          <Field name="email"        label="E-posta"        type="email" placeholder="ahmet@firma.com" />
-          <Field name="phone"        label="Telefon"                  placeholder="0532 000 00 00" />
+          <Field name="full_name"    label="Full name"       required placeholder="Jane Smith" />
+          <Field name="company_name" label="Company name"             placeholder="ABC Ltd." />
+          <Field name="tax_number"   label="Tax number"               placeholder="1234567890" />
+          <Field name="email"        label="Email address"  type="email" placeholder="jane@company.com" />
+          <Field name="phone"        label="Phone"                    placeholder="+90 532 000 0000" />
 
           <div>
-            <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Notlar</label>
-            <textarea name="notes" rows={3} placeholder="İsteğe bağlı notlar..."
+            <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Notes</label>
+            <textarea name="notes" rows={3} placeholder="Optional notes..."
               className="w-full px-3 py-2.5 rounded-lg text-[13px] focus:outline-none resize-none transition-colors"
               style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text-1)" }}
               onFocus={e => { e.target.style.borderColor = "var(--accent)"; }}
@@ -73,12 +73,12 @@ export default function YeniMusteriPage() {
             <button type="submit" disabled={loading}
               className="px-5 py-2 rounded-lg text-[13px] font-semibold text-white transition-all active:scale-[0.98] disabled:opacity-50"
               style={{ background: "var(--accent)" }}>
-              {loading ? "Kaydediliyor..." : "Kaydet"}
+              {loading ? "Saving…" : "Save client"}
             </button>
             <button type="button" onClick={() => router.back()}
               className="px-5 py-2 rounded-lg text-[13px] font-medium transition-colors"
               style={{ color: "var(--text-2)", background: "var(--bg)", border: "1px solid var(--border)" }}>
-              İptal
+              Cancel
             </button>
           </div>
         </form>

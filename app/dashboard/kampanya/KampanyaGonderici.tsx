@@ -12,9 +12,9 @@ import {
 import type { Lead } from "@/app/api/kampanya/route";
 
 const TEMPLATES = [
-  { value: "tanitim",    label: "1. Tanıtım",    desc: "İlk temas — ürünü tanıt, demo teklif et" },
-  { value: "takip",     label: "2. Takip",      desc: "Yanıt alınmadıysa 3-4 gün sonra gönder" },
-  { value: "son_seans", label: "3. Son Seans",  desc: "Son deneme — kapıyı açık bırak" },
+  { value: "tanitim",    label: "1. Introduction",  desc: "First touch — introduce the product, offer a demo" },
+  { value: "takip",     label: "2. Follow-up",     desc: "Send 3-4 days later if no reply" },
+  { value: "son_seans", label: "3. Last Attempt",  desc: "Final try — leave the door open" },
 ];
 
 function parseCsv(text: string): Lead[] {
@@ -40,7 +40,7 @@ function parseCsv(text: string): Lead[] {
 
 export default function KampanyaGonderici() {
   const [leads,    setLeads]    = useState<Lead[]>([]);
-  const [subject,  setSubject]  = useState("Muhasebe iş akışınızı otomatikleştirin");
+  const [subject,  setSubject]  = useState("Automate your accounting workflow");
   const [template, setTemplate] = useState("tanitim");
   const [status,   setStatus]   = useState<"idle" | "sending" | "done" | "error">("idle");
   const [result,   setResult]   = useState<{ sent: number; failed: number; total: number } | null>(null);
@@ -54,7 +54,7 @@ export default function KampanyaGonderici() {
       const text = e.target?.result as string;
       const parsed = parseCsv(text);
       if (parsed.length === 0) {
-        setCsvError("CSV'de geçerli email bulunamadı. 'email' veya 'title' sütunu olmalı.");
+        setCsvError("No valid emails found in CSV. The file must have an 'email' or 'title' column.");
       } else {
         setLeads(parsed);
       }
@@ -121,8 +121,8 @@ export default function KampanyaGonderici() {
               }}
             >
               <Upload size={24} weight="duotone" />
-              <span className="text-[13px] font-medium">Apify CSV yükle</span>
-              <span className="text-[12px]">veya sürükle-bırak · email, title sütunları olmalı</span>
+              <span className="text-[13px] font-medium">Upload Apify CSV</span>
+              <span className="text-[12px]">or drag and drop · must have email, title columns</span>
             </button>
             <input
               ref={fileRef}
@@ -144,7 +144,7 @@ export default function KampanyaGonderici() {
               <CheckCircle size={18} weight="fill" style={{ color: "var(--green)" }} />
               <div>
                 <p className="text-[13px] font-semibold" style={{ color: "var(--green)" }}>
-                  {leads.length} geçerli lead yüklendi
+                  {leads.length} valid leads loaded
                 </p>
                 <p className="text-[11px] mt-0.5" style={{ color: "var(--text-3)" }}>
                   Örnek: {leads[0]?.business_name} — {leads[0]?.email}
@@ -168,12 +168,12 @@ export default function KampanyaGonderici() {
         style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}
       >
         <p className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: "var(--text-3)", letterSpacing: "0.06em" }}>
-          2. Kampanya Ayarları
+          2. Campaign Settings
         </p>
 
         <div>
           <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
-            Konu Satırı
+            Subject Line
           </label>
           <input
             value={subject}
@@ -186,7 +186,7 @@ export default function KampanyaGonderici() {
 
         <div>
           <label className="block text-[12px] font-medium mb-2" style={{ color: "var(--text-2)" }}>
-            E-posta Template
+            Email Template
           </label>
           <div className="space-y-2">
             {TEMPLATES.map(t => (
@@ -228,24 +228,24 @@ export default function KampanyaGonderici() {
             <CheckCircle size={20} weight="fill" style={{ color: "var(--green)" }} />
             <div>
               <p className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>
-                Kampanya tamamlandı
+                Campaign complete
               </p>
               <p className="text-[12px]" style={{ color: "var(--text-3)" }}>
-                {result.sent} gönderildi · {result.failed} başarısız
+                {result.sent} sent · {result.failed} failed
               </p>
             </div>
           </div>
         ) : status === "error" ? (
           <p className="text-[13px] flex items-center gap-2" style={{ color: "var(--red)" }}>
-            <Warning size={16} weight="bold" /> Gönderim hatası — Resend API key'i kontrol edin
+            <Warning size={16} weight="bold" /> Send error — check your Resend API key
           </p>
         ) : (
           <div>
             <p className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>
-              Göndermeye hazır
+              Ready to send
             </p>
             <p className="text-[12px] mt-0.5" style={{ color: "var(--text-3)" }}>
-              {leads.length} lead · 50'li gruplar · ~{Math.ceil(leads.length / 50) * 0.3} sn
+              {leads.length} leads · batches of 50 · ~{Math.ceil(leads.length / 50) * 0.3}s
             </p>
           </div>
         )}
@@ -259,12 +259,12 @@ export default function KampanyaGonderici() {
           {status === "sending" ? (
             <>
               <Spinner size={14} className="animate-spin" />
-              Gönderiliyor...
+              Sending…
             </>
           ) : (
             <>
               <PaperPlaneTilt size={14} weight="bold" />
-              {leads.length > 0 ? `${leads.length} Maili Gönder` : "Gönder"}
+              {leads.length > 0 ? `Send ${leads.length} emails` : "Send"}
             </>
           )}
         </button>
@@ -275,12 +275,12 @@ export default function KampanyaGonderici() {
         className="rounded-xl px-5 py-4"
         style={{ background: "var(--amber-bg)", border: "1px solid var(--amber-lt)" }}
       >
-        <p className="text-[12px] font-semibold mb-1" style={{ color: "var(--amber)" }}>Apify CSV formatı</p>
+        <p className="text-[12px] font-semibold mb-1" style={{ color: "var(--amber)" }}>Apify CSV format</p>
         <p className="text-[12px] leading-relaxed" style={{ color: "var(--text-2)" }}>
           <code style={{ background: "rgba(0,0,0,0.05)", padding: "1px 5px", borderRadius: "4px", fontSize: "11px" }}>
             title, email, phoneUnformatted, city, totalScore
           </code>
-          {" "}sütunları otomatik tanınır.
+          {" "}columns are auto-detected.
           Export: <strong>Apify → Storage → Dataset → Export CSV</strong>
         </p>
       </div>

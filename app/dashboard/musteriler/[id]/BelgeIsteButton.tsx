@@ -3,13 +3,13 @@
 import { useState } from "react";
 
 const BELGE_TURLERI = [
-  "Fatura",
-  "Banka Ekstresi",
-  "Bordro",
-  "Sözleşme",
-  "Vergi Levhası",
-  "SGK Belgesi",
-  "Diğer",
+  "Invoice",
+  "Bank Statement",
+  "Payroll",
+  "Contract",
+  "Tax Certificate",
+  "SGK Document",
+  "Other",
 ];
 
 export default function BelgeIsteButton({
@@ -20,7 +20,7 @@ export default function BelgeIsteButton({
   clientName: string;
 }) {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<string[]>(["Fatura"]);
+  const [selected, setSelected] = useState<string[]>(["Invoice"]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ url: string } | null>(null);
@@ -58,7 +58,7 @@ export default function BelgeIsteButton({
         onClick={() => setOpen(true)}
         className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
       >
-        + Belge İste
+        + Request Documents
       </button>
 
       {open && (
@@ -66,9 +66,9 @@ export default function BelgeIsteButton({
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             {result ? (
               <div>
-                <h3 className="font-semibold text-slate-900 mb-1">Bağlantı hazır!</h3>
+                <h3 className="font-semibold text-slate-900 mb-1">Upload link ready!</h3>
                 <p className="text-sm text-slate-500 mb-4">
-                  Bu bağlantıyı {clientName}&apos;a gönderin:
+                  Send this link to {clientName}:
                 </p>
                 <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-700 break-all mb-4">
                   {result.url}
@@ -78,21 +78,21 @@ export default function BelgeIsteButton({
                     onClick={handleCopy}
                     className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
                   >
-                    {copied ? "Kopyalandı!" : "Kopyala"}
+                    {copied ? "Copied!" : "Copy link"}
                   </button>
                   <button
-                    onClick={() => { setOpen(false); setResult(null); setSelected(["Fatura"]); setMessage(""); }}
+                    onClick={() => { setOpen(false); setResult(null); setSelected(["Invoice"]); setMessage(""); }}
                     className="flex-1 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100"
                   >
-                    Kapat
+                    Close
                   </button>
                 </div>
               </div>
             ) : (
               <div>
-                <h3 className="font-semibold text-slate-900 mb-4">Belge Talebi — {clientName}</h3>
+                <h3 className="font-semibold text-slate-900 mb-4">Document Request — {clientName}</h3>
 
-                <p className="text-sm font-medium text-slate-700 mb-2">Belge türleri</p>
+                <p className="text-sm font-medium text-slate-700 mb-2">Document types</p>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {BELGE_TURLERI.map((t) => (
                     <button
@@ -111,13 +111,13 @@ export default function BelgeIsteButton({
 
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Müşteriye mesaj (opsiyonel)
+                    Message to client (optional)
                   </label>
                   <textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     rows={2}
-                    placeholder="Örn: Ocak ayı faturalarını yükleyin"
+                    placeholder="e.g. Please upload January invoices"
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   />
                 </div>
@@ -128,13 +128,13 @@ export default function BelgeIsteButton({
                     disabled={loading || selected.length === 0}
                     className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
                   >
-                    {loading ? "Oluşturuluyor..." : "Bağlantı Oluştur"}
+                    {loading ? "Creating…" : "Create link"}
                   </button>
                   <button
                     onClick={() => setOpen(false)}
                     className="flex-1 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100"
                   >
-                    İptal
+                    Cancel
                   </button>
                 </div>
               </div>

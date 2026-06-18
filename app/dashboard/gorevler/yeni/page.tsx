@@ -37,7 +37,7 @@ export default function YeniGorevPage() {
       router.refresh();
     } else {
       const json = await res.json();
-      setError(json.hata ?? "Bir hata oluştu");
+      setError(json.hata ?? "Something went wrong.");
       setLoading(false);
     }
   }
@@ -48,11 +48,11 @@ export default function YeniGorevPage() {
         <Link href="/dashboard/gorevler" className="inline-flex items-center gap-1.5 text-[12px] font-medium mb-3"
           style={{ color: "var(--text-3)" }}>
           <ArrowLeft size={13} weight="bold" />
-          Görevler
+          Tasks
         </Link>
-        <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Yeni Görev</h1>
+        <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>New Task</h1>
         <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>
-          Hatırlatmalar otomatik oluşturulur (7, 3, 1 gün önce)
+          Reminders are sent automatically (7, 3, 1 days before)
         </p>
       </div>
 
@@ -62,9 +62,9 @@ export default function YeniGorevPage() {
 
           <div>
             <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
-              Başlık <span style={{ color: "var(--accent)" }}>*</span>
+              Title <span style={{ color: "var(--accent)" }}>*</span>
             </label>
-            <input name="title" required placeholder="KDV Beyannamesi"
+            <input name="title" required placeholder="VAT Return"
               className="w-full px-3 py-2.5 rounded-lg text-[13px] focus:outline-none transition-colors" style={inputStyle}
               onFocus={e => { e.target.style.borderColor = "var(--accent)"; }}
               onBlur={e  => { e.target.style.borderColor = "var(--border)"; }}
@@ -72,7 +72,7 @@ export default function YeniGorevPage() {
           </div>
 
           <div>
-            <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Açıklama</label>
+            <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Description</label>
             <textarea name="description" rows={2}
               className="w-full px-3 py-2.5 rounded-lg text-[13px] focus:outline-none resize-none transition-colors" style={inputStyle}
               onFocus={e => { e.target.style.borderColor = "var(--accent)"; }}
@@ -83,7 +83,7 @@ export default function YeniGorevPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
-                Son Tarih <span style={{ color: "var(--accent)" }}>*</span>
+                Due date <span style={{ color: "var(--accent)" }}>*</span>
               </label>
               <input name="due_date" type="date" required
                 className="w-full px-3 py-2.5 rounded-lg text-[13px] focus:outline-none transition-colors" style={inputStyle}
@@ -92,28 +92,28 @@ export default function YeniGorevPage() {
               />
             </div>
             <div>
-              <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Öncelik</label>
+              <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Priority</label>
               <select name="priority"
                 className="w-full px-3 py-2.5 rounded-lg text-[13px] focus:outline-none transition-colors" style={inputStyle}
                 onFocus={e => { e.target.style.borderColor = "var(--accent)"; }}
                 onBlur={e  => { e.target.style.borderColor = "var(--border)"; }}
               >
                 <option value="normal">Normal</option>
-                <option value="high">Yüksek</option>
-                <option value="critical">Kritik</option>
-                <option value="low">Düşük</option>
+                <option value="high">High</option>
+                <option value="critical">Critical</option>
+                <option value="low">Low</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Müşteri (opsiyonel)</label>
+            <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Client (optional)</label>
             <select name="client_id"
               className="w-full px-3 py-2.5 rounded-lg text-[13px] focus:outline-none transition-colors" style={inputStyle}
               onFocus={e => { e.target.style.borderColor = "var(--accent)"; }}
               onBlur={e  => { e.target.style.borderColor = "var(--border)"; }}
             >
-              <option value="">Müşteri seçin (opsiyonel)</option>
+              <option value="">Select a client (optional)</option>
               {clients.map((c: any) => (
                 <option key={c.id} value={c.id}>
                   {c.full_name}{c.company_name ? ` — ${c.company_name}` : ""}
@@ -133,12 +133,12 @@ export default function YeniGorevPage() {
             <button type="submit" disabled={loading}
               className="px-5 py-2 rounded-lg text-[13px] font-semibold text-white transition-all active:scale-[0.98] disabled:opacity-50"
               style={{ background: "var(--accent)" }}>
-              {loading ? "Kaydediliyor..." : "Kaydet"}
+              {loading ? "Saving…" : "Save task"}
             </button>
             <button type="button" onClick={() => router.back()}
               className="px-5 py-2 rounded-lg text-[13px] font-medium transition-colors"
               style={{ color: "var(--text-2)", background: "var(--bg)", border: "1px solid var(--border)" }}>
-              İptal
+              Cancel
             </button>
           </div>
         </form>

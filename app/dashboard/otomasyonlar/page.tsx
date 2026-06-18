@@ -4,9 +4,9 @@ import OtomasyonTetikle from "./OtomasyonTetikle";
 const OTOMASYONLAR = [
   {
     id: "hatirlatmalar",
-    baslik: "Görev Hatırlatmaları",
-    aciklama: "Yaklaşan görev son tarihleri için muhasebeciye email gönderir.",
-    zamanlama: "Her gün 09:00",
+    baslik: "Task Reminders",
+    aciklama: "Sends an email to the accountant for upcoming task deadlines.",
+    zamanlama: "Daily at 09:00",
     endpoint: "/api/cron/hatirlatmalar",
     renk: "#2563eb",
     bg: "#eff6ff",
@@ -14,9 +14,9 @@ const OTOMASYONLAR = [
   },
   {
     id: "gorev-olustur",
-    baslik: "Otomatik Görev Oluşturma",
-    aciklama: "Aktif şablonlardan her müşteri için aylık görevleri otomatik üretir. Vergi takvimi görevlerini de oluşturur.",
-    zamanlama: "Her ayın 1'i 08:00",
+    baslik: "Auto Task Creation",
+    aciklama: "Generates monthly tasks for each client from active templates. Also creates tax calendar tasks.",
+    zamanlama: "1st of every month, 08:00",
     endpoint: "/api/cron/gorev-olustur",
     renk: "#7c3aed",
     bg: "#f5f3ff",
@@ -24,9 +24,9 @@ const OTOMASYONLAR = [
   },
   {
     id: "tahsilat-hatirlatma",
-    baslik: "Gecikmiş Tahsilat Hatırlatması",
-    aciklama: "Vadesi geçmiş hizmet bedellerini tespit edip müşteriye nazik hatırlatma maili gönderir. 3, 7 ve 14. günlerde tetiklenir.",
-    zamanlama: "Her Pazartesi 09:00",
+    baslik: "Overdue Payment Reminder",
+    aciklama: "Detects overdue service fees and sends a polite reminder email to the client. Triggered on days 3, 7, and 14.",
+    zamanlama: "Every Monday at 09:00",
     endpoint: "/api/cron/tahsilat-hatirlatma",
     renk: "#dc2626",
     bg: "#fef2f2",
@@ -34,9 +34,9 @@ const OTOMASYONLAR = [
   },
   {
     id: "aylik-ozet",
-    baslik: "Aylık Özet E-postası",
-    aciklama: "Her müşteriye o ayki tamamlanan görevler, onaylanan belgeler ve bekleyen işleri gösteren özet emaili gönderir.",
-    zamanlama: "Her ayın 28'i 09:00",
+    baslik: "Monthly Summary Email",
+    aciklama: "Sends each client a summary of completed tasks, approved documents, and pending items for the month.",
+    zamanlama: "28th of every month, 09:00",
     endpoint: "/api/cron/aylik-ozet",
     renk: "#15803d",
     bg: "#f0fdf4",
@@ -49,10 +49,10 @@ export default function OtomasyonlarPage() {
     <div className="space-y-6 animate-fade-up">
       <div>
         <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>
-          Otomasyonlar
+          Automations
         </h1>
         <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>
-          Zamanlanmış görevler — manuel tetikle veya otomatik çalışmaya bırak
+          Scheduled jobs — run manually or let them fire automatically
         </p>
       </div>
 
@@ -84,7 +84,7 @@ export default function OtomasyonlarPage() {
                       className="text-[10px] font-semibold px-2 py-0.5 rounded-md"
                       style={{ background: o.bg, color: o.renk, border: `1px solid ${o.border}` }}
                     >
-                      Aktif
+                      Active
                     </span>
                   </div>
                   <p className="text-[13px] mt-1 leading-relaxed" style={{ color: "var(--text-3)" }}>
@@ -106,12 +106,12 @@ export default function OtomasyonlarPage() {
         style={{ background: "var(--accent-bg)", border: "1px solid var(--accent-lt)" }}
       >
         <p className="text-[12px] font-semibold mb-1" style={{ color: "var(--accent)" }}>
-          Nasıl Çalışır?
+          How it works
         </p>
         <p className="text-[12px] leading-relaxed" style={{ color: "var(--text-2)" }}>
-          Otomasyonlar Vercel Cron ile belirlenen saatlerde otomatik tetiklenir.
-          "Manuel Çalıştır" butonu ile anında test edebilirsin.
-          Email gönderimleri için{" "}
+          Automations are triggered automatically by Vercel Cron at the scheduled times.
+          Use the &quot;Run now&quot; button to test them instantly.
+          For email delivery,{" "}
           <code style={{ background: "rgba(0,0,0,0.06)", padding: "1px 5px", borderRadius: "4px", fontSize: "11px" }}>
             RESEND_API_KEY
           </code>{" "}
@@ -119,7 +119,7 @@ export default function OtomasyonlarPage() {
           <code style={{ background: "rgba(0,0,0,0.06)", padding: "1px 5px", borderRadius: "4px", fontSize: "11px" }}>
             CRON_SECRET
           </code>{" "}
-          env variable'larının tanımlı olması gerekir.
+          env variables must be defined.
         </p>
       </div>
     </div>

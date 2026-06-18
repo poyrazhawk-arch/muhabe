@@ -7,10 +7,10 @@ import BelgeIsteButton from "./BelgeIsteButton";
 import { calculateRAG } from "@/lib/utils/rag";
 
 const DOC_DURUM: Record<string, string> = {
-  pending:  "Bekliyor",
-  received: "Alındı",
-  approved: "Onaylandı",
-  rejected: "Reddedildi",
+  pending:  "Pending",
+  received: "Received",
+  approved: "Approved",
+  rejected: "Rejected",
 };
 const DOC_STYLE: Record<string, React.CSSProperties> = {
   pending:  { background: "#fffbeb", color: "#d97706", border: "1px solid #fde68a" },
@@ -24,7 +24,7 @@ const RAG_STYLE: Record<string, React.CSSProperties> = {
   amber: { background: "#fffbeb", color: "#d97706", border: "1px solid #fde68a" },
   green: { background: "#f0fdf4", color: "#15803d", border: "1px solid #bbf7d0" },
 };
-const RAG_LABEL: Record<string, string> = { red: "Kritik", amber: "Dikkat", green: "Tamam" };
+const RAG_LABEL: Record<string, string> = { red: "Critical", amber: "At Risk", green: "Good" };
 
 export default async function MusteriDetayPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -59,7 +59,7 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7"/>
           </svg>
-          Müşteriler
+          Clients
         </Link>
         <div className="flex items-start justify-between">
           <div>
@@ -80,10 +80,10 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
       {/* Bilgi kartları */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {[
-          client.email      && { label: "E-posta",     value: client.email },
-          client.phone      && { label: "Telefon",     value: client.phone },
-          client.tax_number && { label: "Vergi No",    value: client.tax_number },
-          { label: "Durum", value: client.status === "active" ? "Aktif" : "Pasif" },
+          client.email      && { label: "Email",    value: client.email },
+          client.phone      && { label: "Phone",    value: client.phone },
+          client.tax_number && { label: "Tax No.", value: client.tax_number },
+          { label: "Status", value: client.status === "active" ? "Active" : "Inactive" },
         ].filter(Boolean).map((item: any) => (
           <div key={item.label} className="rounded-lg p-3"
             style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
@@ -99,7 +99,7 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
       <div className="rounded-xl overflow-hidden"
         style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
         <div className="px-5 py-3.5 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-2)" }}>
-          <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>Belge Talebi</h2>
+          <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>Document Request</h2>
           <BelgeIsteButton clientId={id} clientName={client.full_name} />
         </div>
         <div className="p-4">
@@ -120,8 +120,8 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
                         {t.document_types.join(", ")}
                       </p>
                       <p className="text-[11px] mt-0.5" style={{ color: "var(--text-3)" }}>
-                        {expired ? "Süresi doldu" : `${format(new Date(t.expires_at), "d MMM HH:mm", { locale: tr })}'e kadar`}
-                        {" · "}{t.used_count}/{t.max_uses} kullanım
+                        {expired ? "Expired" : `Valid until ${format(new Date(t.expires_at), "d MMM HH:mm", { locale: enUS })}`}
+                        {" · "}{t.used_count}/{t.max_uses} uses
                       </p>
                     </div>
                     {!expired && (
@@ -133,7 +133,7 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
             </div>
           ) : (
             <p className="text-[13px] text-center py-4" style={{ color: "var(--text-3)" }}>
-              Henüz belge talebi oluşturulmamış
+              No document requests yet
             </p>
           )}
         </div>
@@ -144,11 +144,11 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
         style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
         <div className="px-5 py-3.5" style={{ borderBottom: "1px solid var(--border-2)" }}>
           <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>
-            Belgeler <span style={{ color: "var(--text-3)" }}>({documents?.length ?? 0})</span>
+            Documents <span style={{ color: "var(--text-3)" }}>({documents?.length ?? 0})</span>
           </h2>
         </div>
         {!documents || documents.length === 0 ? (
-          <p className="px-5 py-8 text-center text-[13px]" style={{ color: "var(--text-3)" }}>Belge yok</p>
+          <p className="px-5 py-8 text-center text-[13px]" style={{ color: "var(--text-3)" }}>No documents yet</p>
         ) : (
           <div className="divide-y" style={{ borderColor: "var(--border-2)" }}>
             {documents.map((doc) => (
@@ -156,7 +156,7 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
                 <div>
                   <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>{doc.file_name}</p>
                   <p className="text-[11px] mt-0.5" style={{ color: "var(--text-3)" }}>
-                    {doc.document_type} · {format(new Date(doc.created_at), "d MMM yyyy", { locale: tr })}
+                    {doc.document_type} · {format(new Date(doc.created_at), "d MMM yyyy", { locale: enUS })}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-3">
@@ -167,7 +167,7 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
                   <a href={`/api/belgeler/indir/${doc.id}`} target="_blank" rel="noopener noreferrer"
                     className="text-[12px] font-medium px-2.5 py-1 rounded-lg transition-colors"
                     style={{ color: "var(--accent)", background: "var(--accent-bg)" }}>
-                    İndir
+                    Download
                   </a>
                 </div>
               </div>
@@ -181,16 +181,16 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
         style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
         <div className="px-5 py-3.5 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-2)" }}>
           <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>
-            Hizmet Bedelleri <span style={{ color: "var(--text-3)" }}>({fees?.length ?? 0})</span>
+            Service Fees <span style={{ color: "var(--text-3)" }}>({fees?.length ?? 0})</span>
           </h2>
           <Link href="/dashboard/finans" className="text-[12px] font-medium px-2.5 py-1.5 rounded-lg"
             style={{ color: "var(--accent)", background: "var(--accent-bg)" }}>
-            Finans
+            Finance
           </Link>
         </div>
         {!fees || fees.length === 0 ? (
           <p className="px-5 py-8 text-center text-[13px]" style={{ color: "var(--text-3)" }}>
-            Bu müşteri için hizmet bedeli eklenmemiş
+            No service fees added for this client yet
           </p>
         ) : (
           <div className="divide-y" style={{ borderColor: "var(--border-2)" }}>
@@ -200,8 +200,8 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
                 paid:    { background: "#f0fdf4", color: "#15803d", border: "1px solid #bbf7d0" },
                 overdue: { background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca" },
               };
-              const STATUS_LABEL: Record<string, string> = { pending: "Bekliyor", paid: "Ödendi", overdue: "Gecikmiş" };
-              const ay = format(new Date(fee.period_year, fee.period_month - 1, 1), "MMMM yyyy", { locale: tr });
+              const STATUS_LABEL: Record<string, string> = { pending: "Pending", paid: "Paid", overdue: "Overdue" };
+              const ay = format(new Date(fee.period_year, fee.period_month - 1, 1), "MMMM yyyy", { locale: enUS });
               return (
                 <div key={fee.id} className="px-5 py-3 flex items-center justify-between">
                   <div>
@@ -214,7 +214,7 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
                     </span>
                     <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md"
                       style={STATUS_STYLE[fee.status] ?? STATUS_STYLE.pending}>
-                      {STATUS_LABEL[fee.status] ?? "Bekliyor"}
+                      {STATUS_LABEL[fee.status] ?? "Pending"}
                     </span>
                   </div>
                 </div>
@@ -229,11 +229,11 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
         style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
         <div className="px-5 py-3.5" style={{ borderBottom: "1px solid var(--border-2)" }}>
           <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>
-            Aktif Görevler <span style={{ color: "var(--text-3)" }}>({tasks?.length ?? 0})</span>
+            Active Tasks <span style={{ color: "var(--text-3)" }}>({tasks?.length ?? 0})</span>
           </h2>
         </div>
         {!tasks || tasks.length === 0 ? (
-          <p className="px-5 py-8 text-center text-[13px]" style={{ color: "var(--text-3)" }}>Aktif görev yok</p>
+          <p className="px-5 py-8 text-center text-[13px]" style={{ color: "var(--text-3)" }}>No active tasks</p>
         ) : (
           <div className="divide-y" style={{ borderColor: "var(--border-2)" }}>
             {tasks.map((task) => {
@@ -243,8 +243,8 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
                   <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>{task.title}</p>
                   <span className="text-[12px] font-medium tabular-nums"
                     style={{ color: overdue ? "#dc2626" : "var(--text-3)" }}>
-                    {format(new Date(task.due_date), "d MMM yyyy", { locale: tr })}
-                    {overdue && " · Gecikti"}
+                    {format(new Date(task.due_date), "d MMM yyyy", { locale: enUS })}
+                    {overdue && " · Overdue"}
                   </span>
                 </div>
               );

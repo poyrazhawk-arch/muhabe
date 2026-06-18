@@ -82,8 +82,8 @@ export default async function FinansPage() {
         style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
         {!fees || fees.length === 0 ? (
           <div className="py-16 text-center">
-            <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>Henüz hizmet bedeli eklenmemiş</p>
-            <p className="text-[12px] mt-1" style={{ color: "var(--text-3)" }}>Sağ üstteki "Ekle" butonunu kullanın</p>
+            <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>No service fees yet</p>
+            <p className="text-[12px] mt-1" style={{ color: "var(--text-3)" }}>Use the &quot;Add fee&quot; button above to get started</p>
           </div>
         ) : (
           <table className="w-full">
@@ -112,13 +112,13 @@ export default async function FinansPage() {
                       )}
                     </td>
                     <td className="px-5 py-3 text-[13px] tabular-nums" style={{ color: "var(--text-2)" }}>
-                      {format(ay, "MMMM yyyy", { locale: tr })}
+                      {format(ay, "MMMM yyyy", { locale: enUS })}
                     </td>
                     <td className="px-5 py-3 text-[13px] font-semibold tabular-nums" style={{ color: "var(--text-1)" }}>
                       {Number(fee.amount).toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}
                     </td>
                     <td className="px-5 py-3 text-[13px] tabular-nums" style={{ color: "var(--text-3)" }}>
-                      {fee.due_date ? format(new Date(fee.due_date), "d MMM yyyy", { locale: tr }) : "-"}
+                      {fee.due_date ? format(new Date(fee.due_date), "d MMM yyyy", { locale: enUS }) : "-"}
                     </td>
                     <td className="px-5 py-3">
                       <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md"
@@ -130,7 +130,7 @@ export default async function FinansPage() {
                       {fee.status === "pending" && <OdemeButon feeId={fee.id} />}
                       {fee.status === "paid" && fee.paid_at && (
                         <span className="text-[11px]" style={{ color: "var(--text-3)" }}>
-                          {format(new Date(fee.paid_at), "d MMM", { locale: tr })}
+                          {format(new Date(fee.paid_at), "d MMM", { locale: enUS })}
                         </span>
                       )}
                     </td>

@@ -6,19 +6,19 @@ type Client = { id: string; full_name: string; email?: string };
 const TEMPLATES = [
   {
     key: "belge_hatirlatma",
-    label: "Belge Hatırlatması",
-    subject: "Belge Gönderme Hatırlatması",
-    message: "Sayın müşterimiz,\n\nBu ay için gerekli belgelerinizi henüz almadık. Lütfen fatura, banka ekstresi ve diğer belgelerinizi en kısa sürede sisteme yükleyiniz.\n\nTeşekkürler.",
+    label: "Document Reminder",
+    subject: "Document Submission Reminder",
+    message: "Dear client,\n\nWe have not yet received your required documents for this month. Please upload your invoices, bank statements, and other documents as soon as possible.\n\nThank you.",
   },
   {
     key: "beyanname_yaklasıyor",
-    label: "Beyanname Yaklaşıyor",
-    subject: "Beyanname Tarihi Yaklaşıyor",
-    message: "Sayın müşterimiz,\n\nBu ay beyanname son tarihi yaklaşmaktadır. Eksik belgeniz varsa lütfen acilen iletin.\n\nSaygılarımla.",
+    label: "Filing Deadline",
+    subject: "Tax Filing Deadline Approaching",
+    message: "Dear client,\n\nThe tax filing deadline for this month is approaching. If you have any outstanding documents, please send them urgently.\n\nBest regards.",
   },
   {
     key: "ozel",
-    label: "Özel Mesaj",
+    label: "Custom Message",
     subject: "",
     message: "",
   },
@@ -82,7 +82,7 @@ export default function BroadcastModal({ clients }: { clients: Client[] }) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
             d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
         </svg>
-        Toplu E-posta
+        Bulk Email
       </button>
 
       {open && (
@@ -92,8 +92,8 @@ export default function BroadcastModal({ clients }: { clients: Client[] }) {
             style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
 
             <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border)" }}>
-              <h2 className="text-[15px] font-semibold" style={{ color: "var(--text-1)" }}>Toplu E-posta Gönder</h2>
-              <button onClick={() => setOpen(false)} className="text-[13px]" style={{ color: "var(--text-3)" }}>Kapat</button>
+              <h2 className="text-[15px] font-semibold" style={{ color: "var(--text-1)" }}>Send Bulk Email</h2>
+              <button onClick={() => setOpen(false)} className="text-[13px]" style={{ color: "var(--text-3)" }}>Close</button>
             </div>
 
             {result ? (
@@ -104,13 +104,13 @@ export default function BroadcastModal({ clients }: { clients: Client[] }) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>
                   </svg>
                 </div>
-                <p className="text-[16px] font-semibold" style={{ color: "var(--text-1)" }}>Gönderildi</p>
+                <p className="text-[16px] font-semibold" style={{ color: "var(--text-1)" }}>Sent!</p>
                 <p className="text-[13px] mt-1" style={{ color: "var(--text-3)" }}>
-                  {result.sent} e-posta gönderildi{result.failed > 0 ? `, ${result.failed} başarısız` : ""}
+                  {result.sent} emails sent{result.failed > 0 ? `, ${result.failed} failed` : ""}
                 </p>
                 <button onClick={() => setOpen(false)} className="mt-4 px-4 py-2 rounded-lg text-[13px] font-semibold text-white"
                   style={{ background: "var(--accent)" }}>
-                  Kapat
+                  Close
                 </button>
               </div>
             ) : (
@@ -122,7 +122,7 @@ export default function BroadcastModal({ clients }: { clients: Client[] }) {
                       {selectedIds.size} / {clients.length}
                     </span>
                     <button onClick={toggleAll} className="text-[12px] font-medium" style={{ color: "var(--accent)" }}>
-                      {selectedIds.size === clients.length ? "Hepsini kaldır" : "Hepsini seç"}
+                      {selectedIds.size === clients.length ? "Deselect all" : "Select all"}
                     </button>
                   </div>
                   <div className="flex-1 overflow-auto p-2 space-y-0.5">
@@ -133,7 +133,7 @@ export default function BroadcastModal({ clients }: { clients: Client[] }) {
                           className="w-3.5 h-3.5 accent-blue-600"/>
                         <div className="min-w-0">
                           <p className="text-[12px] font-medium truncate" style={{ color: "var(--text-1)" }}>{c.full_name}</p>
-                          {!c.email && <p className="text-[10px]" style={{ color: "#ef4444" }}>E-posta yok</p>}
+                          {!c.email && <p className="text-[10px]" style={{ color: "#ef4444" }}>No email</p>}
                         </div>
                       </label>
                     ))}
@@ -143,7 +143,7 @@ export default function BroadcastModal({ clients }: { clients: Client[] }) {
                 {/* Sağ — içerik */}
                 <div className="flex-1 flex flex-col overflow-auto p-5 space-y-4">
                   <div>
-                    <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Şablon</label>
+                    <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Template</label>
                     <div className="flex gap-2 flex-wrap">
                       {TEMPLATES.map(t => (
                         <button key={t.key} onClick={() => selectTemplate(t.key)}
@@ -157,13 +157,13 @@ export default function BroadcastModal({ clients }: { clients: Client[] }) {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Konu</label>
+                    <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Subject</label>
                     <input value={subject} onChange={e => setSubject(e.target.value)}
                       className="w-full px-3 py-2 rounded-lg text-[13px] focus:outline-none"
                       style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text-1)" }}/>
                   </div>
                   <div className="flex-1">
-                    <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Mesaj</label>
+                    <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Message</label>
                     <textarea value={message} onChange={e => setMessage(e.target.value)} rows={7}
                       className="w-full px-3 py-2 rounded-lg text-[13px] focus:outline-none resize-none"
                       style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text-1)" }}/>
@@ -171,7 +171,7 @@ export default function BroadcastModal({ clients }: { clients: Client[] }) {
                   <button onClick={handleSend} disabled={loading || selectedIds.size === 0 || !subject || !message}
                     className="w-full py-2.5 rounded-lg text-[13px] font-semibold text-white transition-all disabled:opacity-50 active:scale-[0.99]"
                     style={{ background: "var(--accent)" }}>
-                    {loading ? "Gönderiliyor..." : `${emailCount} müşteriye gönder`}
+                    {loading ? "Sending…" : `Send to ${emailCount} client${emailCount !== 1 ? "s" : ""}`}
                   </button>
                 </div>
               </div>
