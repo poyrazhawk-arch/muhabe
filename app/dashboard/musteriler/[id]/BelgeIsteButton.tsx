@@ -8,7 +8,7 @@ const BELGE_TURLERI = [
   "Payroll",
   "Contract",
   "Tax Certificate",
-  "SGK Document",
+  "HMRC Document",
   "Other",
 ];
 

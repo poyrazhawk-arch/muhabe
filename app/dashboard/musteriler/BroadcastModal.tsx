@@ -5,19 +5,19 @@ type Client = { id: string; full_name: string; email?: string };
 
 const TEMPLATES = [
   {
-    key: "belge_hatirlatma",
+    key: "document_reminder",
     label: "Document Reminder",
     subject: "Document Submission Reminder",
     message: "Dear client,\n\nWe have not yet received your required documents for this month. Please upload your invoices, bank statements, and other documents as soon as possible.\n\nThank you.",
   },
   {
-    key: "beyanname_yaklasıyor",
+    key: "filing_deadline",
     label: "Filing Deadline",
     subject: "Tax Filing Deadline Approaching",
     message: "Dear client,\n\nThe tax filing deadline for this month is approaching. If you have any outstanding documents, please send them urgently.\n\nBest regards.",
   },
   {
-    key: "ozel",
+    key: "custom",
     label: "Custom Message",
     subject: "",
     message: "",

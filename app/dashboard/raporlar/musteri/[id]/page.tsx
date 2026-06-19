@@ -50,15 +50,14 @@ export default async function MusteriRaporPage({
   const completedTasks = tasks?.filter(t => t.status === "completed") ?? [];
   const pendingTasks = tasks?.filter(t => t.status !== "completed" && t.status !== "cancelled") ?? [];
 
-  // Dönem kapanış kontrol listesi
   const kapanisListesi = [
-    { baslik: "VAT Return (KDV)", tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("kdv") && t.status === "completed") ?? false },
-    { baslik: "SGK Contribution Filing", tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("sgk") && t.status === "completed") ?? false },
-    { baslik: "Income / Corporate Tax Return", tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("vergi") && t.status === "completed") ?? false },
-    { baslik: "BA-BS Reporting", tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("ba-bs") && t.status === "completed") ?? false },
-    { baslik: "Bank Statements Received", tamamlandi: documents?.some(d => d.document_type.toLowerCase().includes("banka") && d.status !== "pending") ?? false },
-    { baslik: "Invoices Received", tamamlandi: documents?.some(d => (d.document_type.toLowerCase().includes("fatura") || d.document_type.toLowerCase().includes("invoice")) && d.status !== "pending") ?? false },
-    { baslik: "Payroll Processed", tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("bordro") && t.status === "completed") ?? false },
+    { baslik: "VAT Return", tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("vat") && t.status === "completed") ?? false },
+    { baslik: "PAYE / Payroll Filing", tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("paye") && t.status === "completed") ?? false },
+    { baslik: "Corporation Tax Return", tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("corporation tax") && t.status === "completed") ?? false },
+    { baslik: "Company Accounts Filing", tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("accounts") && t.status === "completed") ?? false },
+    { baslik: "Bank Statements Received", tamamlandi: documents?.some(d => d.document_type.toLowerCase().includes("bank") && d.status !== "pending") ?? false },
+    { baslik: "Invoices Received", tamamlandi: documents?.some(d => d.document_type.toLowerCase().includes("invoice") && d.status !== "pending") ?? false },
+    { baslik: "Payroll Processed", tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("payroll") && t.status === "completed") ?? false },
     { baslik: "Trial Balance Extracted", tamamlandi: false },
   ];
 

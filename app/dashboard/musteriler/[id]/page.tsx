@@ -210,7 +210,7 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
                     <span className="text-[13px] font-semibold tabular-nums" style={{ color: "var(--text-1)" }}>
-                      {Number(fee.amount).toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}
+                      {Number(fee.amount).toLocaleString("en-GB", { style: "currency", currency: "GBP" })}
                     </span>
                     <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md"
                       style={STATUS_STYLE[fee.status] ?? STATUS_STYLE.pending}>

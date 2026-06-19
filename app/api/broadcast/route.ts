@@ -9,17 +9,17 @@ const BroadcastSchema = z.object({
   client_ids: z.array(z.string().uuid()).min(1),
   subject:    z.string().min(3).max(200),
   message:    z.string().min(10),
-  template:   z.enum(["belge_hatirlatma", "beyanname_yaklasıyor", "ozel"]).default("ozel"),
+  template:   z.enum(["document_reminder", "filing_deadline", "custom"]).default("custom"),
 });
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Yetkisiz" }, { status: 401 });
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: accountant } = await supabase
     .from("accountants").select("id, full_name, email").eq("user_id", user.id).single();
-  if (!accountant) return NextResponse.json({ error: "Hesap bulunamadı" }, { status: 404 });
+  if (!accountant) return NextResponse.json({ error: "Account not found" }, { status: 404 });
 
   const body = await req.json();
   const parsed = BroadcastSchema.safeParse(body);
@@ -37,9 +37,9 @@ export async function POST(req: NextRequest) {
 
   if (clientErr) return NextResponse.json({ error: clientErr.message }, { status: 500 });
   if (!clients || clients.length === 0)
-    return NextResponse.json({ error: "Geçerli e-posta adresi olan müşteri bulunamadı" }, { status: 404 });
+    return NextResponse.json({ error: "No clients with a valid email address found" }, { status: 404 });
 
-  // Resend batch e-posta gönder
+  // Send emails via Resend batch
   const emails = clients.map(client => ({
     from: process.env.RESEND_FROM_EMAIL ?? "noreply@nixtagency.com",
     to: [client.email!],
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
   let sent = 0;
   let failed = 0;
 
-  // Resend batch max 100 — gruplar halinde gönder
+  // Resend batch max 100 — send in groups of 50
   for (let i = 0; i < emails.length; i += 50) {
     const batch = emails.slice(i, i + 50);
     try {
@@ -67,20 +67,20 @@ export async function POST(req: NextRequest) {
 function buildEmailHtml(clientName: string, message: string, accountantName: string): string {
   return `
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8fafc;margin:0;padding:32px 16px">
   <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:12px;border:1px solid #e8edf2;overflow:hidden">
     <div style="background:#1e3a5f;padding:24px 32px">
-      <p style="color:#93c5fd;font-size:12px;margin:0 0 4px">Muhasebe · İş Akışı Sistemi</p>
-      <p style="color:#fff;font-size:18px;font-weight:600;margin:0">Sayın ${clientName}</p>
+      <p style="color:#93c5fd;font-size:12px;margin:0 0 4px">Accounting · Workflow System</p>
+      <p style="color:#fff;font-size:18px;font-weight:600;margin:0">Dear ${clientName}</p>
     </div>
     <div style="padding:32px">
       <div style="white-space:pre-line;color:#374151;font-size:14px;line-height:1.7">${message}</div>
     </div>
     <div style="padding:16px 32px;background:#f8fafc;border-top:1px solid #e8edf2">
       <p style="margin:0;font-size:12px;color:#9ca3af">
-        Bu e-posta muhasebeci <strong>${accountantName}</strong> tarafından Muhasebe sistemi üzerinden gönderilmiştir.
+        This email was sent by your accountant <strong>${accountantName}</strong> via the Accounting system.
       </p>
     </div>
   </div>
