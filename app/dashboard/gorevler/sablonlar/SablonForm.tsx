@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Plus } from "@phosphor-icons/react";
 
 const RECURRENCE = [
   { value: "monthly",   label: "Monthly" },
@@ -47,9 +48,7 @@ export default function SablonForm() {
         className="flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-semibold text-white active:scale-[0.98] transition-all"
         style={{ background: "var(--accent)", boxShadow: "0 2px 8px rgba(37,99,235,0.28)" }}
       >
-        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4"/>
-        </svg>
+        <Plus size={14} weight="bold" />
         Add Template
       </button>
 

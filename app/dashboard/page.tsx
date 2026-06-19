@@ -3,6 +3,7 @@ import { calculateRAG } from "@/lib/utils/rag";
 import { format, isToday, isThisWeek, isPast } from "date-fns";
 import { enUS } from "date-fns/locale";
 import Link from "next/link";
+import { Plus } from "@phosphor-icons/react/dist/ssr";
 
 const RAG_CFG: Record<string, { label: string; color: string; bg: string; border: string }> = {
   red:   { label: "Critical", color: "#dc2626", bg: "#fef2f2", border: "#fecaca" },
@@ -81,7 +82,7 @@ export default async function DashboardPage() {
   const feeBekleyen = thisMonthFees?.filter(f => f.status === "pending").reduce((s, f) => s + Number(f.amount), 0) ?? 0;
   const feeGecikmiş = thisMonthFees?.filter(f => f.status === "overdue").reduce((s, f) => s + Number(f.amount), 0) ?? 0;
   const feeToplam   = feeOdenen + feeBekleyen + feeGecikmiş;
-  const fmtTL = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  const fmtTL = (n: number) => n.toLocaleString("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 });
 
   const hour      = today.getHours();
   const greeting  = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
@@ -109,9 +110,7 @@ export default async function DashboardPage() {
             boxShadow: "0 1px 3px rgba(37,99,235,0.3), 0 2px 10px rgba(37,99,235,0.12)",
           }}
         >
-          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4"/>
-          </svg>
+          <Plus size={13} weight="bold" />
           New Task
         </Link>
       </div>

@@ -1,6 +1,6 @@
 /**
- * Türk Vergi Takvimi — yasal beyanname tarihleri
- * Tüm tarihler GİB mevzuatına göredir (2024+).
+ * UK / International Tax Filing Calendar
+ * Covers common deadlines for UK, Australia, Canada, New Zealand, Ireland.
  */
 
 export interface TaxItem {
@@ -10,72 +10,55 @@ export interface TaxItem {
   period_month?: number;
 }
 
-/** Belirli yıl için tüm beyanname tarihlerini döndürür */
+/** Generate filing deadlines for a given year */
 export function generateTaxCalendar(year: number): TaxItem[] {
   const items: TaxItem[] = [];
 
   for (let month = 1; month <= 12; month++) {
-    const m = String(month).padStart(2, "0");
-    const nextMonth = month === 12 ? 1 : month + 1;
-    const nextYear  = month === 12 ? year + 1 : year;
-    const nm = String(nextMonth).padStart(2, "0");
+    const m  = String(month).padStart(2, "0");
+    const nm = String(month === 12 ? 1 : month + 1).padStart(2, "0");
+    const ny = month === 12 ? year + 1 : year;
 
-    // KDV Beyannamesi — her ayın 26'sı (bir önceki ay için)
+    // PAYE / Payroll Filing — 19th of each month
     items.push({
-      beyanname_turu: "KDV Beyannamesi",
-      due_date: `${year}-${m}-26`,
+      beyanname_turu: "PAYE / Payroll Filing",
+      due_date: `${year}-${m}-19`,
       period_year: year,
       period_month: month,
     });
 
-    // Muhtasar Beyanname — her ayın 26'sı
+    // VAT Return — 7th of the following month (monthly filers)
     items.push({
-      beyanname_turu: "Muhtasar Beyanname",
-      due_date: `${year}-${m}-26`,
+      beyanname_turu: "VAT Return",
+      due_date: `${ny}-${nm}-07`,
       period_year: year,
       period_month: month,
     });
-
-    // SGK Bildirge — her ayın 23'ü
-    items.push({
-      beyanname_turu: "SGK Aylık Bildirge",
-      due_date: `${year}-${m}-23`,
-      period_year: year,
-      period_month: month,
-    });
-
-    // BA-BS Bildirimi — her ikinci ayın 5'i (birikimli ay için)
-    if (month % 2 === 0) {
-      items.push({
-        beyanname_turu: "BA-BS Bildirimi",
-        due_date: `${nextYear}-${nm}-05`,
-        period_year: year,
-        period_month: month,
-      });
-    }
   }
 
-  // Geçici Vergi
+  // Quarterly Corporation Tax Instalments
   items.push(
-    { beyanname_turu: "1. Dönem Geçici Vergi", due_date: `${year}-05-17`, period_year: year, period_month: 3  },
-    { beyanname_turu: "2. Dönem Geçici Vergi", due_date: `${year}-08-17`, period_year: year, period_month: 6  },
-    { beyanname_turu: "3. Dönem Geçici Vergi", due_date: `${year}-11-17`, period_year: year, period_month: 9  },
+    { beyanname_turu: "Q1 Corporation Tax",  due_date: `${year}-04-01`, period_year: year, period_month: 3  },
+    { beyanname_turu: "Q2 Corporation Tax",  due_date: `${year}-07-01`, period_year: year, period_month: 6  },
+    { beyanname_turu: "Q3 Corporation Tax",  due_date: `${year}-10-01`, period_year: year, period_month: 9  },
+    { beyanname_turu: "Q4 Corporation Tax",  due_date: `${year}-01-01`, period_year: year, period_month: 12 },
   );
 
-  // Yıllık Beyannameler
+  // Annual filings
   items.push(
-    { beyanname_turu: "Yıllık Gelir Vergisi Beyannamesi",    due_date: `${year + 1}-03-31`, period_year: year },
-    { beyanname_turu: "Kurumlar Vergisi Beyannamesi",          due_date: `${year + 1}-04-30`, period_year: year },
-    { beyanname_turu: "Damga Vergisi Beyannamesi (Yıllık)",    due_date: `${year + 1}-01-26`, period_year: year },
+    { beyanname_turu: "Self Assessment (online)", due_date: `${year + 1}-01-31`, period_year: year },
+    { beyanname_turu: "Corporation Tax Return",   due_date: `${year + 1}-12-31`, period_year: year },
+    { beyanname_turu: "Company Accounts Filing",  due_date: `${year + 1}-09-30`, period_year: year },
+    { beyanname_turu: "Confirmation Statement",   due_date: `${year + 1}-03-31`, period_year: year },
   );
 
   return items;
 }
 
-/** Bir sonraki N gün içindeki beyannameleri döndürür */
+/** Return items due within the next N days */
 export function getUpcomingDeadlines(items: TaxItem[], days = 30): TaxItem[] {
-  const now  = new Date();
-  const end  = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+  const now = new Date();
+  const end = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
   return items.filter(item => {
     const d = new Date(item.due_date);
     return d >= now && d <= end;

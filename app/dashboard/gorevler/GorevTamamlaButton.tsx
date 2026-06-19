@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Check } from "@phosphor-icons/react";
 
 export default function GorevTamamlaButton({ gorevId }: { gorevId: string }) {
   const [loading, setLoading] = useState(false);
@@ -21,13 +22,9 @@ export default function GorevTamamlaButton({ gorevId }: { gorevId: string }) {
 
   return (
     <button onClick={handleTamamla} disabled={loading || done}
-      className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all disabled:opacity-50"
-      style={done
-        ? { background: "#f0fdf4", color: "#16a34a", border: "1px solid #bbf7d0" }
-        : { background: "#f0fdf4", color: "#16a34a", border: "1px solid #bbf7d0" }}>
-      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/>
-      </svg>
+      className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all active:scale-[0.97] disabled:opacity-50"
+      style={{ background: "#f0fdf4", color: "#16a34a", border: "1px solid #bbf7d0" }}>
+      <Check size={14} weight="bold" />
       {loading ? "…" : done ? "Done!" : "Complete"}
     </button>
   );

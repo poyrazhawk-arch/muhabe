@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Plus } from "@phosphor-icons/react";
 
 type Client = { id: string; full_name: string; company_name?: string };
 
@@ -37,9 +38,7 @@ export default function YeniFeeForm({ clients }: { clients: Client[] }) {
       <button onClick={() => setOpen(true)}
         className="flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-semibold text-white active:scale-[0.98] transition-all"
         style={{ background: "var(--accent)", boxShadow: "0 2px 8px rgba(37,99,235,0.28)" }}>
-        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4"/>
-        </svg>
+        <Plus size={14} weight="bold" />
         Add fee
       </button>
 
@@ -63,7 +62,7 @@ export default function YeniFeeForm({ clients }: { clients: Client[] }) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Amount (TRY)</label>
+                  <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Amount (GBP)</label>
                   <input required type="number" min="0" step="0.01" value={form.amount}
                     onChange={e => setForm(p => ({ ...p, amount: e.target.value }))}
                     placeholder="1500"

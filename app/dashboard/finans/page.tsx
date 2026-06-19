@@ -39,7 +39,7 @@ export default async function FinansPage() {
   const bekleyen  = thisMonth.filter(f => f.status === "pending").reduce((s, f) => s + Number(f.amount), 0);
   const gecikmiş  = thisMonth.filter(f => f.status === "overdue").reduce((s, f) => s + Number(f.amount), 0);
 
-  const fmt = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+  const fmt = (n: number) => n.toLocaleString("en-GB", { style: "currency", currency: "GBP" });
 
   return (
     <div className="space-y-6 animate-fade-up">
@@ -69,7 +69,7 @@ export default async function FinansPage() {
               borderTop: `2px solid ${color}`,
             }}>
             <div className="w-7 h-7 rounded-lg flex items-center justify-center mb-3" style={{ background: bg }}>
-              <span className="text-[11px] font-bold" style={{ color }}>₺</span>
+              <span className="text-[11px] font-bold" style={{ color }}>£</span>
             </div>
             <p className="text-[22px] font-bold tracking-tight tabular-nums" style={{ color: "var(--text-1)" }}>{value}</p>
             <p className="text-[12px] mt-0.5 font-medium" style={{ color: "var(--text-3)" }}>{label}</p>
@@ -115,7 +115,7 @@ export default async function FinansPage() {
                       {format(ay, "MMMM yyyy", { locale: enUS })}
                     </td>
                     <td className="px-5 py-3 text-[13px] font-semibold tabular-nums" style={{ color: "var(--text-1)" }}>
-                      {Number(fee.amount).toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}
+                      {Number(fee.amount).toLocaleString("en-GB", { style: "currency", currency: "GBP" })}
                     </td>
                     <td className="px-5 py-3 text-[13px] tabular-nums" style={{ color: "var(--text-3)" }}>
                       {fee.due_date ? format(new Date(fee.due_date), "d MMM yyyy", { locale: enUS }) : "-"}

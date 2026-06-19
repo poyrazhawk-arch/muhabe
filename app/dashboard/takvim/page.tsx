@@ -4,14 +4,17 @@ import { enUS } from "date-fns/locale";
 import { generateTaxCalendar, getUpcomingDeadlines } from "@/lib/utils/taxCalendar";
 
 const BEYANNAME_COLOR: Record<string, { bg: string; color: string; border: string }> = {
-  "KDV Beyannamesi":            { bg: "#eff6ff", color: "#1d4ed8", border: "#bfdbfe" },
-  "Muhtasar Beyanname":         { bg: "#f5f3ff", color: "#6d28d9", border: "#ddd6fe" },
-  "SGK Aylık Bildirge":         { bg: "#fff7ed", color: "#c2410c", border: "#fed7aa" },
-  "BA-BS Bildirimi":            { bg: "#fef2f2", color: "#dc2626", border: "#fecaca" },
-  "1. Dönem Geçici Vergi":      { bg: "#f0fdf4", color: "#15803d", border: "#bbf7d0" },
-  "2. Dönem Geçici Vergi":      { bg: "#f0fdf4", color: "#15803d", border: "#bbf7d0" },
-  "3. Dönem Geçici Vergi":      { bg: "#f0fdf4", color: "#15803d", border: "#bbf7d0" },
-  default:                       { bg: "#f8fafc", color: "#475569", border: "#e2e8f0" },
+  "VAT Return":                  { bg: "#eff6ff", color: "#1d4ed8", border: "#bfdbfe" },
+  "PAYE / Payroll Filing":       { bg: "#f5f3ff", color: "#6d28d9", border: "#ddd6fe" },
+  "Q1 Corporation Tax":          { bg: "#f0fdf4", color: "#15803d", border: "#bbf7d0" },
+  "Q2 Corporation Tax":          { bg: "#f0fdf4", color: "#15803d", border: "#bbf7d0" },
+  "Q3 Corporation Tax":          { bg: "#f0fdf4", color: "#15803d", border: "#bbf7d0" },
+  "Q4 Corporation Tax":          { bg: "#f0fdf4", color: "#15803d", border: "#bbf7d0" },
+  "Self Assessment (online)":    { bg: "#fff7ed", color: "#c2410c", border: "#fed7aa" },
+  "Corporation Tax Return":      { bg: "#fef2f2", color: "#dc2626", border: "#fecaca" },
+  "Company Accounts Filing":     { bg: "#fdf4ff", color: "#7e22ce", border: "#e9d5ff" },
+  "Confirmation Statement":      { bg: "#f0f9ff", color: "#0369a1", border: "#bae6fd" },
+  default:                        { bg: "#f8fafc", color: "#475569", border: "#e2e8f0" },
 };
 
 export default async function TakvimPage() {
@@ -42,7 +45,7 @@ export default async function TakvimPage() {
       <div>
         <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Tax Calendar</h1>
         <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>
-          {year} Turkish tax filing calendar
+          {year} filing deadlines — UK / International
         </p>
       </div>
 
