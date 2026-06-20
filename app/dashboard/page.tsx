@@ -4,6 +4,8 @@ import { format, isToday, isThisWeek, isPast, isBefore } from "date-fns";
 import { enUS } from "date-fns/locale";
 import Link from "next/link";
 import { Plus } from "@phosphor-icons/react/dist/ssr";
+import MetricStrip from "@/components/dashboard/MetricStrip";
+import CollectionWidget from "@/components/dashboard/CollectionWidget";
 
 const RAG_CFG: Record<string, { label: string; color: string; bg: string; border: string }> = {
   red:   { label: "Critical", color: "#dc2626", bg: "#fef2f2", border: "#fecaca" },
@@ -115,94 +117,22 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* Metric strip — horizontal, no equal cards */}
-      <div
-        className="rounded-xl overflow-hidden stagger"
-        style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
-      >
-        <div className="grid grid-cols-2 lg:grid-cols-4">
-          {STAT_DEFS.map(({ key, label }, i) => {
-            const isOverdue = key === "overdue" && stats[key] > 0;
-            const isToday   = key === "today"   && stats[key] > 0;
-            const numColor  = isOverdue ? "var(--red)" : isToday ? "var(--amber)" : "var(--text-1)";
-            return (
-              <div
-                key={key}
-                className="px-5 py-4 transition-colors duration-150"
-                style={{
-                  borderRight: i < 3 ? "1px solid var(--border-2)" : "none",
-                  borderBottom: "none",
-                  background: isOverdue ? "var(--red-bg)" : "transparent",
-                }}
-              >
-                <p
-                  className="tabular-nums leading-none"
-                  style={{
-                    fontSize: "30px",
-                    fontWeight: 700,
-                    letterSpacing: "-0.045em",
-                    color: numColor,
-                    marginBottom: 6,
-                  }}
-                >
-                  {stats[key]}
-                </p>
-                <p className="text-[11.5px] font-medium" style={{ color: "var(--text-3)" }}>
-                  {label}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      {/* Metric strip — animated count-up */}
+      <MetricStrip metrics={[
+        { key: "clients", label: "Active clients", value: stats.clients },
+        { key: "today",   label: "Due today",      value: stats.today,   isWarning: stats.today > 0 },
+        { key: "overdue", label: "Overdue tasks",  value: stats.overdue, isDanger:  stats.overdue > 0 },
+        { key: "docs",    label: "Pending docs",   value: stats.docs },
+      ]} />
 
-      {/* Tahsilat widget */}
-      {feeToplam > 0 && (
-        <div
-          className="rounded-xl p-4"
-          style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>This Month's Collections</h2>
-              <p className="text-[12px]" style={{ color: "var(--text-3)" }}>
-                {format(today, "MMMM yyyy", { locale: enUS })}
-              </p>
-            </div>
-            <Link
-              href="/dashboard/finans"
-              className="text-[12px] font-medium px-2.5 py-1.5 rounded-lg"
-              style={{ color: "var(--accent)", background: "var(--accent-bg)" }}
-            >
-              Details
-            </Link>
-          </div>
-          <div className="grid grid-cols-4 gap-3">
-            {[
-              { label: "Total",   value: fmtTL(feeToplam),   color: "#2563eb" },
-              { label: "Paid",    value: fmtTL(feeOdenen),   color: "#15803d" },
-              { label: "Pending", value: fmtTL(feeBekleyen), color: "#d97706" },
-              { label: "Overdue", value: fmtTL(feeGecikmiş), color: "#dc2626" },
-            ].map(({ label, value, color }) => (
-              <div key={label}>
-                <p className="text-[18px] font-bold tabular-nums" style={{ color }}>{value}</p>
-                <p className="text-[11px] mt-0.5" style={{ color: "var(--text-3)" }}>{label}</p>
-              </div>
-            ))}
-          </div>
-          {feeToplam > 0 && (
-            <div className="mt-3 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${Math.round((feeOdenen / feeToplam) * 100)}%`,
-                  background: "linear-gradient(90deg, #15803d, #22c55e)",
-                }}
-              />
-            </div>
-          )}
-        </div>
-      )}
+      {/* Collection progress — animated bar */}
+      <CollectionWidget
+        total={feeToplam}
+        paid={feeOdenen}
+        pending={feeBekleyen}
+        overdue={feeGecikmiş}
+        monthLabel={format(today, "MMMM yyyy", { locale: enUS })}
+      />
 
       {/* Content row */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
