@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence, useInView } from "motion/react";
+import { useRef } from "react";
 import {
   Check,
   ArrowRight,
@@ -11,7 +13,15 @@ import {
   CheckSquare,
   Envelope,
   CaretDown,
+  Notebook,
 } from "@phosphor-icons/react";
+
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 18 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.55, delay, ease: EASE },
+});
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -193,7 +203,10 @@ export default function PricingPage() {
       }}
     >
       {/* ─── Nav ──────────────────────────────────────────────────────────── */}
-      <nav
+      <motion.nav
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         style={{
           position: "sticky",
           top: 0,
@@ -204,52 +217,29 @@ export default function PricingPage() {
           justifyContent: "space-between",
           padding: "0 32px",
           borderBottom: "1px solid rgba(255,255,255,0.05)",
-          background: "rgba(9,17,31,0.9)",
-          backdropFilter: "blur(14px)",
-          WebkitBackdropFilter: "blur(14px)",
+          background: "rgba(9,17,31,0.88)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
         }}
       >
         <Link
           href="/"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 9,
-            textDecoration: "none",
-          }}
+          style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none" }}
         >
-          <div
+          <motion.div
+            whileHover={{ scale: 1.08, rotate: -4 }}
+            whileTap={{ scale: 0.92 }}
             style={{
-              width: 28,
-              height: 28,
-              borderRadius: 8,
-              background: "#2563eb",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              width: 28, height: 28, borderRadius: 8,
+              background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+              display: "flex", alignItems: "center", justifyContent: "center",
               flexShrink: 0,
+              boxShadow: "0 2px 10px rgba(37,99,235,0.5), inset 0 1px 0 rgba(255,255,255,0.18)",
             }}
           >
-            <span
-              style={{
-                color: "#fff",
-                fontSize: 13,
-                fontWeight: 700,
-                letterSpacing: "-0.02em",
-                lineHeight: 1,
-              }}
-            >
-              L
-            </span>
-          </div>
-          <span
-            style={{
-              fontSize: 15,
-              fontWeight: 600,
-              color: "#f0f4f8",
-              letterSpacing: "-0.025em",
-            }}
-          >
+            <Notebook size={14} weight="fill" style={{ color: "#fff" }} />
+          </motion.div>
+          <span style={{ fontSize: 15, fontWeight: 600, color: "#f0f4f8", letterSpacing: "-0.025em" }}>
             Ledger
           </span>
         </Link>
@@ -304,7 +294,7 @@ export default function PricingPage() {
             <ArrowRight size={12} weight="bold" />
           </Link>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* ─── Hero (LEFT-ALIGNED) ─────────────────────────────────────────── */}
       <section
@@ -315,7 +305,8 @@ export default function PricingPage() {
         }}
       >
         {/* Single eyebrow for the whole page */}
-        <p
+        <motion.p
+          {...fadeUp(0.05)}
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -328,20 +319,19 @@ export default function PricingPage() {
             marginBottom: 22,
           }}
         >
-          <span
+          <motion.span
+            animate={{ scale: [1, 1.4, 1] }}
+            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
             style={{
-              display: "inline-block",
-              width: 5,
-              height: 5,
-              borderRadius: "50%",
-              background: "#3b82f6",
-              flexShrink: 0,
+              display: "inline-block", width: 5, height: 5,
+              borderRadius: "50%", background: "#3b82f6", flexShrink: 0,
             }}
           />
           Accounting workflow
-        </p>
+        </motion.p>
 
-        <h1
+        <motion.h1
+          {...fadeUp(0.12)}
           style={{
             fontSize: "clamp(36px, 5.5vw, 58px)",
             fontWeight: 700,
@@ -353,9 +343,10 @@ export default function PricingPage() {
           }}
         >
           Simple pricing for serious practices
-        </h1>
+        </motion.h1>
 
-        <p
+        <motion.p
+          {...fadeUp(0.2)}
           style={{
             fontSize: 16,
             color: "#6b829e",
@@ -365,10 +356,10 @@ export default function PricingPage() {
           }}
         >
           14-day free trial. No credit card. Cancel anytime.
-        </p>
+        </motion.p>
 
         {/* Billing toggle - left-aligned */}
-        <div
+        <motion.div {...fadeUp(0.28)}
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -429,7 +420,7 @@ export default function PricingPage() {
               -20%
             </span>
           </button>
-        </div>
+        </motion.div>
       </section>
 
       {/* ─── Pricing (asymmetric - Pro dominant) ────────────────────────── */}
@@ -444,37 +435,32 @@ export default function PricingPage() {
           alignItems: "start",
         }}
       >
-        {PLANS.map((plan) => {
+        {PLANS.map((plan, i) => {
           const price = displayPrice(plan.monthly);
           const yearlySave =
             annual ? (plan.monthly - annualPrice(plan.monthly)) * 12 : 0;
 
           return (
-            <div
+            <motion.div
               key={plan.id}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: plan.highlight ? -12 : 0 }}
+              transition={{ duration: 0.55, delay: 0.1 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: plan.highlight ? -16 : -4 }}
               style={{
                 position: "relative",
                 borderRadius: 14,
                 padding: plan.highlight ? "32px 28px 36px" : "26px 24px 30px",
-                marginTop: plan.highlight ? -12 : 0,
                 background: plan.highlight
-                  ? "rgba(37,99,235,0.06)"
-                  : "rgba(255,255,255,0.025)",
+                  ? "rgba(37,99,235,0.07)"
+                  : "rgba(255,255,255,0.03)",
                 border: plan.highlight
-                  ? "1.5px solid rgba(59,130,246,0.4)"
-                  : "1px solid rgba(255,255,255,0.07)",
+                  ? "1.5px solid rgba(59,130,246,0.45)"
+                  : "1px solid rgba(255,255,255,0.08)",
                 boxShadow: plan.highlight
-                  ? "0 0 48px rgba(37,99,235,0.14)"
-                  : "none",
-                transition: "transform 0.2s",
+                  ? "0 0 60px rgba(37,99,235,0.18), 0 8px 32px rgba(0,0,0,0.2)"
+                  : "0 2px 12px rgba(0,0,0,0.12)",
               }}
-              onMouseEnter={(e) =>
-                ((e.currentTarget as HTMLElement).style.transform =
-                  "translateY(-2px)")
-              }
-              onMouseLeave={(e) =>
-                ((e.currentTarget as HTMLElement).style.transform = "translateY(0)")
-              }
             >
               {plan.badge && (
                 <div
@@ -648,10 +634,11 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           );
         })}
       </section>
+
 
       {/* ─── Features bento (asymmetric, real images) ────────────────────── */}
       <section
@@ -1150,18 +1137,22 @@ export default function PricingPage() {
                   }}
                 />
               </button>
-              {openFaq === i && (
-                <div
-                  style={{
-                    padding: "0 20px 18px",
-                    fontSize: 13,
-                    color: "#6b829e",
-                    lineHeight: 1.7,
-                  }}
-                >
-                  {faq.a}
-                </div>
-              )}
+              <AnimatePresence initial={false}>
+                {openFaq === i && (
+                  <motion.div
+                    key="answer"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                    style={{ overflow: "hidden" }}
+                  >
+                    <div style={{ padding: "0 20px 18px", fontSize: 13, color: "#6b829e", lineHeight: 1.7 }}>
+                      {faq.a}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           ))}
         </div>
