@@ -50,18 +50,27 @@ export default async function TakvimPage() {
       </div>
 
       {/* Özet */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: "This Month", value: thisMonth.length, color: "#2563eb", bg: "#eff6ff" },
-          { label: "Next 60 Days", value: upcoming.length, color: "#d97706", bg: "#fffbeb" },
-          { label: "Past Due", value: overdue.length, color: "#dc2626", bg: "#fef2f2" },
-        ].map(({ label, value, color, bg }) => (
-          <div key={label} className="rounded-xl p-4"
-            style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)", borderTop: `2px solid ${color}` }}>
-            <p className="text-[26px] font-bold tracking-tight tabular-nums" style={{ color }}>{value}</p>
-            <p className="text-[12px] mt-0.5 font-medium" style={{ color: "var(--text-3)" }}>{label}</p>
-          </div>
-        ))}
+      <div className="rounded-xl overflow-hidden"
+        style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+        <div className="grid grid-cols-3">
+          {[
+            { label: "This Month",  value: thisMonth.length, numColor: "#2563eb",  bg: "transparent" },
+            { label: "Next 60 Days", value: upcoming.length, numColor: "#d97706",  bg: "transparent" },
+            { label: "Past Due",    value: overdue.length,   numColor: overdue.length > 0 ? "#dc2626" : "var(--text-3)", bg: overdue.length > 0 ? "var(--red-bg)" : "transparent" },
+          ].map(({ label, value, numColor, bg }, i) => (
+            <div key={label} className="px-5 py-4"
+              style={{
+                borderRight: i < 2 ? "1px solid var(--border-2)" : "none",
+                background: bg,
+              }}>
+              <p className="tabular-nums leading-none"
+                style={{ fontSize: "30px", fontWeight: 700, letterSpacing: "-0.045em", color: numColor, marginBottom: 6 }}>
+                {value}
+              </p>
+              <p className="text-[11.5px] font-medium" style={{ color: "var(--text-3)" }}>{label}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Yaklaşan (60 gün) */}
@@ -75,14 +84,15 @@ export default async function TakvimPage() {
             No filings in the next 60 days
           </p>
         ) : (
-          <div className="divide-y" style={{ borderColor: "var(--border-2)" }}>
+          <div>
             {upcoming.map((item, i) => {
               const due = new Date(item.due_date);
               const daysLeft = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
               const urgent = daysLeft <= 7;
               const cfg = BEYANNAME_COLOR[item.beyanname_turu] ?? BEYANNAME_COLOR.default;
               return (
-                <div key={i} className="px-5 py-3 flex items-center justify-between">
+                <div key={i} className="px-5 py-3 flex items-center justify-between"
+                  style={{ borderTop: i > 0 ? "1px solid var(--border-2)" : "none" }}>
                   <div className="flex items-center gap-3">
                     <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md"
                       style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}>
@@ -117,14 +127,14 @@ export default async function TakvimPage() {
             {format(now, "MMMM yyyy", { locale: enUS })} Filings
           </h2>
         </div>
-        <div className="divide-y" style={{ borderColor: "var(--border-2)" }}>
+        <div>
           {thisMonth.map((item, i) => {
             const due = new Date(item.due_date);
             const passed = isBefore(due, now);
             const cfg = BEYANNAME_COLOR[item.beyanname_turu] ?? BEYANNAME_COLOR.default;
             return (
               <div key={i} className="px-5 py-3 flex items-center justify-between"
-                style={{ opacity: passed ? 0.5 : 1 }}>
+                style={{ borderTop: i > 0 ? "1px solid var(--border-2)" : "none", opacity: passed ? 0.5 : 1 }}>
                 <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md"
                   style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}>
                   {item.beyanname_turu}

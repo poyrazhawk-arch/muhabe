@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { calculateRAG } from "@/lib/utils/rag";
-import { format, isToday, isThisWeek, isPast } from "date-fns";
+import { format, isToday, isThisWeek, isPast, isBefore } from "date-fns";
 import { enUS } from "date-fns/locale";
 import Link from "next/link";
 import { Plus } from "@phosphor-icons/react/dist/ssr";
@@ -94,12 +94,12 @@ export default async function DashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="tracking-[-0.025em] font-bold" style={{ fontSize: "26px", lineHeight: 1.2 }}>
-            <span style={{ color: "var(--text-1)" }}>{greeting}, </span>
-            <span style={{ color: "var(--accent)" }}>{firstName}</span>
+          <h1 style={{ fontSize: "22px", fontWeight: 700, letterSpacing: "-0.035em", lineHeight: 1.2 }}>
+            <span style={{ color: "var(--text-3)", fontWeight: 500 }}>{greeting}, </span>
+            <span style={{ color: "var(--text-1)" }}>{firstName}</span>
           </h1>
-          <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>
-            Here&apos;s a quick look at how things are going.
+          <p className="text-[12.5px] mt-1" style={{ color: "var(--text-3)" }}>
+            {format(today, "EEEE, d MMMM yyyy", { locale: enUS })}
           </p>
         </div>
         <Link
@@ -115,41 +115,45 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* Stat cards — metric-forward, no decorative borders */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 stagger">
-        {STAT_DEFS.map(({ key, label, dotColor }) => (
-          <div
-            key={key}
-            className="rounded-xl px-5 py-4 transition-all duration-150 hover:-translate-y-px hover:shadow-md"
-            style={{
-              background: key === "overdue" && stats[key] > 0 ? "var(--red-bg)" : "var(--surface)",
-              border: `1px solid ${key === "overdue" && stats[key] > 0 ? "var(--red-lt)" : "var(--border)"}`,
-            }}
-          >
-            <p className="text-[11px] font-medium mb-3" style={{ color: "var(--text-3)" }}>
-              {label}
-            </p>
-            <p
-              className="tabular-nums leading-none"
-              style={{
-                fontSize: "36px",
-                fontWeight: 700,
-                letterSpacing: "-0.04em",
-                color: stats[key] > 0 && (key === "overdue") ? "var(--red)"
-                     : stats[key] > 0 && (key === "today") ? "var(--amber)"
-                     : "var(--text-1)",
-              }}
-            >
-              {stats[key]}
-            </p>
-            <div className="flex items-center gap-1.5 mt-3 pt-3" style={{ borderTop: "1px solid var(--border-2)" }}>
-              <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dotColor }} />
-              <p className="text-[11px]" style={{ color: "var(--text-3)" }}>
-                {key === "clients" ? "total active" : key === "today" ? "due today" : key === "overdue" ? "action required" : "needs review"}
-              </p>
-            </div>
-          </div>
-        ))}
+      {/* Metric strip — horizontal, no equal cards */}
+      <div
+        className="rounded-xl overflow-hidden stagger"
+        style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+      >
+        <div className="grid grid-cols-2 lg:grid-cols-4">
+          {STAT_DEFS.map(({ key, label }, i) => {
+            const isOverdue = key === "overdue" && stats[key] > 0;
+            const isToday   = key === "today"   && stats[key] > 0;
+            const numColor  = isOverdue ? "var(--red)" : isToday ? "var(--amber)" : "var(--text-1)";
+            return (
+              <div
+                key={key}
+                className="px-5 py-4 transition-colors duration-150"
+                style={{
+                  borderRight: i < 3 ? "1px solid var(--border-2)" : "none",
+                  borderBottom: "none",
+                  background: isOverdue ? "var(--red-bg)" : "transparent",
+                }}
+              >
+                <p
+                  className="tabular-nums leading-none"
+                  style={{
+                    fontSize: "30px",
+                    fontWeight: 700,
+                    letterSpacing: "-0.045em",
+                    color: numColor,
+                    marginBottom: 6,
+                  }}
+                >
+                  {stats[key]}
+                </p>
+                <p className="text-[11.5px] font-medium" style={{ color: "var(--text-3)" }}>
+                  {label}
+                </p>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Tahsilat widget */}
@@ -227,7 +231,7 @@ export default async function DashboardPage() {
             </Link>
           </div>
 
-          <div className="divide-y max-h-[280px] overflow-auto" style={{ borderColor: "var(--border-2)" }}>
+          <div className="max-h-[280px] overflow-auto">
             {clientsWithRAG.length === 0 ? (
               <div className="px-5 py-10 text-center">
                 <p className="text-[13px]" style={{ color: "var(--text-3)" }}>No clients yet</p>
@@ -242,7 +246,10 @@ export default async function DashboardPage() {
                 <Link
                   key={client.id}
                   href={`/dashboard/musteriler/${client.id}`}
-                  className="px-5 py-2.5 flex items-center justify-between hover:bg-slate-50/70 transition-colors"
+                  className="px-5 py-2.5 flex items-center justify-between transition-colors"
+                  style={{ borderTop: "1px solid var(--border-2)" }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-2)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div
@@ -292,9 +299,9 @@ export default async function DashboardPage() {
               {tasksDueWeek.length} tasks
             </p>
           </div>
-          <div className="p-2 space-y-px max-h-[280px] overflow-auto">
+          <div className="max-h-[280px] overflow-auto">
             {tasksDueWeek.length === 0 ? (
-              <p className="px-3 py-8 text-center text-[13px]" style={{ color: "var(--text-3)" }}>
+              <p className="px-5 py-10 text-center text-[12.5px]" style={{ color: "var(--text-3)" }}>
                 No tasks this week
               </p>
             ) : tasksDueWeek.map((task: any) => {
@@ -303,25 +310,36 @@ export default async function DashboardPage() {
               return (
                 <div
                   key={task.id}
-                  className="flex items-start gap-2.5 px-3 py-2.5 rounded-lg hover:bg-slate-50/70 transition-colors"
+                  className="flex items-center gap-3 px-4 py-2.5 transition-colors"
+                  style={{ borderTop: "1px solid var(--border-2)" }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-2)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                 >
                   <div
-                    className="w-1.5 h-1.5 rounded-full mt-[5px] shrink-0"
-                    style={{ background: overdue ? "var(--red)" : todayTask ? "var(--amber)" : "var(--border)" }}
+                    className="shrink-0"
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      background: overdue ? "var(--red)" : todayTask ? "var(--amber)" : "var(--border)",
+                    }}
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="text-[13px] font-medium truncate" style={{ color: "var(--text-1)" }}>
+                    <p className="text-[12.5px] font-medium truncate" style={{ color: "var(--text-1)" }}>
                       {task.title}
                     </p>
                     {task.clients && (
-                      <p className="text-[11px] mt-0.5" style={{ color: "var(--text-3)" }}>
+                      <p className="text-[11px]" style={{ color: "var(--text-3)" }}>
                         {(task.clients as any).full_name}
                       </p>
                     )}
                   </div>
                   <span
-                    className="text-[11px] shrink-0 font-medium tabular-nums"
-                    style={{ color: overdue ? "var(--red)" : todayTask ? "var(--amber)" : "var(--text-3)" }}
+                    className="text-[11px] shrink-0 font-medium tabular-nums px-2 py-0.5 rounded-md"
+                    style={{
+                      color: overdue ? "var(--red)" : todayTask ? "var(--amber)" : "var(--text-3)",
+                      background: overdue ? "var(--red-bg)" : todayTask ? "var(--amber-bg)" : "transparent",
+                    }}
                   >
                     {format(new Date(task.due_date), "d MMM", { locale: enUS })}
                   </span>

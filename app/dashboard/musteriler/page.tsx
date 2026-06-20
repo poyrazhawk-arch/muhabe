@@ -4,6 +4,7 @@ import BroadcastModal from "./BroadcastModal";
 import { calculateRAG, RAG_LABELS } from "@/lib/utils/rag";
 import type { RAGStatus } from "@/types";
 import { isToday, isThisWeek, isPast } from "date-fns";
+import { Plus, CaretRight, Users } from "@phosphor-icons/react/dist/ssr";
 
 const RAG_CFG: Record<RAGStatus, { bg: string; color: string; border: string }> = {
   red:   { bg: "#fef2f2", color: "#dc2626", border: "#fecaca" },
@@ -54,9 +55,7 @@ export default async function MusterilerPage() {
           <Link href="/dashboard/musteriler/yeni"
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-semibold text-white transition-all active:scale-[0.98]"
             style={{ background: "var(--accent)", boxShadow: "0 2px 8px rgba(37,99,235,0.28)" }}>
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4"/>
-            </svg>
+            <Plus size={14} weight="bold" />
             New Client
           </Link>
         </div>
@@ -71,10 +70,7 @@ export default async function MusterilerPage() {
               className="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-4"
               style={{ background: "var(--surface-3)", border: "1px solid var(--border)" }}
             >
-              <svg className="w-5 h-5" style={{ color: "var(--text-3)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-              </svg>
+              <Users size={22} weight="duotone" style={{ color: "var(--text-3)" }} />
             </div>
             <p className="text-[13px] font-semibold mb-1" style={{ color: "var(--text-1)" }}>No clients yet</p>
             <p className="text-[12px] mb-5" style={{ color: "var(--text-3)" }}>Add your first client to get started</p>
@@ -163,9 +159,7 @@ export default async function MusterilerPage() {
                       className="inline-flex items-center gap-1 text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors"
                       style={{ color: "var(--accent)", background: "var(--accent-bg)" }}>
                       View
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7"/>
-                      </svg>
+                      <CaretRight size={11} weight="bold" />
                     </Link>
                   </td>
                 </tr>

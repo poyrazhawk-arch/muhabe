@@ -53,28 +53,29 @@ export default async function FinansPage() {
         <YeniFeeForm clients={clients ?? []} />
       </div>
 
-      {/* Özet kartlar */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[
-          { label: "This Month Total", value: fmt(toplam),   color: "#2563eb", bg: "#eff6ff" },
-          { label: "Paid",             value: fmt(odenen),   color: "#15803d", bg: "#f0fdf4" },
-          { label: "Pending",          value: fmt(bekleyen), color: "#d97706", bg: "#fffbeb" },
-          { label: "Overdue",          value: fmt(gecikmiş), color: "#dc2626", bg: "#fef2f2" },
-        ].map(({ label, value, color, bg }) => (
-          <div key={label} className="rounded-xl p-4"
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              boxShadow: "var(--shadow-sm)",
-              borderTop: `2px solid ${color}`,
-            }}>
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center mb-3" style={{ background: bg }}>
-              <span className="text-[11px] font-bold" style={{ color }}>£</span>
+      {/* Metric strip */}
+      <div className="rounded-xl overflow-hidden"
+        style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+        <div className="grid grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: "This Month",  value: fmt(toplam),   numColor: "var(--text-1)",  bg: "transparent" },
+            { label: "Paid",        value: fmt(odenen),   numColor: "#15803d",         bg: "transparent" },
+            { label: "Pending",     value: fmt(bekleyen), numColor: "#d97706",         bg: "transparent" },
+            { label: "Overdue",     value: fmt(gecikmiş), numColor: gecikmiş > 0 ? "#dc2626" : "var(--text-3)", bg: gecikmiş > 0 ? "var(--red-bg)" : "transparent" },
+          ].map(({ label, value, numColor, bg }, i) => (
+            <div key={label} className="px-5 py-4"
+              style={{
+                borderRight: i < 3 ? "1px solid var(--border-2)" : "none",
+                background: bg,
+              }}>
+              <p className="tabular-nums leading-none"
+                style={{ fontSize: "24px", fontWeight: 700, letterSpacing: "-0.04em", color: numColor, marginBottom: 6 }}>
+                {value}
+              </p>
+              <p className="text-[11.5px] font-medium" style={{ color: "var(--text-3)" }}>{label}</p>
             </div>
-            <p className="text-[22px] font-bold tracking-tight tabular-nums" style={{ color: "var(--text-1)" }}>{value}</p>
-            <p className="text-[12px] mt-0.5 font-medium" style={{ color: "var(--text-3)" }}>{label}</p>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* Tablo */}
@@ -101,8 +102,10 @@ export default async function FinansPage() {
                 const client = fee.clients;
                 const ay = new Date(fee.period_year, fee.period_month - 1, 1);
                 return (
-                  <tr key={fee.id} className="transition-colors hover:bg-slate-50/60"
-                    style={{ borderTop: idx > 0 ? "1px solid var(--border-2)" : "none" }}>
+                  <tr key={fee.id}
+                    style={{ borderTop: idx > 0 ? "1px solid var(--border-2)" : "none", transition: "background 0.1s" }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-2)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
                     <td className="px-5 py-3">
                       <p className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>
                         {client?.full_name ?? "-"}

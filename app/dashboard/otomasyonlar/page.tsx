@@ -1,5 +1,6 @@
 import Link from "next/link";
 import OtomasyonTetikle from "./OtomasyonTetikle";
+import { Clock } from "@phosphor-icons/react/dist/ssr";
 
 const OTOMASYONLAR = [
   {
@@ -90,8 +91,9 @@ export default function OtomasyonlarPage() {
                   <p className="text-[13px] mt-1 leading-relaxed" style={{ color: "var(--text-3)" }}>
                     {o.aciklama}
                   </p>
-                  <p className="text-[12px] mt-2 font-medium" style={{ color: "var(--text-2)" }}>
-                    🕘 {o.zamanlama}
+                  <p className="text-[12px] mt-2 font-medium flex items-center gap-1.5" style={{ color: "var(--text-2)" }}>
+                    <Clock size={12} weight="regular" style={{ color: "var(--text-3)" }} />
+                    {o.zamanlama}
                   </p>
                 </div>
               </div>
@@ -115,7 +117,7 @@ export default function OtomasyonlarPage() {
           <code style={{ background: "rgba(0,0,0,0.06)", padding: "1px 5px", borderRadius: "4px", fontSize: "11px" }}>
             RESEND_API_KEY
           </code>{" "}
-          ve{" "}
+          and{" "}
           <code style={{ background: "rgba(0,0,0,0.06)", padding: "1px 5px", borderRadius: "4px", fontSize: "11px" }}>
             CRON_SECRET
           </code>{" "}
