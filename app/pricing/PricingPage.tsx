@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Check,
   ArrowRight,
@@ -151,11 +152,34 @@ function annualPrice(monthly: number) {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function PricingPage() {
-  const [annual, setAnnual] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [annual, setAnnual]       = useState(false);
+  const [openFaq, setOpenFaq]     = useState<number | null>(null);
+  const [loading, setLoading]     = useState<string | null>(null);
+  const router                    = useRouter();
 
   const displayPrice = (monthly: number) =>
     annual ? annualPrice(monthly) : monthly;
+
+  async function startCheckout(planId: string) {
+    setLoading(planId);
+    try {
+      const res  = await fetch("/api/polar/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: planId }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error("No checkout URL returned");
+        setLoading(null);
+      }
+    } catch {
+      console.error("Checkout failed");
+      setLoading(null);
+    }
+  }
 
   return (
     <div
@@ -538,8 +562,9 @@ export default function PricingPage() {
               </div>
 
               {/* CTA */}
-              <Link
-                href="/auth/kayit"
+              <button
+                onClick={() => startCheckout(plan.id)}
+                disabled={loading === plan.id}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -550,7 +575,7 @@ export default function PricingPage() {
                   borderRadius: 9,
                   fontSize: 13,
                   fontWeight: 600,
-                  textDecoration: "none",
+                  cursor: loading === plan.id ? "wait" : "pointer",
                   transition: "all 0.15s",
                   background: plan.highlight
                     ? "#2563eb"
@@ -560,19 +585,21 @@ export default function PricingPage() {
                     ? "none"
                     : "1px solid rgba(255,255,255,0.07)",
                   marginBottom: 24,
+                  opacity: loading === plan.id ? 0.7 : 1,
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background =
-                    plan.highlight ? "#1d4ed8" : "rgba(255,255,255,0.1)";
+                  if (loading !== plan.id)
+                    (e.currentTarget as HTMLElement).style.background =
+                      plan.highlight ? "#1d4ed8" : "rgba(255,255,255,0.1)";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLElement).style.background =
                     plan.highlight ? "#2563eb" : "rgba(255,255,255,0.06)";
                 }}
               >
-                Start free trial
-                <ArrowRight size={12} weight="bold" />
-              </Link>
+                {loading === plan.id ? "Redirecting…" : "Get started"}
+                {loading !== plan.id && <ArrowRight size={12} weight="bold" />}
+              </button>
 
               {/* Divider */}
               <div
@@ -1179,8 +1206,9 @@ export default function PricingPage() {
               hour.
             </p>
           </div>
-          <Link
-            href="/auth/kayit"
+          <button
+            onClick={() => startCheckout("pro")}
+            disabled={loading === "pro"}
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -1191,25 +1219,28 @@ export default function PricingPage() {
               fontWeight: 600,
               color: "#fff",
               background: "#2563eb",
-              textDecoration: "none",
+              border: "none",
+              cursor: loading === "pro" ? "wait" : "pointer",
               whiteSpace: "nowrap",
               transition: "background 0.15s, transform 0.1s",
               boxShadow: "0 4px 20px rgba(37,99,235,0.35)",
               flexShrink: 0,
+              opacity: loading === "pro" ? 0.7 : 1,
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "#1d4ed8";
-              (e.currentTarget as HTMLElement).style.transform =
-                "translateY(-2px)";
+              if (loading !== "pro") {
+                (e.currentTarget as HTMLElement).style.background = "#1d4ed8";
+                (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
+              }
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = "#2563eb";
               (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
             }}
           >
-            Start free trial
-            <ArrowRight size={15} weight="bold" />
-          </Link>
+            {loading === "pro" ? "Redirecting…" : "Start free trial"}
+            {loading !== "pro" && <ArrowRight size={15} weight="bold" />}
+          </button>
         </div>
       </section>
 
