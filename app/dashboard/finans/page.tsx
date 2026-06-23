@@ -4,6 +4,7 @@ import { enUS } from "date-fns/locale";
 import OdemeButon from "./OdemeButon";
 import YeniFeeForm from "./YeniFeeForm";
 import BillAllButton from "./BillAllButton";
+import SendInvoiceButton from "./SendInvoiceButton";
 
 const STATUS: Record<string, { label: string; bg: string; color: string; border: string }> = {
   pending:  { label: "Pending", bg: "#fffbeb", color: "#d97706", border: "#fde68a" },
@@ -23,7 +24,7 @@ export default async function FinansPage() {
 
   const [{ data: fees }, { data: clients }] = await Promise.all([
     supabase.from("service_fees")
-      .select("*, clients(full_name, company_name)")
+      .select("*, clients(full_name, company_name, email, portal_token)")
       .eq("accountant_id", accountant!.id)
       .order("period_year", { ascending: false })
       .order("period_month", { ascending: false }),
@@ -135,13 +136,18 @@ export default async function FinansPage() {
                         {s.label}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-right">
-                      {fee.status === "pending" && <OdemeButon feeId={fee.id} />}
-                      {fee.status === "paid" && fee.paid_at && (
-                        <span className="text-[11px]" style={{ color: "var(--text-3)" }}>
-                          {format(new Date(fee.paid_at), "d MMM", { locale: enUS })}
-                        </span>
-                      )}
+                    <td className="px-5 py-3">
+                      <div className="flex items-center justify-end gap-2">
+                        {fee.status !== "paid" && (
+                          <SendInvoiceButton feeId={fee.id} clientEmail={fee.clients?.email} />
+                        )}
+                        {fee.status === "pending" && <OdemeButon feeId={fee.id} />}
+                        {fee.status === "paid" && fee.paid_at && (
+                          <span className="text-[11px]" style={{ color: "var(--text-3)" }}>
+                            {format(new Date(fee.paid_at), "d MMM", { locale: enUS })}
+                          </span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );

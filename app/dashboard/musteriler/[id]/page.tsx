@@ -34,7 +34,7 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
     .from("accountants").select("id").eq("user_id", user!.id).single();
 
   const { data: client } = await supabase
-    .from("clients").select("*, monthly_fee").eq("id", id).eq("accountant_id", accountant!.id).single();
+    .from("clients").select("*, monthly_fee, portal_token").eq("id", id).eq("accountant_id", accountant!.id).single();
   if (!client) notFound();
 
   const [{ data: documents }, { data: tasks }, { data: tokens }, { data: fees }] = await Promise.all([
@@ -70,10 +70,13 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
               <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>{client.company_name}</p>
             )}
           </div>
-          <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg"
-            style={RAG_STYLE[rag]}>
-            {RAG_LABEL[rag]}
-          </span>
+          <div className="flex items-center gap-2">
+            {client.portal_token && <PortalLinkButton portalToken={client.portal_token} />}
+            <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg"
+              style={RAG_STYLE[rag]}>
+              {RAG_LABEL[rag]}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -263,3 +266,4 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
 // Client components
 import CopyButton from "./CopyButton";
 import MonthlyFeeEdit from "./MonthlyFeeEdit";
+import PortalLinkButton from "./PortalLinkButton";
