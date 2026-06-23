@@ -46,6 +46,32 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(data, { status: 201 });
 }
 
+export async function PATCH(request: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { data: accountant } = await supabase
+    .from("accountants").select("id").eq("user_id", user.id).single();
+  if (!accountant) return NextResponse.json({ error: "Account not found" }, { status: 404 });
+
+  const { id, ...updates } = await request.json();
+  if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
+
+  const allowed = ["monthly_fee", "notes", "phone", "email", "status"];
+  const safe = Object.fromEntries(Object.entries(updates).filter(([k]) => allowed.includes(k)));
+
+  const { data, error } = await supabase
+    .from("clients")
+    .update({ ...safe, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("accountant_id", accountant.id)
+    .select().single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json(data);
+}
+
 export async function GET() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

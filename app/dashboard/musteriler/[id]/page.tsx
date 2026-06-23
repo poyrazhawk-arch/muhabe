@@ -34,7 +34,7 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
     .from("accountants").select("id").eq("user_id", user!.id).single();
 
   const { data: client } = await supabase
-    .from("clients").select("*").eq("id", id).eq("accountant_id", accountant!.id).single();
+    .from("clients").select("*, monthly_fee").eq("id", id).eq("accountant_id", accountant!.id).single();
   if (!client) notFound();
 
   const [{ data: documents }, { data: tasks }, { data: tokens }, { data: fees }] = await Promise.all([
@@ -93,6 +93,10 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
             </p>
           </div>
         ))}
+        <div className="rounded-lg p-3" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+          <p className="text-[11px] font-medium mb-1" style={{ color: "var(--text-3)" }}>Monthly fee</p>
+          <MonthlyFeeEdit clientId={id} current={client.monthly_fee ?? null} />
+        </div>
       </div>
 
       {/* Belge Talebi */}
@@ -256,5 +260,6 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
   );
 }
 
-// Client component for clipboard
+// Client components
 import CopyButton from "./CopyButton";
+import MonthlyFeeEdit from "./MonthlyFeeEdit";

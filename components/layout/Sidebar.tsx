@@ -11,8 +11,6 @@ import {
   ChartBar,
   CalendarCheck,
   Wallet,
-  PaperPlaneTilt,
-  Robot,
   SignOut,
   Notebook,
 } from "@phosphor-icons/react";
@@ -21,15 +19,13 @@ import type { Accountant } from "@/types";
 import { cn } from "@/lib/utils/cn";
 
 const NAV_ITEMS = [
-  { href: "/dashboard",              label: "Overview",     Icon: HouseSimple    },
-  { href: "/dashboard/musteriler",   label: "Clients",      Icon: Users          },
-  { href: "/dashboard/belgeler",     label: "Documents",    Icon: Files          },
-  { href: "/dashboard/gorevler",     label: "Tasks",        Icon: ClipboardText  },
-  { href: "/dashboard/takvim",       label: "Tax Calendar", Icon: CalendarCheck  },
-  { href: "/dashboard/finans",       label: "Finance",      Icon: Wallet         },
-  { href: "/dashboard/raporlar",     label: "Reports",      Icon: ChartBar       },
-  { href: "/dashboard/kampanya",     label: "Campaign",     Icon: PaperPlaneTilt },
-  { href: "/dashboard/otomasyonlar", label: "Automations",  Icon: Robot          },
+  { href: "/dashboard",            label: "Overview",     Icon: HouseSimple   },
+  { href: "/dashboard/musteriler", label: "Clients",      Icon: Users         },
+  { href: "/dashboard/belgeler",   label: "Documents",    Icon: Files         },
+  { href: "/dashboard/gorevler",   label: "Tasks",        Icon: ClipboardText },
+  { href: "/dashboard/takvim",     label: "Tax Calendar", Icon: CalendarCheck },
+  { href: "/dashboard/finans",     label: "Finance",      Icon: Wallet        },
+  { href: "/dashboard/raporlar",   label: "Reports",      Icon: ChartBar      },
 ];
 
 const DIVIDER_AFTER = 3;

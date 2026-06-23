@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import OdemeButon from "./OdemeButon";
 import YeniFeeForm from "./YeniFeeForm";
+import BillAllButton from "./BillAllButton";
 
 const STATUS: Record<string, { label: string; bg: string; color: string; border: string }> = {
   pending:  { label: "Pending", bg: "#fffbeb", color: "#d97706", border: "#fde68a" },
@@ -27,7 +28,7 @@ export default async function FinansPage() {
       .order("period_year", { ascending: false })
       .order("period_month", { ascending: false }),
     supabase.from("clients")
-      .select("id, full_name, company_name")
+      .select("id, full_name, company_name, monthly_fee")
       .eq("accountant_id", accountant!.id)
       .eq("status", "active")
       .order("full_name"),
@@ -50,7 +51,10 @@ export default async function FinansPage() {
             Service fee and collection tracking
           </p>
         </div>
-        <YeniFeeForm clients={clients ?? []} />
+        <div className="flex items-center gap-2">
+          <BillAllButton clients={clients ?? []} />
+          <YeniFeeForm clients={clients ?? []} />
+        </div>
       </div>
 
       {/* Metric strip */}
