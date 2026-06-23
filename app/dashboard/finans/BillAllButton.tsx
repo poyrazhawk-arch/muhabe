@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import { Users, Warning, CheckCircle, ArrowRight } from "@phosphor-icons/react";
+import { Users, Warning, CheckCircle, ArrowRight, X } from "@phosphor-icons/react";
 
 type Client = { id: string; full_name: string; company_name?: string | null; monthly_fee?: number | null };
 
@@ -144,7 +144,7 @@ export default function BillAllButton({ clients }: { clients: Client[] }) {
                       className="w-7 h-7 flex items-center justify-center rounded-lg shrink-0 ml-3"
                       style={{ background: "var(--surface-2)", color: "var(--text-3)", border: "1px solid var(--border)" }}
                     >
-                      ×
+                      <X size={13} weight="bold" />
                     </motion.button>
                   </div>
 
@@ -179,8 +179,8 @@ export default function BillAllButton({ clients }: { clients: Client[] }) {
                       },
                     ].map(({ label, el }) => (
                       <div key={label}>
-                        <label className="block text-[10.5px] font-semibold uppercase tracking-wider mb-1.5"
-                          style={{ color: "var(--text-3)", letterSpacing: "0.06em" }}>{label}</label>
+                        <label className="block text-[10.5px] font-medium mb-1.5"
+                          style={{ color: "var(--text-3)" }}>{label}</label>
                         {el}
                       </div>
                     ))}
@@ -190,12 +190,8 @@ export default function BillAllButton({ clients }: { clients: Client[] }) {
                 {/* Divider + column headers */}
                 <div className="px-6 py-2 shrink-0 flex items-center justify-between"
                   style={{ borderTop: "1px solid var(--border-2)", background: "var(--bg)" }}>
-                  <span className="text-[10.5px] font-semibold uppercase tracking-wider" style={{ color: "var(--text-3)", letterSpacing: "0.06em" }}>
-                    Client
-                  </span>
-                  <span className="text-[10.5px] font-semibold uppercase tracking-wider" style={{ color: "var(--text-3)", letterSpacing: "0.06em" }}>
-                    Amount (GBP)
-                  </span>
+                  <span className="text-[10.5px] font-medium" style={{ color: "var(--text-3)" }}>Client</span>
+                  <span className="text-[10.5px] font-medium" style={{ color: "var(--text-3)" }}>Amount (GBP)</span>
                 </div>
 
                 {/* Client list */}
@@ -210,7 +206,7 @@ export default function BillAllButton({ clients }: { clients: Client[] }) {
                       transition={{ delay: i * 0.025, duration: 0.2 }}
                       className="flex items-center gap-3 py-1"
                     >
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[11px] font-bold"
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-[11px] font-bold"
                         style={{ background: "var(--surface-2)", color: "var(--text-2)", border: "1px solid var(--border)" }}>
                         {c.full_name.charAt(0)}
                       </div>

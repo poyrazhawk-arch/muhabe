@@ -54,16 +54,14 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
 
       {/* Breadcrumb + Başlık */}
       <div>
-        <Link href="/dashboard/musteriler" className="inline-flex items-center gap-1 text-[12px] font-medium mb-3"
+        <Link href="/dashboard/musteriler" className="inline-flex items-center gap-1.5 text-[12px] font-medium mb-3 transition-opacity hover:opacity-70"
           style={{ color: "var(--text-3)" }}>
-          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7"/>
-          </svg>
+          <ArrowLeft size={12} weight="bold" />
           Clients
         </Link>
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>
+            <h1 className="font-semibold" style={{ fontSize: "22px", letterSpacing: "-0.03em", lineHeight: 1.2, color: "var(--text-1)" }}>
               {client.full_name}
             </h1>
             {client.company_name && (
@@ -118,8 +116,8 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
                 return (
                   <div key={t.id} className="flex items-center justify-between p-3 rounded-lg"
                     style={{
-                      background: expired ? "var(--bg)" : "#eff6ff",
-                      border: `1px solid ${expired ? "var(--border)" : "#bfdbfe"}`,
+                      background: expired ? "var(--bg)" : "var(--accent-bg)",
+                      border: `1px solid ${expired ? "var(--border)" : "var(--border)"}`,
                       opacity: expired ? 0.6 : 1,
                     }}>
                     <div>
@@ -271,3 +269,4 @@ import CopyButton from "./CopyButton";
 import MonthlyFeeEdit from "./MonthlyFeeEdit";
 import PortalLinkButton from "./PortalLinkButton";
 import BelgeHatirlatmaButton from "./BelgeHatirlatmaButton";
+import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";

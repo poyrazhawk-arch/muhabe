@@ -96,7 +96,7 @@ export default async function FinansPage() {
           </div>
         ) : (
           <table className="w-full">
-            <thead style={{ background: "#fafbfc", borderBottom: "1px solid var(--border)" }}>
+            <thead style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--border)" }}>
               <tr>
                 {["Client", "Period", "Amount", "Due Date", "Status", ""].map((h, i) => (
                   <th key={i} className={`px-5 py-3 text-[11px] font-semibold uppercase tracking-wider ${i === 5 ? "text-right" : "text-left"}`}
@@ -138,14 +138,16 @@ export default async function FinansPage() {
                     </td>
                     <td className="px-5 py-3">
                       <div className="flex items-center justify-end gap-2">
-                        {fee.status !== "paid" && (
-                          <SendInvoiceButton feeId={fee.id} clientEmail={fee.clients?.email} />
-                        )}
-                        {fee.status === "pending" && <OdemeButon feeId={fee.id} />}
                         {fee.status === "paid" && fee.paid_at && (
                           <span className="text-[11px]" style={{ color: "var(--text-3)" }}>
                             {format(new Date(fee.paid_at), "d MMM", { locale: enUS })}
                           </span>
+                        )}
+                        {fee.status !== "paid" && (
+                          <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                            <SendInvoiceButton feeId={fee.id} clientEmail={fee.clients?.email} />
+                            {fee.status === "pending" && <OdemeButon feeId={fee.id} />}
+                          </div>
                         )}
                       </div>
                     </td>

@@ -50,16 +50,20 @@ export default function OdemeButon({ feeId }: { feeId: string }) {
           className="inline-flex items-center gap-1.5"
         >
           <span className="text-[11px] font-medium" style={{ color: "var(--text-3)" }}>Confirm?</span>
-          <button onClick={confirm}
-            className="inline-flex items-center gap-1 text-[11.5px] font-semibold px-2.5 py-1 rounded-lg transition-all active:scale-95"
+          <motion.button onClick={confirm}
+            whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.93 }}
+            transition={{ type: "spring", stiffness: 420, damping: 26 }}
+            className="inline-flex items-center gap-1 text-[11.5px] font-semibold px-2.5 py-1 rounded-lg"
             style={{ color: "#fff", background: "#16a34a" }}>
             <CheckCircle size={12} weight="fill" /> Yes
-          </button>
-          <button onClick={() => setState("idle")}
-            className="inline-flex items-center justify-center w-6 h-6 rounded-lg transition-all active:scale-95"
+          </motion.button>
+          <motion.button onClick={() => setState("idle")}
+            whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.92 }}
+            transition={{ type: "spring", stiffness: 420, damping: 26 }}
+            className="inline-flex items-center justify-center w-6 h-6 rounded-lg"
             style={{ background: "var(--surface-2)", color: "var(--text-3)", border: "1px solid var(--border)" }}>
             <X size={10} weight="bold" />
-          </button>
+          </motion.button>
         </motion.div>
       )}
 
