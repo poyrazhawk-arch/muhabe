@@ -46,9 +46,12 @@ export default async function FinansPage() {
     <div className="space-y-6 animate-fade-up">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Finance</h1>
-          <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>
-            Service fee and collection tracking
+          <h1 className="font-semibold tracking-tight"
+            style={{ fontSize: "20px", letterSpacing: "-0.03em", color: "var(--text-1)" }}>
+            Finance
+          </h1>
+          <p className="text-[12.5px] mt-0.5" style={{ color: "var(--text-3)" }}>
+            Service fees · {format(new Date(), "MMMM yyyy", { locale: enUS })}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -107,9 +110,8 @@ export default async function FinansPage() {
                 const ay = new Date(fee.period_year, fee.period_month - 1, 1);
                 return (
                   <tr key={fee.id}
-                    style={{ borderTop: idx > 0 ? "1px solid var(--border-2)" : "none", transition: "background 0.1s" }}
-                    onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-2)")}
-                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                    className="group transition-colors duration-100 hover:bg-[var(--surface-2)]"
+                    style={{ borderTop: idx > 0 ? "1px solid var(--border-2)" : "none" }}>
                     <td className="px-5 py-3">
                       <p className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>
                         {client?.full_name ?? "-"}
