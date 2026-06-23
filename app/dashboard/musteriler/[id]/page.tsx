@@ -132,7 +132,10 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
                       </p>
                     </div>
                     {!expired && (
-                      <CopyButton url={url} />
+                      <div className="flex items-center gap-2 shrink-0 ml-3">
+                        <BelgeHatirlatmaButton tokenId={t.id} clientEmail={client.email} />
+                        <CopyButton url={url} />
+                      </div>
                     )}
                   </div>
                 );
@@ -267,3 +270,4 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
 import CopyButton from "./CopyButton";
 import MonthlyFeeEdit from "./MonthlyFeeEdit";
 import PortalLinkButton from "./PortalLinkButton";
+import BelgeHatirlatmaButton from "./BelgeHatirlatmaButton";
