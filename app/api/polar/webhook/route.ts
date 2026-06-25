@@ -1,5 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+const PRODUCT_PLAN: Record<string, string> = {
+  [process.env.POLAR_PRODUCT_STARTER ?? ""]: "starter",
+  [process.env.POLAR_PRODUCT_PRO     ?? ""]: "pro",
+  [process.env.POLAR_PRODUCT_OFFICE  ?? ""]: "office",
+};
 
 function verifySignature(payload: string, signature: string, secret: string): boolean {
   const hmac = crypto.createHmac("sha256", secret).update(payload).digest("hex");
@@ -19,20 +31,32 @@ export async function POST(req: NextRequest) {
   const type  = event.type as string;
 
   if (type === "subscription.created" || type === "subscription.active") {
-    const sub        = event.data;
-    const customerEmail = sub.customer?.email;
-    const productId     = sub.product_id;
-    const status        = sub.status;
+    const sub   = event.data;
+    const email = sub.customer?.email as string | undefined;
+    const plan  = PRODUCT_PLAN[sub.product_id] ?? "starter";
 
-    console.log(`[Polar] ${type}: ${customerEmail} → product ${productId} (${status})`);
-    // TODO: update user subscription tier in Supabase based on productId
+    if (email) {
+      await supabase
+        .from("accountants")
+        .update({
+          plan: plan,
+          polar_subscription_id: sub.id,
+          polar_customer_email: email,
+        })
+        .eq("email", email);
+    }
   }
 
   if (type === "subscription.canceled" || type === "subscription.revoked") {
-    const sub           = event.data;
-    const customerEmail = sub.customer?.email;
-    console.log(`[Polar] ${type}: ${customerEmail} subscription ended`);
-    // TODO: downgrade user to free tier
+    const sub   = event.data;
+    const email = sub.customer?.email as string | undefined;
+
+    if (email) {
+      await supabase
+        .from("accountants")
+        .update({ plan: "free", polar_subscription_id: null })
+        .eq("email", email);
+    }
   }
 
   return NextResponse.json({ received: true });
