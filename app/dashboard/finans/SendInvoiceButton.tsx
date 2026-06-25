@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { PaperPlaneTilt, CheckCircle } from "@phosphor-icons/react";
 
-export default function SendInvoiceButton({ feeId, clientEmail }: { feeId: string; clientEmail?: string | null }) {
+export default function SendInvoiceButton({ feeId, clientEmail, isOverdue }: { feeId: string; clientEmail?: string | null; isOverdue?: boolean }) {
   const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
 
   if (!clientEmail) return null;
@@ -27,7 +27,10 @@ export default function SendInvoiceButton({ feeId, clientEmail }: { feeId: strin
           onClick={send}
           whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }}
           className="inline-flex items-center gap-1 text-[11.5px] font-medium px-2.5 py-1.5 rounded-lg"
-          style={{ color: "var(--text-3)", background: "var(--surface-2)", border: "1px solid var(--border)" }}>
+          style={isOverdue
+            ? { color: "#dc2626", background: "#fef2f2", border: "1px solid #fecaca" }
+            : { color: "var(--text-3)", background: "var(--surface-2)", border: "1px solid var(--border)" }
+          }>
           <PaperPlaneTilt size={12} />
           Invoice
         </motion.button>

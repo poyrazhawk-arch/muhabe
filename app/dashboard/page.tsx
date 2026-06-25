@@ -63,8 +63,18 @@ export default async function DashboardPage() {
 
   const today          = new Date();
   const tasksDueToday  = allTasks?.filter(t => isToday(new Date(t.due_date))) ?? [];
-  const tasksDueWeek   = allTasks?.filter(t => isThisWeek(new Date(t.due_date), { weekStartsOn: 1 })) ?? [];
   const overdueTasks   = allTasks?.filter(t => isPast(new Date(t.due_date)) && !isToday(new Date(t.due_date))) ?? [];
+
+  const PRIORITY_ORD: Record<string, number> = { critical: 0, high: 1, normal: 2, low: 3 };
+  const tasksDueWeek   = [...(allTasks?.filter(t => isThisWeek(new Date(t.due_date), { weekStartsOn: 1 })) ?? [])].sort((a, b) => {
+    const aOverdue = isPast(new Date(a.due_date)) && !isToday(new Date(a.due_date));
+    const bOverdue = isPast(new Date(b.due_date)) && !isToday(new Date(b.due_date));
+    const pa = PRIORITY_ORD[a.priority] ?? 2;
+    const pb = PRIORITY_ORD[b.priority] ?? 2;
+    if (pa !== pb) return pa - pb;
+    if (aOverdue !== bOverdue) return aOverdue ? -1 : 1;
+    return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+  });
 
   const clientsWithRAG = (clients ?? []).map(c => {
     const pendingCount = pendingDocs?.filter(d => d.client_id === c.id).length ?? 0;
@@ -86,23 +96,33 @@ export default async function DashboardPage() {
   const feeToplam   = feeOdenen + feeBekleyen + feeGecikmiş;
   const fmtTL = (n: number) => n.toLocaleString("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 });
 
-  const hour      = today.getHours();
-  const greeting  = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const firstName = accountant.full_name?.split(" ")[0] ?? "";
-
   return (
-    <div className="space-y-5 animate-fade-up">
+    <div className="space-y-6 animate-fade-up">
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* Header — date label + stats + action */}
+      <div
+        className="flex items-end justify-between pb-6"
+        style={{ borderBottom: "1px solid var(--border)" }}
+      >
         <div>
-          <h1 style={{ fontSize: "22px", fontWeight: 700, letterSpacing: "-0.035em", lineHeight: 1.2 }}>
-            <span style={{ color: "var(--text-3)", fontWeight: 500 }}>{greeting}, </span>
-            <span style={{ color: "var(--text-1)" }}>{firstName}</span>
-          </h1>
-          <p className="text-[12.5px] mt-1" style={{ color: "var(--text-3)" }}>
+          <p
+            style={{
+              fontSize: "11px",
+              fontWeight: 600,
+              color: "var(--text-3)",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              marginBottom: 14,
+            }}
+          >
             {format(today, "EEEE, d MMMM yyyy", { locale: enUS })}
           </p>
+          <MetricStrip metrics={[
+            { key: "clients", label: "Active clients", value: stats.clients },
+            { key: "today",   label: "Due today",      value: stats.today,   isWarning: stats.today > 0 },
+            { key: "overdue", label: "Overdue tasks",  value: stats.overdue, isDanger:  stats.overdue > 0 },
+            { key: "docs",    label: "Pending docs",   value: stats.docs },
+          ]} />
         </div>
         <Link
           href="/dashboard/gorevler/yeni"
@@ -110,20 +130,13 @@ export default async function DashboardPage() {
           style={{
             background: "var(--accent)",
             boxShadow: "0 1px 3px rgba(37,99,235,0.3), 0 2px 10px rgba(37,99,235,0.12)",
+            alignSelf: "flex-end",
           }}
         >
           <Plus size={13} weight="bold" />
           New Task
         </Link>
       </div>
-
-      {/* Metric strip — animated count-up */}
-      <MetricStrip metrics={[
-        { key: "clients", label: "Active clients", value: stats.clients },
-        { key: "today",   label: "Due today",      value: stats.today,   isWarning: stats.today > 0 },
-        { key: "overdue", label: "Overdue tasks",  value: stats.overdue, isDanger:  stats.overdue > 0 },
-        { key: "docs",    label: "Pending docs",   value: stats.docs },
-      ]} />
 
       {/* Collection progress — animated bar */}
       <CollectionWidget
@@ -140,24 +153,20 @@ export default async function DashboardPage() {
         {/* Müşteri RAG */}
         <div
           className="lg:col-span-3 rounded-xl overflow-hidden"
-          style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}
+          style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
         >
           <div
-            className="px-5 py-3.5 flex items-center justify-between"
+            className="px-5 py-4 flex items-center justify-between"
             style={{ borderBottom: "1px solid var(--border-2)" }}
           >
-            <div>
-              <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>Client Status</h2>
-              <p className="text-[12px] mt-0.5" style={{ color: "var(--text-3)" }}>
-                {clients?.length ?? 0} active clients
-              </p>
-            </div>
+            <p style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-3)", letterSpacing: "0.07em", textTransform: "uppercase" }}>
+              Clients · {clients?.length ?? 0} active
+            </p>
             <Link
               href="/dashboard/musteriler"
-              className="text-[12px] font-medium px-2.5 py-1.5 rounded-lg transition-colors"
-              style={{ color: "var(--accent)", background: "var(--accent-bg)" }}
+              style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-3)", textDecoration: "none" }}
             >
-              All
+              View all →
             </Link>
           </div>
 
@@ -221,58 +230,74 @@ export default async function DashboardPage() {
         {/* Bu hafta görevler */}
         <div
           className="lg:col-span-2 rounded-xl overflow-hidden"
-          style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}
+          style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
         >
-          <div className="px-5 py-3.5" style={{ borderBottom: "1px solid var(--border-2)" }}>
-            <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>This Week</h2>
-            <p className="text-[12px] mt-0.5" style={{ color: "var(--text-3)" }}>
-              {tasksDueWeek.length} tasks
+          <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border-2)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <p style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-3)", letterSpacing: "0.07em", textTransform: "uppercase" }}>
+              This week
             </p>
+            <span style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 500 }}>
+              {tasksDueWeek.length} tasks
+            </span>
           </div>
           <div className="max-h-[280px] overflow-auto">
             {tasksDueWeek.length === 0 ? (
-              <p className="px-5 py-10 text-center text-[12.5px]" style={{ color: "var(--text-3)" }}>
-                No tasks this week
+              <p style={{ padding: "40px 16px", textAlign: "center", fontSize: 12.5, color: "var(--text-3)" }}>
+                Clear week ahead
               </p>
-            ) : tasksDueWeek.map((task: any) => {
+            ) : tasksDueWeek.map((task: any, ti: number) => {
               const overdue   = isPast(new Date(task.due_date)) && !isToday(new Date(task.due_date));
               const todayTask = isToday(new Date(task.due_date));
+              const isCritical = task.priority === "critical";
+              const dotColor = overdue ? "var(--red)" : todayTask ? "var(--amber)" : isCritical ? "#dc2626" : "var(--border)";
               return (
                 <div
                   key={task.id}
-                  className="flex items-center gap-3 px-4 py-2.5 transition-colors"
-                  style={{ borderTop: "1px solid var(--border-2)" }}
-                  onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-2)")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 10,
+                    padding: "9px 14px",
+                    borderTop: ti > 0 ? "1px solid var(--border-2)" : "none",
+                    background: (isCritical && overdue) ? "rgba(220,38,38,0.02)" : "transparent",
+                    transition: "background 0.1s", cursor: "default",
+                    position: "relative",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = (isCritical && overdue) ? "rgba(220,38,38,0.05)" : "var(--surface-2)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = (isCritical && overdue) ? "rgba(220,38,38,0.02)" : "transparent")}
                 >
-                  <div
-                    className="shrink-0"
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: "50%",
-                      background: overdue ? "var(--red)" : todayTask ? "var(--amber)" : "var(--border)",
-                    }}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[12.5px] font-medium truncate" style={{ color: "var(--text-1)" }}>
+                  {/* Priority dot */}
+                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: dotColor, flexShrink: 0 }} />
+
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <p style={{
+                      fontSize: 12.5, fontWeight: isCritical ? 600 : 500,
+                      color: "var(--text-1)", letterSpacing: "-0.01em",
+                      whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                    }}>
                       {task.title}
                     </p>
                     {task.clients && (
-                      <p className="text-[11px]" style={{ color: "var(--text-3)" }}>
+                      <p style={{ fontSize: 11, color: "var(--text-3)", marginTop: 1 }}>
                         {(task.clients as any).full_name}
                       </p>
                     )}
                   </div>
-                  <span
-                    className="text-[11px] shrink-0 font-medium tabular-nums px-2 py-0.5 rounded-md"
-                    style={{
-                      color: overdue ? "var(--red)" : todayTask ? "var(--amber)" : "var(--text-3)",
-                      background: overdue ? "var(--red-bg)" : todayTask ? "var(--amber-bg)" : "transparent",
-                    }}
-                  >
-                    {format(new Date(task.due_date), "d MMM", { locale: enUS })}
-                  </span>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+                    {overdue && (
+                      <span style={{
+                        fontSize: 9.5, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
+                        background: "var(--red-bg)", color: "var(--red)", letterSpacing: "0.04em",
+                      }}>
+                        LATE
+                      </span>
+                    )}
+                    <span style={{
+                      fontSize: 11, fontWeight: 500, color: overdue ? "var(--red)" : todayTask ? "var(--amber)" : "var(--text-3)",
+                      fontVariantNumeric: "tabular-nums",
+                    }}>
+                      {format(new Date(task.due_date), "d MMM", { locale: enUS })}
+                    </span>
+                  </div>
                 </div>
               );
             })}

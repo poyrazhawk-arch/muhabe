@@ -37,12 +37,13 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
     .from("clients").select("*, monthly_fee, portal_token").eq("id", id).eq("accountant_id", accountant!.id).single();
   if (!client) notFound();
 
-  const [{ data: documents }, { data: tasks }, { data: tokens }, { data: fees }] = await Promise.all([
+  const [{ data: documents }, { data: tasks }, { data: tokens }, { data: fees }, { data: comms }] = await Promise.all([
     supabase.from("documents").select("*").eq("client_id", id).order("created_at", { ascending: false }),
     supabase.from("tasks").select("*").eq("client_id", id).neq("status", "completed").order("due_date"),
     supabase.from("upload_tokens").select("*").eq("client_id", id).eq("is_active", true)
       .order("created_at", { ascending: false }).limit(3),
     supabase.from("service_fees").select("*").eq("client_id", id).order("period_year", { ascending: false }).order("period_month", { ascending: false }).limit(12),
+    supabase.from("client_comms").select("id, channel, subject, body, logged_at").eq("client_id", id).order("logged_at", { ascending: false }).limit(50),
   ]);
 
   const pendingDocs   = documents?.filter(d => d.status === "pending").length ?? 0;
@@ -105,7 +106,7 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
         style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
         <div className="px-5 py-3.5 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-2)" }}>
           <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>Document Request</h2>
-          <BelgeIsteButton clientId={id} clientName={client.full_name} />
+          <BelgeIsteButton clientId={id} clientName={client.full_name} clientEmail={client.email ?? null} />
         </div>
         <div className="p-4">
           {tokens && tokens.length > 0 ? (
@@ -232,6 +233,9 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
         )}
       </div>
 
+      {/* İletişim Logu */}
+      <CommsLog clientId={id} initial={comms ?? []} />
+
       {/* Görevler */}
       <div className="rounded-xl overflow-hidden"
         style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
@@ -269,4 +273,5 @@ import CopyButton from "./CopyButton";
 import MonthlyFeeEdit from "./MonthlyFeeEdit";
 import PortalLinkButton from "./PortalLinkButton";
 import BelgeHatirlatmaButton from "./BelgeHatirlatmaButton";
+import CommsLog from "./CommsLog";
 import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";

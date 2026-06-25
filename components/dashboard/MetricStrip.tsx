@@ -13,51 +13,49 @@ interface Metric {
 
 export default function MetricStrip({ metrics }: { metrics: Metric[] }) {
   return (
-    <div
-      className="rounded-xl overflow-hidden"
-      style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
-    >
-      <div className="grid grid-cols-2 lg:grid-cols-4">
-        {metrics.map((m, i) => {
-          const numColor = m.isDanger
-            ? "var(--red)"
-            : m.isWarning
-            ? "var(--amber)"
-            : "var(--text-1)";
+    <div className="flex items-end gap-8 flex-wrap">
+      {metrics.map((m, i) => {
+        const numColor = m.isDanger
+          ? "var(--red)"
+          : m.isWarning
+          ? "var(--amber)"
+          : "var(--text-1)";
 
-          return (
-            <motion.div
-              key={m.key}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-              className="px-5 py-4"
+        return (
+          <motion.div
+            key={m.key}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.38, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <AnimatedNumber
+              value={m.value}
+              duration={800}
               style={{
-                borderRight: i < 3 ? "1px solid var(--border-2)" : "none",
-                background: m.isDanger ? "var(--red-bg)" : "transparent",
+                display: "block",
+                fontSize: "38px",
+                fontWeight: 800,
+                letterSpacing: "-0.055em",
+                lineHeight: 1,
+                color: numColor,
+                fontVariantNumeric: "tabular-nums",
+              }}
+            />
+            <span
+              style={{
+                display: "block",
+                marginTop: 5,
+                fontSize: "11px",
+                fontWeight: 500,
+                color: "var(--text-3)",
+                letterSpacing: "0.015em",
               }}
             >
-              <AnimatedNumber
-                value={m.value}
-                duration={900}
-                style={{
-                  display: "block",
-                  fontSize: "30px",
-                  fontWeight: 700,
-                  letterSpacing: "-0.045em",
-                  lineHeight: 1,
-                  color: numColor,
-                  marginBottom: 6,
-                  fontVariantNumeric: "tabular-nums",
-                }}
-              />
-              <p className="text-[11.5px] font-medium" style={{ color: "var(--text-3)" }}>
-                {m.label}
-              </p>
-            </motion.div>
-          );
-        })}
-      </div>
+              {m.label}
+            </span>
+          </motion.div>
+        );
+      })}
     </div>
   );
 }

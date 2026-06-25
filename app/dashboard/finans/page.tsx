@@ -5,11 +5,12 @@ import OdemeButon from "./OdemeButon";
 import YeniFeeForm from "./YeniFeeForm";
 import BillAllButton from "./BillAllButton";
 import SendInvoiceButton from "./SendInvoiceButton";
+import RemindOverdueButton from "./RemindOverdueButton";
 
-const STATUS: Record<string, { label: string; bg: string; color: string; border: string }> = {
-  pending:  { label: "Pending", bg: "#fffbeb", color: "#d97706", border: "#fde68a" },
-  paid:     { label: "Paid",    bg: "#f0fdf4", color: "#15803d", border: "#bbf7d0" },
-  overdue:  { label: "Overdue", bg: "#fef2f2", color: "#dc2626", border: "#fecaca" },
+const S: Record<string, { label: string; color: string; bg: string; border: string }> = {
+  pending: { label: "Pending", color: "#d97706", bg: "#fffbeb", border: "#fde68a" },
+  paid:    { label: "Paid",    color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0" },
+  overdue: { label: "Overdue", color: "#dc2626", bg: "#fef2f2", border: "#fecaca" },
 };
 
 export default async function FinansPage() {
@@ -26,6 +27,7 @@ export default async function FinansPage() {
     supabase.from("service_fees")
       .select("*, clients(full_name, company_name, email, portal_token)")
       .eq("accountant_id", accountant!.id)
+      .order("status")
       .order("period_year", { ascending: false })
       .order("period_month", { ascending: false }),
     supabase.from("clients")
@@ -35,119 +37,195 @@ export default async function FinansPage() {
       .order("full_name"),
   ]);
 
-  const thisMonth = fees?.filter(f => f.period_month === month && f.period_year === year) ?? [];
-  const toplam    = thisMonth.reduce((s, f) => s + Number(f.amount), 0);
-  const odenen    = thisMonth.filter(f => f.status === "paid").reduce((s, f) => s + Number(f.amount), 0);
-  const bekleyen  = thisMonth.filter(f => f.status === "pending").reduce((s, f) => s + Number(f.amount), 0);
-  const gecikmiş  = thisMonth.filter(f => f.status === "overdue").reduce((s, f) => s + Number(f.amount), 0);
+  const thisMonth   = fees?.filter(f => f.period_month === month && f.period_year === year) ?? [];
+  const toplam      = thisMonth.reduce((s, f) => s + Number(f.amount), 0);
+  const odenen      = thisMonth.filter(f => f.status === "paid").reduce((s, f) => s + Number(f.amount), 0);
+  const bekleyen    = thisMonth.filter(f => f.status === "pending").reduce((s, f) => s + Number(f.amount), 0);
+  const gecikmiş    = thisMonth.filter(f => f.status === "overdue").reduce((s, f) => s + Number(f.amount), 0);
+  const overdueFees = (fees ?? []).filter((f: any) => f.status === "overdue" && f.clients?.email)
+    .map((f: any) => ({ id: f.id, email: f.clients.email }));
 
-  const fmt = (n: number) => n.toLocaleString("en-GB", { style: "currency", currency: "GBP" });
+  const fmt = (n: number) => n.toLocaleString("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 });
 
   return (
-    <div className="space-y-6 animate-fade-up">
-      <div className="flex items-start justify-between">
+    <div className="space-y-5 animate-fade-up">
+
+      {/* Page header */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
         <div>
-          <h1 className="font-semibold tracking-tight"
-            style={{ fontSize: "20px", letterSpacing: "-0.03em", color: "var(--text-1)" }}>
-            Finance
-          </h1>
-          <p className="text-[12.5px] mt-0.5" style={{ color: "var(--text-3)" }}>
-            Service fees · {format(new Date(), "MMMM yyyy", { locale: enUS })}
+          <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: 6 }}>
+            Finance · {format(now, "MMMM yyyy", { locale: enUS })}
+          </p>
+          <p style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.055em", color: "var(--text-1)", lineHeight: 1 }}>
+            {fmt(toplam)}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, alignSelf: "flex-end" }}>
+          {overdueFees.length > 0 && <RemindOverdueButton overdueFees={overdueFees} />}
           <BillAllButton clients={clients ?? []} />
           <YeniFeeForm clients={clients ?? []} />
         </div>
       </div>
 
-      {/* Metric strip */}
-      <div className="rounded-xl overflow-hidden"
-        style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-        <div className="grid grid-cols-2 lg:grid-cols-4">
-          {[
-            { label: "This Month",  value: fmt(toplam),   numColor: "var(--text-1)",  bg: "transparent" },
-            { label: "Paid",        value: fmt(odenen),   numColor: "#15803d",         bg: "transparent" },
-            { label: "Pending",     value: fmt(bekleyen), numColor: "#d97706",         bg: "transparent" },
-            { label: "Overdue",     value: fmt(gecikmiş), numColor: gecikmiş > 0 ? "#dc2626" : "var(--text-3)", bg: gecikmiş > 0 ? "var(--red-bg)" : "transparent" },
-          ].map(({ label, value, numColor, bg }, i) => (
-            <div key={label} className="px-5 py-4"
-              style={{
-                borderRight: i < 3 ? "1px solid var(--border-2)" : "none",
-                background: bg,
-              }}>
-              <p className="tabular-nums leading-none"
-                style={{ fontSize: "24px", fontWeight: 700, letterSpacing: "-0.04em", color: numColor, marginBottom: 6 }}>
-                {value}
-              </p>
-              <p className="text-[11.5px] font-medium" style={{ color: "var(--text-3)" }}>{label}</p>
-            </div>
-          ))}
-        </div>
+      {/* Metric strip — naked stats, Linear style */}
+      <div style={{
+        display: "flex", gap: 0,
+        background: "var(--surface)", border: "1px solid var(--border)",
+        borderRadius: 12, overflow: "hidden",
+      }}>
+        {[
+          { label: "Paid",    value: fmt(odenen),   color: "#15803d", pct: toplam > 0 ? (odened: number) => odened / toplam : null },
+          { label: "Pending", value: fmt(bekleyen), color: "#d97706" },
+          { label: "Overdue", value: fmt(gecikmiş), color: gecikmiş > 0 ? "#dc2626" : "var(--text-3)", alert: gecikmiş > 0 },
+        ].map(({ label, value, color, alert }, i) => (
+          <div key={label} style={{
+            flex: 1, padding: "16px 20px",
+            borderLeft: i > 0 ? "1px solid var(--border-2)" : "none",
+            background: alert ? "rgba(220,38,38,0.025)" : "transparent",
+          }}>
+            <p style={{
+              fontSize: 22, fontWeight: 800, letterSpacing: "-0.045em",
+              color, lineHeight: 1, marginBottom: 5, fontVariantNumeric: "tabular-nums",
+            }}>
+              {value}
+            </p>
+            <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--text-3)" }}>
+              {label}
+            </p>
+          </div>
+        ))}
       </div>
 
-      {/* Tablo */}
-      <div className="rounded-xl overflow-hidden"
-        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
+      {/* Progress bar */}
+      {toplam > 0 && (
+        <div style={{ height: 3, borderRadius: 99, background: "var(--surface-3)", overflow: "hidden" }}>
+          <div style={{
+            height: "100%", borderRadius: 99,
+            background: "#16a34a",
+            width: `${(odenen / toplam) * 100}%`,
+            transition: "width 0.6s cubic-bezier(0.22,1,0.36,1)",
+          }} />
+        </div>
+      )}
+
+      {/* Table */}
+      <div style={{
+        background: "var(--surface)", border: "1px solid var(--border)",
+        borderRadius: 14, overflow: "hidden", boxShadow: "var(--shadow-sm)",
+      }}>
         {!fees || fees.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>No service fees yet</p>
-            <p className="text-[12px] mt-1" style={{ color: "var(--text-3)" }}>Use the &quot;Add fee&quot; button above to get started</p>
+          <div style={{ padding: "56px 20px", textAlign: "center" }}>
+            <p style={{ fontSize: 13.5, fontWeight: 600, color: "var(--text-1)" }}>No service fees yet</p>
+            <p style={{ fontSize: 12.5, marginTop: 4, color: "var(--text-3)" }}>
+              Use &quot;Add fee&quot; above to get started
+            </p>
           </div>
         ) : (
-          <table className="w-full">
-            <thead style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--border)" }}>
-              <tr>
-                {["Client", "Period", "Amount", "Due Date", "Status", ""].map((h, i) => (
-                  <th key={i} className={`px-5 py-3 text-[11px] font-semibold uppercase tracking-wider ${i === 5 ? "text-right" : "text-left"}`}
-                    style={{ color: "var(--text-3)", letterSpacing: "0.06em" }}>{h}</th>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--border)" }}>
+                {["", "Client", "Period", "Amount", "Status", ""].map((h, i) => (
+                  <th key={i}
+                    style={{
+                      padding: "9px 14px",
+                      fontSize: 10.5, fontWeight: 600, letterSpacing: "0.07em",
+                      textTransform: "uppercase", color: "var(--text-3)",
+                      textAlign: i === 5 ? "right" : "left",
+                      width: i === 0 ? 3 : undefined,
+                    }}
+                  >
+                    {h}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {fees.map((fee: any, idx: number) => {
-                const s = STATUS[fee.status] ?? STATUS.pending;
+                const s      = S[fee.status] ?? S.pending;
                 const client = fee.clients;
-                const ay = new Date(fee.period_year, fee.period_month - 1, 1);
+                const ay     = new Date(fee.period_year, fee.period_month - 1, 1);
+                const isOverdue = fee.status === "overdue";
+
                 return (
-                  <tr key={fee.id}
-                    className="group transition-colors duration-100 hover:bg-[var(--surface-2)]"
-                    style={{ borderTop: idx > 0 ? "1px solid var(--border-2)" : "none" }}>
-                    <td className="px-5 py-3">
-                      <p className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>
-                        {client?.full_name ?? "-"}
+                  <tr
+                    key={fee.id}
+                    className="group"
+                    style={{
+                      borderTop: idx > 0 ? "1px solid var(--border-2)" : "none",
+                      background: isOverdue ? "rgba(220,38,38,0.025)" : "transparent",
+                      transition: "background 0.1s",
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = isOverdue ? "rgba(220,38,38,0.055)" : "var(--surface-2)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = isOverdue ? "rgba(220,38,38,0.025)" : "transparent")}
+                  >
+                    {/* Status stripe */}
+                    <td style={{ padding: 0, width: 3 }}>
+                      <div style={{
+                        width: 3, minHeight: 44, height: "100%",
+                        background: isOverdue ? "#dc2626" : fee.status === "paid" ? "#16a34a44" : "transparent",
+                      }} />
+                    </td>
+
+                    {/* Client */}
+                    <td style={{ padding: "11px 14px" }}>
+                      <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-1)", letterSpacing: "-0.01em" }}>
+                        {client?.full_name ?? "—"}
                       </p>
                       {client?.company_name && (
-                        <p className="text-[11px]" style={{ color: "var(--text-3)" }}>{client.company_name}</p>
+                        <p style={{ fontSize: 11.5, color: "var(--text-3)", marginTop: 1 }}>
+                          {client.company_name}
+                        </p>
                       )}
                     </td>
-                    <td className="px-5 py-3 text-[13px] tabular-nums" style={{ color: "var(--text-2)" }}>
-                      {format(ay, "MMMM yyyy", { locale: enUS })}
+
+                    {/* Period */}
+                    <td style={{ padding: "11px 14px", fontSize: 12.5, color: "var(--text-3)", fontVariantNumeric: "tabular-nums" }}>
+                      {format(ay, "MMM yyyy", { locale: enUS })}
                     </td>
-                    <td className="px-5 py-3 text-[13px] font-semibold tabular-nums" style={{ color: "var(--text-1)" }}>
+
+                    {/* Amount */}
+                    <td style={{
+                      padding: "11px 14px",
+                      fontSize: 13.5, fontWeight: 700, letterSpacing: "-0.03em",
+                      color: "var(--text-1)", fontVariantNumeric: "tabular-nums",
+                    }}>
                       {Number(fee.amount).toLocaleString("en-GB", { style: "currency", currency: "GBP" })}
                     </td>
-                    <td className="px-5 py-3 text-[13px] tabular-nums" style={{ color: "var(--text-3)" }}>
-                      {fee.due_date ? format(new Date(fee.due_date), "d MMM yyyy", { locale: enUS }) : "-"}
-                    </td>
-                    <td className="px-5 py-3">
-                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md"
-                        style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>
+
+                    {/* Status */}
+                    <td style={{ padding: "11px 14px" }}>
+                      <span style={{
+                        display: "inline-flex", alignItems: "center", gap: 5,
+                        fontSize: 11, fontWeight: 600,
+                        padding: "3px 8px", borderRadius: 20,
+                        background: s.bg, color: s.color, border: `1px solid ${s.border}`,
+                      }}>
+                        <span style={{
+                          width: 5, height: 5, borderRadius: "50%",
+                          background: s.color, flexShrink: 0,
+                        }} />
                         {s.label}
                       </span>
                     </td>
-                    <td className="px-5 py-3">
-                      <div className="flex items-center justify-end gap-2">
+
+                    {/* Actions */}
+                    <td style={{ padding: "11px 16px" }}>
+                      <div style={{
+                        display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 6,
+                        opacity: isOverdue ? 1 : undefined,
+                      }}
+                        className={isOverdue ? undefined : "opacity-0 group-hover:opacity-100 transition-opacity"}
+                      >
                         {fee.status === "paid" && fee.paid_at && (
-                          <span className="text-[11px]" style={{ color: "var(--text-3)" }}>
+                          <span style={{ fontSize: 11, color: "var(--text-3)", fontVariantNumeric: "tabular-nums" }}>
                             {format(new Date(fee.paid_at), "d MMM", { locale: enUS })}
                           </span>
                         )}
                         {fee.status !== "paid" && (
-                          <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                            <SendInvoiceButton feeId={fee.id} clientEmail={fee.clients?.email} />
+                          <>
+                            <SendInvoiceButton feeId={fee.id} clientEmail={client?.email} isOverdue={isOverdue} />
                             {fee.status === "pending" && <OdemeButon feeId={fee.id} />}
-                          </div>
+                          </>
                         )}
                       </div>
                     </td>

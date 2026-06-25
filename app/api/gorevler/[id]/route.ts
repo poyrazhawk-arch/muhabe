@@ -3,8 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 const GuncellemeSchema = z.object({
-  status: z.enum(["pending", "in_progress", "completed", "cancelled"]).optional(),
-  priority: z.enum(["low", "normal", "high", "critical"]).optional(),
+  status:        z.enum(["pending", "in_progress", "completed", "cancelled"]).optional(),
+  priority:      z.enum(["low", "normal", "high", "critical"]).optional(),
+  outcome_ref:   z.string().optional(),
+  outcome_notes: z.string().optional(),
 });
 
 export async function PATCH(

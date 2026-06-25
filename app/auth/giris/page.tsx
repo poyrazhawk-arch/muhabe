@@ -4,13 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
-import { EnvelopeSimple, Lock, Eye, EyeSlash, ArrowRight, Notebook, ShieldCheck, Lightning, Lock as LockIcon } from "@phosphor-icons/react";
-
-const TRUST = [
-  { Icon: ShieldCheck, val: "GDPR",  label: "Compliant"     },
-  { Icon: Lightning,   val: "99.9%", label: "Uptime"        },
-  { Icon: LockIcon,    val: "2FA",   label: "Secured"       },
-];
+import { EnvelopeSimple, Lock, Eye, EyeSlash, ArrowRight, Notebook } from "@phosphor-icons/react";
 
 const EASE: [number,number,number,number] = [0.22, 1, 0.36, 1];
 
@@ -92,7 +86,7 @@ export default function GirisPage() {
 
           {/* Headline */}
           <div className="flex-1 flex flex-col justify-center">
-            {["Every client.", "Every deadline.", "Under control."].map((line, i) => (
+            {["Your clients.", "Your deadlines.", "One dashboard."].map((line, i) => (
               <motion.span
                 key={line}
                 initial={{ opacity: 0, x: -20 }}
@@ -111,7 +105,7 @@ export default function GirisPage() {
               className="text-[14px] leading-relaxed mt-5 max-w-[340px]"
               style={{ color: "#4a6480" }}
             >
-              Tax calendars, client health tracking, and collections — all in one place.
+              HMRC filings, document requests, and overdue invoices. No more switching tabs.
             </motion.p>
 
             {/* Floating glass card — app preview hint */}
@@ -156,26 +150,15 @@ export default function GirisPage() {
             </motion.div>
           </div>
 
-          {/* Trust metrics */}
-          <motion.div
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.85, ease: EASE }}
-            className="flex items-center gap-8 pt-6"
-            style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+            className="text-[11px] pt-6"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.06)", color: "#2d4861" }}
           >
-            {TRUST.map(({ Icon, val, label }, i) => (
-              <motion.div
-                key={label}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.9 + i * 0.07, ease: EASE }}
-              >
-                <p className="text-[15px] font-bold text-white tabular-nums">{val}</p>
-                <p className="text-[10px] mt-0.5 uppercase tracking-[0.08em]" style={{ color: "#2d4861" }}>{label}</p>
-              </motion.div>
-            ))}
-          </motion.div>
+            GDPR-compliant · EU data residency · SOC 2 ready
+          </motion.p>
         </div>
       </div>
 
@@ -213,8 +196,8 @@ export default function GirisPage() {
             className="text-[13px] mb-7"
             style={{ color: "var(--text-3)" }}
           >
-            Continue with your email and password.{" "}
-            <a href="/auth/kayit" className="font-medium" style={{ color: "var(--accent)" }}>Create account</a>
+            No account yet?{" "}
+            <a href="/auth/kayit" className="font-medium" style={{ color: "var(--accent)" }}>Create one</a>
           </motion.p>
 
           <form onSubmit={handleSubmit} className="space-y-4">

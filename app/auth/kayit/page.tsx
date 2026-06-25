@@ -4,14 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
-import { EnvelopeSimple, Lock, Eye, EyeSlash, User, ArrowRight, Buildings, Notebook, CheckCircle, Sparkle } from "@phosphor-icons/react";
+import { EnvelopeSimple, Lock, Eye, EyeSlash, User, ArrowRight, Buildings, Notebook, CheckCircle } from "@phosphor-icons/react";
 
 const EASE: [number,number,number,number] = [0.22, 1, 0.36, 1];
 
 const PERKS = [
-  { Icon: CheckCircle, text: "Free 14-day trial, no card required" },
-  { Icon: CheckCircle, text: "Unlimited clients on Pro"            },
-  { Icon: CheckCircle, text: "GDPR-compliant, EU data residency"   },
+  { Icon: CheckCircle, text: "HMRC deadline reminders, set automatically" },
+  { Icon: CheckCircle, text: "Document requests sent straight from the app" },
+  { Icon: CheckCircle, text: "See at a glance who hasn't paid"             },
 ];
 
 export default function KayitPage() {
@@ -117,7 +117,7 @@ export default function KayitPage() {
 
           {/* Headline */}
           <div className="flex-1 flex flex-col justify-center">
-            {["Start free.", "Scale when", "you're ready."].map((line, i) => (
+            {["Stop tracking", "clients in", "spreadsheets."].map((line, i) => (
               <motion.span
                 key={line}
                 initial={{ opacity: 0, x: -20 }}
@@ -137,7 +137,7 @@ export default function KayitPage() {
               className="text-[14px] leading-relaxed mt-5 max-w-[340px]"
               style={{ color: "#4a6480" }}
             >
-              Everything you need to run a modern accounting practice — from day one.
+              14 days free, no card needed. Your whole practice in one tab.
             </motion.p>
 
             {/* Perks list */}
@@ -156,22 +156,6 @@ export default function KayitPage() {
               ))}
             </div>
 
-            {/* Floating promo badge */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.85, ease: EASE }}
-              className="mt-8 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl self-start"
-              style={{
-                background: "rgba(37,99,235,0.1)",
-                border: "1px solid rgba(37,99,235,0.2)",
-              }}
-            >
-              <Sparkle size={12} weight="fill" style={{ color: "#60a5fa" }} />
-              <span className="text-[11px] font-semibold" style={{ color: "#60a5fa" }}>
-                No credit card required
-              </span>
-            </motion.div>
           </div>
 
           {/* Bottom metrics */}
@@ -183,9 +167,9 @@ export default function KayitPage() {
             style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
           >
             {[
-              { val: "Free",  label: "No credit card" },
-              { val: "2 min", label: "Setup time"      },
-              { val: "GDPR",  label: "Compliant"       },
+              { val: "14 days", label: "Free trial"   },
+              { val: "< 2 min", label: "Setup time"   },
+              { val: "EU",      label: "Data residency" },
             ].map(({ val, label }, i) => (
               <motion.div
                 key={label}

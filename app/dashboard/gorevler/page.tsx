@@ -5,11 +5,13 @@ import { enUS } from "date-fns/locale";
 import { ClipboardText, Plus } from "@phosphor-icons/react/dist/ssr";
 import GorevTamamlaButton from "./GorevTamamlaButton";
 
-const ONCELIK: Record<string, { label: string; bg: string; color: string; border: string }> = {
-  critical: { label: "Critical", bg: "var(--red-bg)",   color: "var(--red)",   border: "var(--red-lt)"   },
-  high:     { label: "High",     bg: "#fff7ed",          color: "#ea580c",      border: "#fed7aa"          },
-  normal:   { label: "Normal",   bg: "var(--surface-2)", color: "var(--text-3)", border: "var(--border)"   },
-  low:      { label: "Low",      bg: "var(--surface-2)", color: "var(--text-3)", border: "var(--border)"   },
+const PRIORITY_ORDER: Record<string, number> = { critical: 0, high: 1, normal: 2, low: 3 };
+
+const P_CFG: Record<string, { dot: string; label: string }> = {
+  critical: { dot: "#dc2626", label: "Critical" },
+  high:     { dot: "#ea580c", label: "High"     },
+  normal:   { dot: "#6b7280", label: "Normal"   },
+  low:      { dot: "#9ca3af", label: "Low"       },
 };
 
 export default async function GorevlerPage() {
@@ -18,62 +20,115 @@ export default async function GorevlerPage() {
   const { data: accountant } = await supabase
     .from("accountants").select("id").eq("user_id", user!.id).single();
 
-  const { data: tasks } = await supabase
+  const { data: raw } = await supabase
     .from("tasks").select("*, clients(full_name)")
     .eq("accountant_id", accountant!.id)
     .neq("status", "completed").neq("status", "cancelled")
     .order("due_date");
 
-  const geciken = tasks?.filter(t => isPast(new Date(t.due_date)) && !isToday(new Date(t.due_date))).length ?? 0;
-  const bugun   = tasks?.filter(t => isToday(new Date(t.due_date))).length ?? 0;
+  const tasks = [...(raw ?? [])].sort((a, b) => {
+    const aO = isPast(new Date(a.due_date)) && !isToday(new Date(a.due_date));
+    const bO = isPast(new Date(b.due_date)) && !isToday(new Date(b.due_date));
+    const pa = PRIORITY_ORDER[a.priority] ?? 2;
+    const pb = PRIORITY_ORDER[b.priority] ?? 2;
+    if (pa !== pb) return pa - pb;
+    if (aO !== bO) return aO ? -1 : 1;
+    return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+  });
+
+  const geciken = tasks.filter(t => isPast(new Date(t.due_date)) && !isToday(new Date(t.due_date))).length;
+  const bugun   = tasks.filter(t => isToday(new Date(t.due_date))).length;
+  const critical = tasks.filter(t => t.priority === "critical").length;
 
   return (
     <div className="space-y-5 animate-fade-up">
-      <div className="flex items-center justify-between">
+
+      {/* Page header */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
         <div>
-          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Tasks</h1>
-          <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>
-            {tasks?.length ?? 0} active
-            {geciken > 0 && <span style={{ color: "var(--red)" }}> · {geciken} overdue</span>}
-            {bugun > 0 && <span style={{ color: "var(--amber)" }}> · {bugun} today</span>}
+          <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: 6 }}>
+            Tasks
           </p>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.055em", color: "var(--text-1)", lineHeight: 1 }}>
+              {tasks.length}
+            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              {geciken > 0 && (
+                <span style={{
+                  fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 20,
+                  background: "var(--red-bg)", color: "var(--red)", border: "1px solid var(--red-lt)",
+                }}>
+                  {geciken} overdue
+                </span>
+              )}
+              {bugun > 0 && (
+                <span style={{
+                  fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 20,
+                  background: "var(--amber-bg)", color: "var(--amber)", border: "1px solid var(--amber-lt)",
+                }}>
+                  {bugun} today
+                </span>
+              )}
+              {critical > 0 && (
+                <span style={{
+                  fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 20,
+                  background: "#fff1f2", color: "#dc2626", border: "1px solid #fecaca",
+                }}>
+                  {critical} critical
+                </span>
+              )}
+            </div>
+          </div>
         </div>
         <Link
           href="/dashboard/gorevler/yeni"
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-semibold text-white transition-all active:scale-[0.98]"
-          style={{ background: "var(--accent)", boxShadow: "0 2px 8px rgba(37,99,235,0.28)" }}
+          className="btn-primary"
+          style={{ alignSelf: "flex-end" }}
         >
-          <Plus size={14} weight="bold" />
-          New Task
+          <Plus size={13} weight="bold" />
+          New task
         </Link>
       </div>
 
-      <div
-        className="rounded-xl overflow-hidden"
-        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}
-      >
-        {!tasks || tasks.length === 0 ? (
-          <div className="py-16 text-center">
-            <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3"
-              style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}
-            >
-              <ClipboardText size={22} style={{ color: "var(--text-3)" }} weight="duotone" />
+      {/* Table */}
+      <div style={{
+        background: "var(--surface)", border: "1px solid var(--border)",
+        borderRadius: 14, overflow: "hidden", boxShadow: "var(--shadow-sm)",
+      }}>
+        {tasks.length === 0 ? (
+          <div style={{ padding: "60px 20px", textAlign: "center" }}>
+            <div style={{
+              width: 40, height: 40, borderRadius: 10, margin: "0 auto 12px",
+              background: "var(--surface-2)", border: "1px solid var(--border)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <ClipboardText size={20} style={{ color: "var(--text-3)" }} weight="duotone" />
             </div>
-            <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>No active tasks</p>
-            <p className="text-[12px] mt-1" style={{ color: "var(--text-3)" }}>Add a new task to start tracking</p>
+            <p style={{ fontSize: 13.5, fontWeight: 600, color: "var(--text-1)" }}>No active tasks</p>
+            <p style={{ fontSize: 12.5, color: "var(--text-3)", marginTop: 4 }}>Add a task to start tracking</p>
           </div>
         ) : (
-          <table className="w-full">
-            <thead style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--border)" }}>
-              <tr>
-                {["Task", "Client", "Due Date", "Priority", ""].map((h, i) => (
-                  <th
-                    key={i}
-                    className={`px-5 py-3 text-[11px] font-semibold uppercase tracking-wider ${i === 4 ? "text-right" : "text-left"}`}
-                    style={{ color: "var(--text-3)", letterSpacing: "0.06em" }}
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--border)" }}>
+                {[
+                  { label: "Task",      w: "auto" },
+                  { label: "Client",    w: 160 },
+                  { label: "Due",       w: 130 },
+                  { label: "Priority",  w: 100 },
+                  { label: "",          w: 110 },
+                ].map((col, i) => (
+                  <th key={i}
+                    style={{
+                      padding: "9px 16px",
+                      fontSize: 10.5, fontWeight: 600, letterSpacing: "0.07em",
+                      textTransform: "uppercase", color: "var(--text-3)",
+                      textAlign: i === 4 ? "right" : "left",
+                      width: col.w !== "auto" ? col.w : undefined,
+                    }}
                   >
-                    {h}
+                    {col.label}
                   </th>
                 ))}
               </tr>
@@ -83,68 +138,97 @@ export default async function GorevlerPage() {
                 const due     = new Date(task.due_date);
                 const overdue = isPast(due) && !isToday(due);
                 const todayT  = isToday(due);
-                const onc     = ONCELIK[task.priority] ?? ONCELIK.normal;
+                const p       = P_CFG[task.priority] ?? P_CFG.normal;
+                const criticalOverdue = task.priority === "critical" && overdue;
+
                 return (
                   <tr
                     key={task.id}
                     style={{
                       borderTop: idx > 0 ? "1px solid var(--border-2)" : "none",
+                      background: criticalOverdue ? "rgba(220,38,38,0.025)" : "transparent",
                       transition: "background 0.1s",
+                      position: "relative",
                     }}
-                    onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-2)")}
-                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    onMouseEnter={e => (e.currentTarget.style.background = criticalOverdue ? "rgba(220,38,38,0.055)" : "var(--surface-2)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = criticalOverdue ? "rgba(220,38,38,0.025)" : "transparent")}
                   >
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-2.5">
-                        <div
-                          className="w-1.5 h-1.5 rounded-full shrink-0"
+                    {/* Priority stripe */}
+                    <td style={{ padding: 0, width: 3 }}>
+                      <div style={{
+                        width: 3, height: "100%", minHeight: 44,
+                        background: criticalOverdue ? "#dc2626" : task.priority === "critical" ? "#dc262644" : "transparent",
+                      }} />
+                    </td>
+
+                    {/* Task name */}
+                    <td style={{ padding: "11px 14px 11px 12px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span
+                          title={p.label}
                           style={{
-                            background: overdue ? "var(--red)" : todayT ? "var(--amber)" : "var(--border)",
+                            width: 7, height: 7, borderRadius: "50%", flexShrink: 0,
+                            background: overdue ? "#dc2626" : todayT ? "#d97706" : p.dot,
                           }}
                         />
-                        <span className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>
+                        <span style={{
+                          fontSize: 13, fontWeight: 600, color: "var(--text-1)",
+                          letterSpacing: "-0.01em",
+                        }}>
                           {task.title}
                         </span>
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-[13px]" style={{ color: "var(--text-2)" }}>
-                      {task.clients ? (task.clients as any).full_name : "-"}
+
+                    {/* Client */}
+                    <td style={{ padding: "11px 14px", fontSize: 12.5, color: "var(--text-3)", width: 160 }}>
+                      {task.clients ? (task.clients as any).full_name : <span style={{ color: "var(--border)" }}>—</span>}
                     </td>
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-1.5">
-                        <span
-                          className="text-[13px] font-medium tabular-nums"
-                          style={{ color: overdue ? "var(--red)" : todayT ? "var(--amber)" : "var(--text-2)" }}
-                        >
-                          {format(due, "d MMM yyyy", { locale: enUS })}
+
+                    {/* Due date */}
+                    <td style={{ padding: "11px 14px", width: 130 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <span style={{
+                          fontSize: 12.5, fontWeight: overdue || todayT ? 600 : 400,
+                          color: overdue ? "#dc2626" : todayT ? "#d97706" : "var(--text-3)",
+                          fontVariantNumeric: "tabular-nums",
+                        }}>
+                          {format(due, "d MMM", { locale: enUS })}
                         </span>
                         {overdue && (
-                          <span
-                            className="text-[10px] font-bold px-1.5 py-0.5 rounded"
-                            style={{ background: "var(--red-bg)", color: "var(--red)" }}
-                          >
-                            Overdue
+                          <span style={{
+                            fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
+                            background: "var(--red-bg)", color: "var(--red)", letterSpacing: "0.02em",
+                          }}>
+                            OVERDUE
                           </span>
                         )}
                         {todayT && (
-                          <span
-                            className="text-[10px] font-bold px-1.5 py-0.5 rounded"
-                            style={{ background: "var(--amber-bg)", color: "var(--amber)" }}
-                          >
-                            Today
+                          <span style={{
+                            fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
+                            background: "var(--amber-bg)", color: "var(--amber)", letterSpacing: "0.02em",
+                          }}>
+                            TODAY
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="px-5 py-3">
-                      <span
-                        className="text-[11px] font-semibold px-2 py-0.5 rounded-md"
-                        style={{ background: onc.bg, color: onc.color, border: `1px solid ${onc.border}` }}
-                      >
-                        {onc.label}
+
+                    {/* Priority pill */}
+                    <td style={{ padding: "11px 14px", width: 100 }}>
+                      <span style={{
+                        display: "inline-flex", alignItems: "center", gap: 5,
+                        fontSize: 11.5, fontWeight: 500, color: "var(--text-3)",
+                      }}>
+                        <span style={{
+                          width: 6, height: 6, borderRadius: "50%", background: p.dot, flexShrink: 0,
+                        }} />
+                        {p.label}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-right">
+
+                    {/* Action */}
+                    <td style={{ padding: "11px 16px", textAlign: "right", width: 110 }}>
                       <GorevTamamlaButton gorevId={task.id} />
                     </td>
                   </tr>
