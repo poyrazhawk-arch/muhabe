@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Lock, CheckCircle, ArrowRight } from "@phosphor-icons/react";
+import { useDict } from "@/lib/i18n/LocaleContext";
 
 export default function SifremiGuncellePage() {
+  const t = useDict().auth;
   const [password,  setPassword]  = useState("");
   const [password2, setPassword2] = useState("");
   const [loading,   setLoading]   = useState(false);
@@ -17,15 +19,15 @@ export default function SifremiGuncellePage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (password !== password2) { setError("Passwords do not match."); return; }
-    if (password.length < 8)    { setError("Password must be at least 8 characters."); return; }
+    if (password !== password2) { setError(t.passwordsDontMatch); return; }
+    if (password.length < 8)    { setError(t.passwordMin8); return; }
 
     setLoading(true);
     setError("");
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
       setError(error.message === "Auth session missing"
-        ? "Session expired. Please request a new password reset link."
+        ? t.sessionExpired
         : error.message
       );
     } else {
@@ -57,14 +59,14 @@ export default function SifremiGuncellePage() {
               style={{ background: "var(--green-bg)", border: "1px solid var(--green-lt)" }}>
               <CheckCircle size={28} weight="fill" style={{ color: "var(--green)" }} />
             </div>
-            <h2 className="text-[18px] font-semibold mb-2" style={{ color: "var(--text-1)" }}>Password updated</h2>
+            <h2 className="text-[18px] font-semibold mb-2" style={{ color: "var(--text-1)" }}>{t.passwordUpdatedTitle}</h2>
             <p className="text-[13px]" style={{ color: "var(--text-3)" }}>
-              You can now sign in with your new password.
+              {t.passwordUpdatedSub}
             </p>
             <a href="/auth/giris"
               className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-semibold text-white"
               style={{ background: "var(--accent)" }}>
-              Sign in <ArrowRight size={13} weight="bold" />
+              {t.signIn} <ArrowRight size={13} weight="bold" />
             </a>
           </div>
         ) : (
@@ -74,10 +76,10 @@ export default function SifremiGuncellePage() {
               <Lock size={20} weight="duotone" style={{ color: "var(--accent)" }} />
             </div>
             <h2 className="text-[22px] font-semibold tracking-tight mb-1" style={{ color: "var(--text-1)" }}>
-              Set new password
+              {t.newPasswordTitle}
             </h2>
             <p className="text-[13px] mb-7" style={{ color: "var(--text-3)" }}>
-              Create a new password for your account.
+              {t.forgotSub}
             </p>
 
             <div className="rounded-xl p-5"
@@ -85,22 +87,22 @@ export default function SifremiGuncellePage() {
               <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
                   <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
-                    New password
+                    {t.newPasswordLabel}
                   </label>
                   <input type="password" required minLength={8}
                     value={password} onChange={e => setPassword(e.target.value)}
-                    placeholder="Min. 8 characters"
+                    placeholder={t.minCharsPlaceholder}
                     className="input-base"
                     onFocus={e => { e.target.style.borderColor = "var(--accent)"; e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.08)"; }}
                     onBlur={e => { e.target.style.borderColor = "var(--border)"; e.target.style.boxShadow = "none"; }} />
                 </div>
                 <div>
                   <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
-                    Confirm password
+                    {t.confirmPasswordLabel}
                   </label>
                   <input type="password" required
                     value={password2} onChange={e => setPassword2(e.target.value)}
-                    placeholder="Repeat your password"
+                    placeholder={t.repeatPasswordPlaceholder}
                     className="input-base"
                     onFocus={e => { e.target.style.borderColor = "var(--accent)"; e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.08)"; }}
                     onBlur={e => { e.target.style.borderColor = "var(--border)"; e.target.style.boxShadow = "none"; }} />
@@ -116,7 +118,7 @@ export default function SifremiGuncellePage() {
                 <button type="submit" disabled={loading}
                   className="w-full py-2.5 rounded-lg text-[13px] font-semibold text-white transition-all active:scale-[0.98] disabled:opacity-60"
                   style={{ background: "var(--accent)" }}>
-                  {loading ? "Saving…" : "Save password"}
+                  {loading ? t.saving : t.savePassword}
                 </button>
               </form>
             </div>

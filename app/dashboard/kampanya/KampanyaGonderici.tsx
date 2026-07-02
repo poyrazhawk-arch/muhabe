@@ -10,12 +10,7 @@ import {
   X,
 } from "@phosphor-icons/react";
 import type { Lead } from "@/app/api/kampanya/route";
-
-const TEMPLATES = [
-  { value: "tanitim",    label: "1. Introduction",  desc: "First touch — introduce the product, offer a demo" },
-  { value: "takip",     label: "2. Follow-up",     desc: "Send 3-4 days later if no reply" },
-  { value: "son_seans", label: "3. Last Attempt",  desc: "Final try — leave the door open" },
-];
+import { useDict } from "@/lib/i18n/LocaleContext";
 
 function parseCsv(text: string): Lead[] {
   const lines = text.trim().split("\n");
@@ -39,8 +34,14 @@ function parseCsv(text: string): Lead[] {
 }
 
 export default function KampanyaGonderici() {
+  const t = useDict().kampanya;
+  const TEMPLATES = [
+    { value: "tanitim",    label: t.templateIntro,       desc: t.templateIntroDesc },
+    { value: "takip",      label: t.templateFollowup,    desc: t.templateFollowupDesc },
+    { value: "son_seans",  label: t.templateLastAttempt, desc: t.templateLastAttemptDesc },
+  ];
   const [leads,    setLeads]    = useState<Lead[]>([]);
-  const [subject,  setSubject]  = useState("Automate your accounting workflow");
+  const [subject,  setSubject]  = useState(t.defaultSubject);
   const [template, setTemplate] = useState("tanitim");
   const [status,   setStatus]   = useState<"idle" | "sending" | "done" | "error">("idle");
   const [result,   setResult]   = useState<{ sent: number; failed: number; total: number } | null>(null);
@@ -54,7 +55,7 @@ export default function KampanyaGonderici() {
       const text = e.target?.result as string;
       const parsed = parseCsv(text);
       if (parsed.length === 0) {
-        setCsvError("No valid emails found in CSV. The file must have an 'email' or 'title' column.");
+        setCsvError(t.noValidEmails);
       } else {
         setLeads(parsed);
       }
@@ -100,7 +101,7 @@ export default function KampanyaGonderici() {
         style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}
       >
         <p className="text-[12px] font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-3)", letterSpacing: "0.06em" }}>
-          1. Lead CSV
+          {t.stepLeadCsv}
         </p>
 
         {leads.length === 0 ? (
@@ -121,8 +122,8 @@ export default function KampanyaGonderici() {
               }}
             >
               <Upload size={24} weight="duotone" />
-              <span className="text-[13px] font-medium">Upload Apify CSV</span>
-              <span className="text-[12px]">or drag and drop · must have email, title columns</span>
+              <span className="text-[13px] font-medium">{t.uploadCsv}</span>
+              <span className="text-[12px]">{t.dragOrDropCsv}</span>
             </button>
             <input
               ref={fileRef}
@@ -144,10 +145,10 @@ export default function KampanyaGonderici() {
               <CheckCircle size={18} weight="fill" style={{ color: "var(--green)" }} />
               <div>
                 <p className="text-[13px] font-semibold" style={{ color: "var(--green)" }}>
-                  {leads.length} valid leads loaded
+                  {leads.length} {t.validLeadsLoaded}
                 </p>
                 <p className="text-[11px] mt-0.5" style={{ color: "var(--text-3)" }}>
-                  Örnek: {leads[0]?.business_name} — {leads[0]?.email}
+                  {t.exampleLabel} {leads[0]?.business_name} — {leads[0]?.email}
                 </p>
               </div>
             </div>
@@ -168,12 +169,12 @@ export default function KampanyaGonderici() {
         style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}
       >
         <p className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: "var(--text-3)", letterSpacing: "0.06em" }}>
-          2. Campaign Settings
+          {t.stepCampaignSettings}
         </p>
 
         <div>
           <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
-            Subject Line
+            {t.subjectLine}
           </label>
           <input
             value={subject}

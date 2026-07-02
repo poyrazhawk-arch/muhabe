@@ -1,61 +1,99 @@
 /**
- * UK / International Tax Filing Calendar
- * Covers common deadlines for UK, Australia, Canada, New Zealand, Ireland.
+ * Türk Vergi / Beyanname Takvimi (GİB)
+ * ------------------------------------
+ * Muhasebecinin her ay / dönem takip etmesi gereken beyanname ve ödeme
+ * son tarihlerini üretir. Tarihler standart GİB takvimine göredir; resmî
+ * tatil kaydırmaları GİB tarafından ilan edildiğinde değişebilir.
+ *
+ * Aylık yükümlülükler bir sonraki ayda doğar (örn. Haziran KDV'si Temmuz'da).
+ * Bu fonksiyon `year` içinde SON TARİHİ düşen kalemleri üretir; böylece
+ * takvim görünümü o yılın 12 ayının tamamını gösterir.
  */
 
+export type TaxLocale = "tr" | "en";
+
 export interface TaxItem {
+  /** Renk/kimlik eşlemesi için dilden bağımsız sabit kod */
+  code: string;
+  /** Kullanıcıya gösterilen ad (locale'e göre) */
   beyanname_turu: string;
   due_date: string; // YYYY-MM-DD
   period_year: number;
   period_month?: number;
 }
 
-/** Generate filing deadlines for a given year */
-export function generateTaxCalendar(year: number): TaxItem[] {
+const LABELS: Record<string, Record<TaxLocale, string>> = {
+  kdv:       { tr: "KDV Beyannamesi",                       en: "VAT Return" },
+  muhtasar:  { tr: "Muhtasar ve Prim Hizmet Beyannamesi",   en: "Withholding & Payroll Declaration" },
+  sgk_prim:  { tr: "SGK Prim Ödemesi",                      en: "Social Security Premium Payment" },
+  ba_bs:     { tr: "Form Ba-Bs",                            en: "Ba-Bs Forms" },
+  gecici:    { tr: "Geçici Vergi Beyannamesi",              en: "Advance Tax Return" },
+  yillik_gv: { tr: "Yıllık Gelir Vergisi Beyannamesi",      en: "Annual Income Tax Return" },
+  kurumlar:  { tr: "Kurumlar Vergisi Beyannamesi",          en: "Corporate Tax Return" },
+};
+
+const pad = (n: number) => String(n).padStart(2, "0");
+/** Ayın son günü (1-tabanlı ay) */
+const lastDay = (year: number, month: number) => new Date(year, month, 0).getDate();
+
+/**
+ * Verilen yıl için Türk beyanname/ödeme son tarihlerini üretir.
+ * @param year   Takvim yılı (son tarihlerin düştüğü yıl)
+ * @param locale Etiket dili — varsayılan "tr"
+ */
+export function generateTaxCalendar(year: number, locale: TaxLocale = "tr"): TaxItem[] {
   const items: TaxItem[] = [];
+  const label = (code: string) => LABELS[code][locale];
 
-  for (let month = 1; month <= 12; month++) {
-    const m  = String(month).padStart(2, "0");
-    const nm = String(month === 12 ? 1 : month + 1).padStart(2, "0");
-    const ny = month === 12 ? year + 1 : year;
+  // ── Aylık yükümlülükler ───────────────────────────────────────────
+  // dueMonth = son tarihin düştüğü ay; dönem bir önceki aydır.
+  for (let dueMonth = 1; dueMonth <= 12; dueMonth++) {
+    const periodMonth = dueMonth === 1 ? 12 : dueMonth - 1;
+    const periodYear  = dueMonth === 1 ? year - 1 : year;
+    const dm = pad(dueMonth);
 
-    // PAYE / Payroll Filing — 19th of each month
+    // KDV Beyannamesi — izleyen ayın 28'i
     items.push({
-      beyanname_turu: "PAYE / Payroll Filing",
-      due_date: `${year}-${m}-19`,
-      period_year: year,
-      period_month: month,
+      code: "kdv", beyanname_turu: label("kdv"),
+      due_date: `${year}-${dm}-28`, period_year: periodYear, period_month: periodMonth,
     });
 
-    // VAT Return — 7th of the following month (monthly filers)
+    // Muhtasar ve Prim Hizmet Beyannamesi — izleyen ayın 26'sı
     items.push({
-      beyanname_turu: "VAT Return",
-      due_date: `${ny}-${nm}-07`,
-      period_year: year,
-      period_month: month,
+      code: "muhtasar", beyanname_turu: label("muhtasar"),
+      due_date: `${year}-${dm}-26`, period_year: periodYear, period_month: periodMonth,
+    });
+
+    // SGK Prim Ödemesi — izleyen ayın son günü
+    items.push({
+      code: "sgk_prim", beyanname_turu: label("sgk_prim"),
+      due_date: `${year}-${dm}-${pad(lastDay(year, dueMonth))}`, period_year: periodYear, period_month: periodMonth,
+    });
+
+    // Form Ba-Bs — izleyen ayın son günü
+    items.push({
+      code: "ba_bs", beyanname_turu: label("ba_bs"),
+      due_date: `${year}-${dm}-${pad(lastDay(year, dueMonth))}`, period_year: periodYear, period_month: periodMonth,
     });
   }
 
-  // Quarterly Corporation Tax Instalments
+  // ── Geçici Vergi (3 dönem — 4. dönem 2016'da kaldırıldı) ───────────
   items.push(
-    { beyanname_turu: "Q1 Corporation Tax",  due_date: `${year}-04-01`, period_year: year, period_month: 3  },
-    { beyanname_turu: "Q2 Corporation Tax",  due_date: `${year}-07-01`, period_year: year, period_month: 6  },
-    { beyanname_turu: "Q3 Corporation Tax",  due_date: `${year}-10-01`, period_year: year, period_month: 9  },
-    { beyanname_turu: "Q4 Corporation Tax",  due_date: `${year}-01-01`, period_year: year, period_month: 12 },
+    { code: "gecici", beyanname_turu: label("gecici"), due_date: `${year}-05-17`, period_year: year, period_month: 3 },
+    { code: "gecici", beyanname_turu: label("gecici"), due_date: `${year}-08-17`, period_year: year, period_month: 6 },
+    { code: "gecici", beyanname_turu: label("gecici"), due_date: `${year}-11-17`, period_year: year, period_month: 9 },
   );
 
-  // Annual filings
+  // ── Yıllık beyannameler (bir önceki yılın dönemi için) ─────────────
   items.push(
-    { beyanname_turu: "Self Assessment (online)", due_date: `${year + 1}-01-31`, period_year: year },
-    { beyanname_turu: "Corporation Tax Return",   due_date: `${year + 1}-12-31`, period_year: year },
-    { beyanname_turu: "Company Accounts Filing",  due_date: `${year + 1}-09-30`, period_year: year },
-    { beyanname_turu: "Confirmation Statement",   due_date: `${year + 1}-03-31`, period_year: year },
+    { code: "yillik_gv", beyanname_turu: label("yillik_gv"), due_date: `${year}-03-31`, period_year: year - 1 },
+    { code: "kurumlar",  beyanname_turu: label("kurumlar"),  due_date: `${year}-04-30`, period_year: year - 1 },
   );
 
-  return items;
+  return items.sort((a, b) => a.due_date.localeCompare(b.due_date));
 }
 
-/** Return items due within the next N days */
+/** Önümüzdeki N gün içindeki son tarihleri döndürür */
 export function getUpcomingDeadlines(items: TaxItem[], days = 30): TaxItem[] {
   const now = new Date();
   const end = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);

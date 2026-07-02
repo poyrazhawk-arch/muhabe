@@ -4,15 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
+import { useDict } from "@/lib/i18n/LocaleContext";
 import { EnvelopeSimple, Lock, Eye, EyeSlash, User, ArrowRight, Buildings, Notebook, CheckCircle } from "@phosphor-icons/react";
 
 const EASE: [number,number,number,number] = [0.22, 1, 0.36, 1];
-
-const PERKS = [
-  { Icon: CheckCircle, text: "HMRC deadline reminders, set automatically" },
-  { Icon: CheckCircle, text: "Document requests sent straight from the app" },
-  { Icon: CheckCircle, text: "See at a glance who hasn't paid"             },
-];
 
 export default function KayitPage() {
   const [form, setForm] = useState({ fullName: "", email: "", password: "", officeName: "" });
@@ -22,6 +17,13 @@ export default function KayitPage() {
 
   const supabase = createClient();
   const router   = useRouter();
+  const t = useDict().auth;
+
+  const PERKS = [
+    { Icon: CheckCircle, text: t.perk1 },
+    { Icon: CheckCircle, text: t.perk2 },
+    { Icon: CheckCircle, text: t.perk3 },
+  ];
 
   function set(field: string) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -30,7 +32,7 @@ export default function KayitPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (form.password.length < 8) { setError("Password must be at least 8 characters."); return; }
+    if (form.password.length < 8) { setError(t.passwordMin8); return; }
     setLoading(true);
     setError("");
 
@@ -47,7 +49,7 @@ export default function KayitPage() {
 
     if (!res.ok) {
       const json = await res.json();
-      setError(json.error ?? "An error occurred.");
+      setError(json.error ?? t.genericError);
       setLoading(false);
       return;
     }
@@ -68,9 +70,9 @@ export default function KayitPage() {
   }
 
   const fields = [
-    { id: "fullName",   label: "Full name",    Icon: User,            type: "text",     placeholder: "Alex Johnson",               autoComplete: "name"         },
-    { id: "officeName", label: "Office name",  Icon: Buildings,       type: "text",     placeholder: "Johnson & Associates CPA",    autoComplete: "organization", optional: true },
-    { id: "email",      label: "Email address",Icon: EnvelopeSimple,  type: "email",    placeholder: "you@firm.com",               autoComplete: "email"        },
+    { id: "fullName",   label: t.fullName,    Icon: User,            type: "text",     placeholder: t.fullNamePlaceholder,    autoComplete: "name"         },
+    { id: "officeName", label: t.officeName,  Icon: Buildings,       type: "text",     placeholder: t.officeNamePlaceholder,  autoComplete: "organization", optional: true },
+    { id: "email",      label: t.email,       Icon: EnvelopeSimple,  type: "email",    placeholder: t.emailPlaceholder,       autoComplete: "email"        },
   ] as const;
 
   return (
@@ -117,7 +119,7 @@ export default function KayitPage() {
 
           {/* Headline */}
           <div className="flex-1 flex flex-col justify-center">
-            {["Stop tracking", "clients in", "spreadsheets."].map((line, i) => (
+            {[t.signupHero1, t.signupHero2, t.signupHero3].map((line, i) => (
               <motion.span
                 key={line}
                 initial={{ opacity: 0, x: -20 }}
@@ -137,7 +139,7 @@ export default function KayitPage() {
               className="text-[14px] leading-relaxed mt-5 max-w-[340px]"
               style={{ color: "#4a6480" }}
             >
-              14 days free, no card needed. Your whole practice in one tab.
+              {t.signupHeroSub}
             </motion.p>
 
             {/* Perks list */}
@@ -167,9 +169,9 @@ export default function KayitPage() {
             style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
           >
             {[
-              { val: "14 days", label: "Free trial"   },
-              { val: "< 2 min", label: "Setup time"   },
-              { val: "EU",      label: "Data residency" },
+              { val: "14 days", label: t.metricTrial },
+              { val: "< 2 min", label: t.metricSetup },
+              { val: "EU",      label: t.metricData  },
             ].map(({ val, label }, i) => (
               <motion.div
                 key={label}
@@ -210,7 +212,7 @@ export default function KayitPage() {
             className="text-[24px] font-bold tracking-[-0.035em] mb-1"
             style={{ color: "var(--text-1)" }}
           >
-            Create account
+            {t.createAccountTitle}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0 }}
@@ -219,8 +221,8 @@ export default function KayitPage() {
             className="text-[13px] mb-7"
             style={{ color: "var(--text-3)" }}
           >
-            Already have an account?{" "}
-            <a href="/auth/giris" className="font-medium" style={{ color: "var(--accent)" }}>Sign in</a>
+            {t.haveAccount}{" "}
+            <a href="/auth/giris" className="font-medium" style={{ color: "var(--accent)" }}>{t.signInLink}</a>
           </motion.p>
 
           <form onSubmit={handleSubmit} className="space-y-3.5">
@@ -234,7 +236,7 @@ export default function KayitPage() {
                 <label htmlFor={id} className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
                   {label}{" "}
                   {"optional" in rest && rest.optional && (
-                    <span style={{ color: "var(--text-3)", fontWeight: 400 }}>(optional)</span>
+                    <span style={{ color: "var(--text-3)", fontWeight: 400 }}>{t.optional}</span>
                   )}
                 </label>
                 <div className="relative">
@@ -258,7 +260,7 @@ export default function KayitPage() {
               transition={{ duration: 0.4, delay: 0.15 + fields.length * 0.07, ease: EASE }}
             >
               <label htmlFor="password" className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
-                Password
+                {t.password}
               </label>
               <div className="relative">
                 <Lock size={14} style={{ color: "var(--text-3)", position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)" }} />
@@ -266,7 +268,7 @@ export default function KayitPage() {
                   id="password" type={showPw ? "text" : "password"}
                   required minLength={8} autoComplete="new-password"
                   value={form.password} onChange={set("password")}
-                  placeholder="Min. 8 characters"
+                  placeholder={t.passwordPlaceholder}
                   className="input-base" style={{ paddingLeft: "34px", paddingRight: "40px" }}
                 />
                 <button type="button" onClick={() => setShowPw(v => !v)}
@@ -282,7 +284,7 @@ export default function KayitPage() {
                   className="text-[11px] mt-1"
                   style={{ color: form.password.length < 8 ? "var(--red)" : "#16a34a" }}
                 >
-                  {form.password.length < 8 ? `${8 - form.password.length} more characters needed` : "Strong password"}
+                  {form.password.length < 8 ? `${8 - form.password.length} ${t.passwordMinChars}` : t.strongPassword}
                 </motion.p>
               )}
             </motion.div>
@@ -314,7 +316,7 @@ export default function KayitPage() {
                 boxShadow: "0 1px 3px rgba(37,99,235,0.35), 0 4px 16px rgba(37,99,235,0.18), inset 0 1px 0 rgba(255,255,255,0.12)",
               }}
             >
-              {loading ? "Creating account…" : <> Create account <ArrowRight size={14} weight="bold" /> </>}
+              {loading ? t.creatingAccount : <> {t.createAccount} <ArrowRight size={14} weight="bold" /> </>}
             </motion.button>
           </form>
 
@@ -325,8 +327,8 @@ export default function KayitPage() {
             className="text-[11px] mt-6 text-center"
             style={{ color: "var(--text-3)" }}
           >
-            By signing up you agree to our{" "}
-            <span className="underline underline-offset-2 cursor-pointer">terms of service</span>.
+            {t.signupTerms}{" "}
+            <span className="underline underline-offset-2 cursor-pointer">{t.termsLink}</span>.
           </motion.p>
         </motion.div>
       </div>

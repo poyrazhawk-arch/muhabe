@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { format, formatDistanceToNow } from "date-fns";
-import { enUS } from "date-fns/locale";
+import { enUS, tr } from "date-fns/locale";
 import { ChatText, Phone, Envelope, FileText, Plus, X, Check } from "@phosphor-icons/react";
+import { useDict, useLocale } from "@/lib/i18n/LocaleContext";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -16,14 +17,16 @@ type Comm = {
   logged_at: string;
 };
 
-const CH = {
-  note:   { label: "Note",   Icon: ChatText, dot: "#6d28d9" },
-  email:  { label: "Email",  Icon: Envelope, dot: "#2563eb" },
-  call:   { label: "Call",   Icon: Phone,    dot: "#16a34a" },
-  letter: { label: "Letter", Icon: FileText, dot: "#d97706" },
-} as const;
-
 export default function CommsLog({ clientId, initial }: { clientId: string; initial: Comm[] }) {
+  const t = useDict().musteriler;
+  const locale = useLocale();
+  const dfLocale = locale === "tr" ? tr : enUS;
+  const CH = {
+    note:   { label: t.chNote,   Icon: ChatText, dot: "#6d28d9" },
+    email:  { label: t.chEmail,  Icon: Envelope, dot: "#2563eb" },
+    call:   { label: t.chCall,   Icon: Phone,    dot: "#16a34a" },
+    letter: { label: t.chLetter, Icon: FileText, dot: "#d97706" },
+  } as const;
   const [comms,   setComms]   = useState<Comm[]>(initial);
   const [open,    setOpen]    = useState(false);
   const [channel, setChannel] = useState<Comm["channel"]>("note");
@@ -60,7 +63,7 @@ export default function CommsLog({ clientId, initial }: { clientId: string; init
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-3)" }}>
-            Comms
+            {t.comms}
           </p>
           {comms.length > 0 && (
             <span style={{
@@ -89,7 +92,7 @@ export default function CommsLog({ clientId, initial }: { clientId: string; init
               : <motion.span key="p" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.12 }}><Plus size={11} weight="bold" /></motion.span>
             }
           </AnimatePresence>
-          {open ? "Cancel" : "Log"}
+          {open ? t.cancel : t.log}
         </button>
       </div>
 
@@ -146,7 +149,7 @@ export default function CommsLog({ clientId, initial }: { clientId: string; init
                 type="text" value={subject}
                 onChange={e => setSubject(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter" && subject.trim()) save(); }}
-                placeholder="Subject / summary"
+                placeholder={t.subjectSummaryPlaceholder}
                 className="input-base"
                 style={{ fontSize: 13, padding: "8px 12px", background: "var(--surface)" }}
               />
@@ -160,7 +163,7 @@ export default function CommsLog({ clientId, initial }: { clientId: string; init
                 />
                 <textarea
                   value={body} onChange={e => setBody(e.target.value)}
-                  placeholder="Details (optional)"
+                  placeholder={t.detailsOptionalPlaceholder}
                   rows={2} className="input-base"
                   style={{ fontSize: 12.5, resize: "none", padding: "8px 12px", background: "var(--surface)", flex: 1 }}
                 />
@@ -180,7 +183,7 @@ export default function CommsLog({ clientId, initial }: { clientId: string; init
                   }}
                 >
                   <Check size={12} weight="bold" />
-                  {saving ? "Saving…" : "Save log"}
+                  {saving ? t.saving : t.saveLog}
                 </button>
               </div>
             </div>
@@ -191,7 +194,7 @@ export default function CommsLog({ clientId, initial }: { clientId: string; init
       {/* Log entries */}
       {comms.length === 0 && !open ? (
         <p style={{ padding: "28px 16px", textAlign: "center", fontSize: 12.5, color: "var(--text-3)" }}>
-          No communications logged
+          {t.noCommunicationsLogged}
         </p>
       ) : (
         <div style={{ position: "relative" }}>
@@ -205,7 +208,7 @@ export default function CommsLog({ clientId, initial }: { clientId: string; init
           {comms.map((comm, i) => {
             const c = CH[comm.channel] ?? CH.note;
             const d = new Date(comm.logged_at);
-            const ago = formatDistanceToNow(d, { addSuffix: true, locale: enUS });
+            const ago = formatDistanceToNow(d, { addSuffix: true, locale: dfLocale });
             return (
               <motion.div
                 key={comm.id}
@@ -236,7 +239,7 @@ export default function CommsLog({ clientId, initial }: { clientId: string; init
                     </p>
                     <time
                       dateTime={comm.logged_at}
-                      title={format(d, "d MMM yyyy, HH:mm", { locale: enUS })}
+                      title={format(d, "d MMM yyyy, HH:mm", { locale: dfLocale })}
                       style={{ fontSize: 11, color: "var(--text-3)", flexShrink: 0, whiteSpace: "nowrap" }}
                     >
                       {ago}

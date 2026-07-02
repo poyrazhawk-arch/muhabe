@@ -1,20 +1,26 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { format, isPast, isToday } from "date-fns";
-import { enUS } from "date-fns/locale";
+import { enUS, tr } from "date-fns/locale";
 import { ClipboardText, Plus } from "@phosphor-icons/react/dist/ssr";
 import GorevTamamlaButton from "./GorevTamamlaButton";
+import { getLocale } from "@/lib/i18n/server";
+import { getDict } from "@/lib/i18n/dictionaries";
 
 const PRIORITY_ORDER: Record<string, number> = { critical: 0, high: 1, normal: 2, low: 3 };
 
-const P_CFG: Record<string, { dot: string; label: string }> = {
-  critical: { dot: "#dc2626", label: "Critical" },
-  high:     { dot: "#ea580c", label: "High"     },
-  normal:   { dot: "#6b7280", label: "Normal"   },
-  low:      { dot: "#9ca3af", label: "Low"       },
-};
-
 export default async function GorevlerPage() {
+  const locale = await getLocale();
+  const t = getDict(locale).gorevler;
+  const dateLocale = locale === "tr" ? tr : enUS;
+
+  const P_CFG: Record<string, { dot: string; label: string }> = {
+    critical: { dot: "#dc2626", label: t.priorityCritical },
+    high:     { dot: "#ea580c", label: t.priorityHigh     },
+    normal:   { dot: "#6b7280", label: t.priorityNormal   },
+    low:      { dot: "#9ca3af", label: t.priorityLow       },
+  };
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const { data: accountant } = await supabase
@@ -47,7 +53,7 @@ export default async function GorevlerPage() {
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
         <div>
           <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: 6 }}>
-            Tasks
+            {t.tasks}
           </p>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <span style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.055em", color: "var(--text-1)", lineHeight: 1 }}>
@@ -59,7 +65,7 @@ export default async function GorevlerPage() {
                   fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 20,
                   background: "var(--red-bg)", color: "var(--red)", border: "1px solid var(--red-lt)",
                 }}>
-                  {geciken} overdue
+                  {geciken} {t.overdue}
                 </span>
               )}
               {bugun > 0 && (
@@ -67,7 +73,7 @@ export default async function GorevlerPage() {
                   fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 20,
                   background: "var(--amber-bg)", color: "var(--amber)", border: "1px solid var(--amber-lt)",
                 }}>
-                  {bugun} today
+                  {bugun} {t.today}
                 </span>
               )}
               {critical > 0 && (
@@ -75,7 +81,7 @@ export default async function GorevlerPage() {
                   fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 20,
                   background: "#fff1f2", color: "#dc2626", border: "1px solid #fecaca",
                 }}>
-                  {critical} critical
+                  {critical} {t.critical}
                 </span>
               )}
             </div>
@@ -87,7 +93,7 @@ export default async function GorevlerPage() {
           style={{ alignSelf: "flex-end" }}
         >
           <Plus size={13} weight="bold" />
-          New task
+          {t.newTask}
         </Link>
       </div>
 
@@ -105,18 +111,18 @@ export default async function GorevlerPage() {
             }}>
               <ClipboardText size={20} style={{ color: "var(--text-3)" }} weight="duotone" />
             </div>
-            <p style={{ fontSize: 13.5, fontWeight: 600, color: "var(--text-1)" }}>No active tasks</p>
-            <p style={{ fontSize: 12.5, color: "var(--text-3)", marginTop: 4 }}>Add a task to start tracking</p>
+            <p style={{ fontSize: 13.5, fontWeight: 600, color: "var(--text-1)" }}>{t.noActiveTasks}</p>
+            <p style={{ fontSize: 12.5, color: "var(--text-3)", marginTop: 4 }}>{t.addTaskToStart}</p>
           </div>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--border)" }}>
                 {[
-                  { label: "Task",      w: "auto" },
-                  { label: "Client",    w: 160 },
-                  { label: "Due",       w: 130 },
-                  { label: "Priority",  w: 100 },
+                  { label: t.colTask,      w: "auto" },
+                  { label: t.colClient,    w: 160 },
+                  { label: t.colDue,       w: 130 },
+                  { label: t.colPriority,  w: 100 },
                   { label: "",          w: 110 },
                 ].map((col, i) => (
                   <th key={i}
@@ -193,14 +199,14 @@ export default async function GorevlerPage() {
                           color: overdue ? "#dc2626" : todayT ? "#d97706" : "var(--text-3)",
                           fontVariantNumeric: "tabular-nums",
                         }}>
-                          {format(due, "d MMM", { locale: enUS })}
+                          {format(due, "d MMM", { locale: dateLocale })}
                         </span>
                         {overdue && (
                           <span style={{
                             fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
                             background: "var(--red-bg)", color: "var(--red)", letterSpacing: "0.02em",
                           }}>
-                            OVERDUE
+                            {t.overdueBadge}
                           </span>
                         )}
                         {todayT && (
@@ -208,7 +214,7 @@ export default async function GorevlerPage() {
                             fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
                             background: "var(--amber-bg)", color: "var(--amber)", letterSpacing: "0.02em",
                           }}>
-                            TODAY
+                            {t.todayBadge}
                           </span>
                         )}
                       </div>

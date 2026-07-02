@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
+import { useDict } from "@/lib/i18n/LocaleContext";
 import { EnvelopeSimple, Lock, Eye, EyeSlash, ArrowRight, Notebook } from "@phosphor-icons/react";
 
 const EASE: [number,number,number,number] = [0.22, 1, 0.36, 1];
@@ -17,6 +18,7 @@ export default function GirisPage() {
 
   const supabase = createClient();
   const router   = useRouter();
+  const t = useDict().auth;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,9 +27,9 @@ export default function GirisPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       if (error.message.toLowerCase().includes("email not confirmed")) {
-        setError("Your email is not confirmed. Check your inbox.");
+        setError(t.errEmailNotConfirmed);
       } else if (error.message.toLowerCase().includes("invalid")) {
-        setError("Invalid email or password.");
+        setError(t.errInvalidCreds);
       } else {
         setError(error.message);
       }
@@ -86,7 +88,7 @@ export default function GirisPage() {
 
           {/* Headline */}
           <div className="flex-1 flex flex-col justify-center">
-            {["Your clients.", "Your deadlines.", "One dashboard."].map((line, i) => (
+            {[t.heroLine1, t.heroLine2, t.heroLine3].map((line, i) => (
               <motion.span
                 key={line}
                 initial={{ opacity: 0, x: -20 }}
@@ -105,7 +107,7 @@ export default function GirisPage() {
               className="text-[14px] leading-relaxed mt-5 max-w-[340px]"
               style={{ color: "#4a6480" }}
             >
-              HMRC filings, document requests, and overdue invoices. No more switching tabs.
+              {t.heroSub}
             </motion.p>
 
             {/* Floating glass card — app preview hint */}
@@ -122,7 +124,7 @@ export default function GirisPage() {
               }}
             >
               <p className="text-[10px] font-semibold uppercase tracking-widest mb-3" style={{ color: "#3b5070" }}>
-                Client overview
+                {t.clientOverview}
               </p>
               {[
                 { name: "Harper & Co.", rag: "green",  label: "OK"       },
@@ -157,7 +159,7 @@ export default function GirisPage() {
             className="text-[11px] pt-6"
             style={{ borderTop: "1px solid rgba(255,255,255,0.06)", color: "#2d4861" }}
           >
-            GDPR-compliant · EU data residency · SOC 2 ready
+            {t.compliance}
           </motion.p>
         </div>
       </div>
@@ -187,7 +189,7 @@ export default function GirisPage() {
             className="text-[24px] font-bold tracking-[-0.035em] mb-1"
             style={{ color: "var(--text-1)" }}
           >
-            Sign in
+            {t.signInTitle}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0 }}
@@ -196,8 +198,8 @@ export default function GirisPage() {
             className="text-[13px] mb-7"
             style={{ color: "var(--text-3)" }}
           >
-            No account yet?{" "}
-            <a href="/auth/kayit" className="font-medium" style={{ color: "var(--accent)" }}>Create one</a>
+            {t.noAccount}{" "}
+            <a href="/auth/kayit" className="font-medium" style={{ color: "var(--accent)" }}>{t.createOne}</a>
           </motion.p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -208,14 +210,14 @@ export default function GirisPage() {
               transition={{ duration: 0.4, delay: 0.15, ease: EASE }}
             >
               <label htmlFor="email" className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
-                Email address
+                {t.email}
               </label>
               <div className="relative">
                 <EnvelopeSimple size={14} style={{ color: "var(--text-3)", position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)" }} />
                 <input
                   id="email" type="email" required autoComplete="email"
                   value={email} onChange={e => setEmail(e.target.value)}
-                  placeholder="you@firm.com"
+                  placeholder={t.emailPlaceholder}
                   className="input-base" style={{ paddingLeft: "34px" }}
                 />
               </div>
@@ -229,10 +231,10 @@ export default function GirisPage() {
             >
               <div className="flex items-center justify-between mb-1.5">
                 <label htmlFor="password" className="text-[12px] font-medium" style={{ color: "var(--text-2)" }}>
-                  Password
+                  {t.password}
                 </label>
                 <a href="/auth/sifremi-unuttum" className="text-[11px] font-medium" style={{ color: "var(--accent)" }}>
-                  Forgot password?
+                  {t.forgotPassword}
                 </a>
               </div>
               <div className="relative">
@@ -275,7 +277,7 @@ export default function GirisPage() {
                 boxShadow: "0 1px 3px rgba(37,99,235,0.35), 0 4px 16px rgba(37,99,235,0.18), inset 0 1px 0 rgba(255,255,255,0.12)",
               }}
             >
-              {loading ? "Signing in…" : <> Sign in <ArrowRight size={14} weight="bold" /> </>}
+              {loading ? t.signingIn : <> {t.signIn} <ArrowRight size={14} weight="bold" /> </>}
             </motion.button>
           </form>
 
@@ -286,8 +288,8 @@ export default function GirisPage() {
             className="text-[11px] mt-6 text-center"
             style={{ color: "var(--text-3)" }}
           >
-            By signing in you agree to our{" "}
-            <span className="underline underline-offset-2 cursor-pointer">terms of service</span>.
+            {t.terms}{" "}
+            <span className="underline underline-offset-2 cursor-pointer">{t.termsLink}</span>.
           </motion.p>
         </motion.div>
       </div>

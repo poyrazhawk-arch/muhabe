@@ -1,30 +1,31 @@
 "use client";
 import { useState } from "react";
+import { useDict } from "@/lib/i18n/LocaleContext";
 
 type Client = { id: string; full_name: string; email?: string };
 
-const TEMPLATES = [
-  {
-    key: "document_reminder",
-    label: "Document Reminder",
-    subject: "Document Submission Reminder",
-    message: "Dear client,\n\nWe have not yet received your required documents for this month. Please upload your invoices, bank statements, and other documents as soon as possible.\n\nThank you.",
-  },
-  {
-    key: "filing_deadline",
-    label: "Filing Deadline",
-    subject: "Tax Filing Deadline Approaching",
-    message: "Dear client,\n\nThe tax filing deadline for this month is approaching. If you have any outstanding documents, please send them urgently.\n\nBest regards.",
-  },
-  {
-    key: "custom",
-    label: "Custom Message",
-    subject: "",
-    message: "",
-  },
-];
-
 export default function BroadcastModal({ clients }: { clients: Client[] }) {
+  const t = useDict().musteriler;
+  const TEMPLATES = [
+    {
+      key: "document_reminder",
+      label: t.templateDocumentReminder,
+      subject: t.subjectDocumentReminder,
+      message: t.messageDocumentReminder,
+    },
+    {
+      key: "filing_deadline",
+      label: t.templateFilingDeadline,
+      subject: t.subjectFilingDeadline,
+      message: t.messageFilingDeadline,
+    },
+    {
+      key: "custom",
+      label: t.templateCustom,
+      subject: "",
+      message: "",
+    },
+  ];
   const [open, setOpen]             = useState(false);
   const [loading, setLoading]       = useState(false);
   const [result, setResult]         = useState<{ sent: number; failed: number } | null>(null);
@@ -82,7 +83,7 @@ export default function BroadcastModal({ clients }: { clients: Client[] }) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
             d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
         </svg>
-        Bulk Email
+        {t.bulkEmail}
       </button>
 
       {open && (
@@ -92,8 +93,8 @@ export default function BroadcastModal({ clients }: { clients: Client[] }) {
             style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
 
             <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border)" }}>
-              <h2 className="text-[15px] font-semibold" style={{ color: "var(--text-1)" }}>Send Bulk Email</h2>
-              <button onClick={() => setOpen(false)} className="text-[13px]" style={{ color: "var(--text-3)" }}>Close</button>
+              <h2 className="text-[15px] font-semibold" style={{ color: "var(--text-1)" }}>{t.sendBulkEmail}</h2>
+              <button onClick={() => setOpen(false)} className="text-[13px]" style={{ color: "var(--text-3)" }}>{t.close}</button>
             </div>
 
             {result ? (
@@ -104,13 +105,13 @@ export default function BroadcastModal({ clients }: { clients: Client[] }) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>
                   </svg>
                 </div>
-                <p className="text-[16px] font-semibold" style={{ color: "var(--text-1)" }}>Sent!</p>
+                <p className="text-[16px] font-semibold" style={{ color: "var(--text-1)" }}>{t.sent}</p>
                 <p className="text-[13px] mt-1" style={{ color: "var(--text-3)" }}>
-                  {result.sent} emails sent{result.failed > 0 ? `, ${result.failed} failed` : ""}
+                  {t.emailsSent.replace("{count}", String(result.sent)).replace("{failedSuffix}", result.failed > 0 ? t.failedSuffix.replace("{count}", String(result.failed)) : "")}
                 </p>
                 <button onClick={() => setOpen(false)} className="mt-4 px-4 py-2 rounded-lg text-[13px] font-semibold text-white"
                   style={{ background: "var(--accent)" }}>
-                  Close
+                  {t.close}
                 </button>
               </div>
             ) : (
@@ -122,7 +123,7 @@ export default function BroadcastModal({ clients }: { clients: Client[] }) {
                       {selectedIds.size} / {clients.length}
                     </span>
                     <button onClick={toggleAll} className="text-[12px] font-medium" style={{ color: "var(--accent)" }}>
-                      {selectedIds.size === clients.length ? "Deselect all" : "Select all"}
+                      {selectedIds.size === clients.length ? t.deselectAll : t.selectAll}
                     </button>
                   </div>
                   <div className="flex-1 overflow-auto p-2 space-y-0.5">
@@ -133,7 +134,7 @@ export default function BroadcastModal({ clients }: { clients: Client[] }) {
                           className="w-3.5 h-3.5 accent-blue-600"/>
                         <div className="min-w-0">
                           <p className="text-[12px] font-medium truncate" style={{ color: "var(--text-1)" }}>{c.full_name}</p>
-                          {!c.email && <p className="text-[10px]" style={{ color: "#ef4444" }}>No email</p>}
+                          {!c.email && <p className="text-[10px]" style={{ color: "#ef4444" }}>{t.noEmail}</p>}
                         </div>
                       </label>
                     ))}
@@ -143,27 +144,27 @@ export default function BroadcastModal({ clients }: { clients: Client[] }) {
                 {/* Sağ — içerik */}
                 <div className="flex-1 flex flex-col overflow-auto p-5 space-y-4">
                   <div>
-                    <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Template</label>
+                    <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>{t.templateLabel}</label>
                     <div className="flex gap-2 flex-wrap">
-                      {TEMPLATES.map(t => (
-                        <button key={t.key} onClick={() => selectTemplate(t.key)}
+                      {TEMPLATES.map(tpl => (
+                        <button key={tpl.key} onClick={() => selectTemplate(tpl.key)}
                           className="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors"
-                          style={template === t.key
+                          style={template === tpl.key
                             ? { background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe" }
                             : { background: "var(--bg)", color: "var(--text-2)", border: "1px solid var(--border)" }}>
-                          {t.label}
+                          {tpl.label}
                         </button>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Subject</label>
+                    <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>{t.subjectLabel}</label>
                     <input value={subject} onChange={e => setSubject(e.target.value)}
                       className="w-full px-3 py-2 rounded-lg text-[13px] focus:outline-none"
                       style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text-1)" }}/>
                   </div>
                   <div className="flex-1">
-                    <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Message</label>
+                    <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>{t.messageLabel}</label>
                     <textarea value={message} onChange={e => setMessage(e.target.value)} rows={7}
                       className="w-full px-3 py-2 rounded-lg text-[13px] focus:outline-none resize-none"
                       style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text-1)" }}/>
@@ -171,7 +172,7 @@ export default function BroadcastModal({ clients }: { clients: Client[] }) {
                   <button onClick={handleSend} disabled={loading || selectedIds.size === 0 || !subject || !message}
                     className="w-full py-2.5 rounded-lg text-[13px] font-semibold text-white transition-all disabled:opacity-50 active:scale-[0.99]"
                     style={{ background: "var(--accent)" }}>
-                    {loading ? "Sending…" : `Send to ${emailCount} client${emailCount !== 1 ? "s" : ""}`}
+                    {loading ? t.sending : t.sendToClients.replace("{count}", String(emailCount)).replace("{plural}", emailCount !== 1 ? "s" : "")}
                   </button>
                 </div>
               </div>

@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useDict } from "@/lib/i18n/LocaleContext";
 
 export default function BelgeOnayButton({ belgeId }: { belgeId: string }) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const t = useDict().belgeler;
 
   async function handleOnayla() {
     setLoading(true);
@@ -24,7 +26,7 @@ export default function BelgeOnayButton({ belgeId }: { belgeId: string }) {
       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/>
       </svg>
-      {loading ? "..." : "Onayla"}
+      {loading ? t.approving : t.approve}
     </button>
   );
 }

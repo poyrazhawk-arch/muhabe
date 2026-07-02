@@ -15,18 +15,9 @@ import {
   Notebook,
 } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
+import { useDict } from "@/lib/i18n/LocaleContext";
 import type { Accountant } from "@/types";
 import { cn } from "@/lib/utils/cn";
-
-const NAV_ITEMS = [
-  { href: "/dashboard",            label: "Overview",     Icon: HouseSimple   },
-  { href: "/dashboard/musteriler", label: "Clients",      Icon: Users         },
-  { href: "/dashboard/belgeler",   label: "Documents",    Icon: Files         },
-  { href: "/dashboard/gorevler",   label: "Tasks",        Icon: ClipboardText },
-  { href: "/dashboard/takvim",     label: "Tax Calendar", Icon: CalendarCheck },
-  { href: "/dashboard/finans",     label: "Finance",      Icon: Wallet        },
-  { href: "/dashboard/raporlar",   label: "Reports",      Icon: ChartBar      },
-];
 
 const DIVIDER_AFTER = 3;
 
@@ -34,6 +25,17 @@ export default function Sidebar({ accountant }: { accountant: Accountant | null 
   const pathname = usePathname();
   const router   = useRouter();
   const supabase = createClient();
+  const t = useDict().sidebar;
+
+  const NAV_ITEMS = [
+    { href: "/dashboard",            label: t.overview,    Icon: HouseSimple   },
+    { href: "/dashboard/musteriler", label: t.clients,     Icon: Users         },
+    { href: "/dashboard/belgeler",   label: t.documents,   Icon: Files         },
+    { href: "/dashboard/gorevler",   label: t.tasks,       Icon: ClipboardText },
+    { href: "/dashboard/takvim",     label: t.taxCalendar, Icon: CalendarCheck },
+    { href: "/dashboard/finans",     label: t.finance,     Icon: Wallet        },
+    { href: "/dashboard/raporlar",   label: t.reports,     Icon: ChartBar      },
+  ];
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -168,7 +170,7 @@ export default function Sidebar({ accountant }: { accountant: Accountant | null 
               border: "1px solid rgba(255,255,255,0.08)",
             }}
           >
-            {accountant?.full_name ?? "User"}
+            {accountant?.full_name ?? t.user}
           </div>
         </div>
 
@@ -199,7 +201,7 @@ export default function Sidebar({ accountant }: { accountant: Accountant | null 
               border: "1px solid rgba(255,255,255,0.08)",
             }}
           >
-            Sign out
+            {t.signOut}
           </div>
         </div>
       </div>

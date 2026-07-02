@@ -4,10 +4,12 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { Check, X, Hash, TextAlignLeft, CalendarBlank } from "@phosphor-icons/react";
+import { useDict } from "@/lib/i18n/LocaleContext";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export default function GorevTamamlaButton({ gorevId }: { gorevId: string }) {
+  const t = useDict().gorevler;
   const [open,    setOpen]    = useState(false);
   const [ref,     setRef]     = useState("");
   const [notes,   setNotes]   = useState("");
@@ -56,7 +58,7 @@ export default function GorevTamamlaButton({ gorevId }: { gorevId: string }) {
         }}
       >
         <Check size={12} weight="bold" />
-        Complete
+        {t.complete}
       </button>
 
       <AnimatePresence>
@@ -109,10 +111,10 @@ export default function GorevTamamlaButton({ gorevId }: { gorevId: string }) {
                   </div>
                   <div>
                     <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)", letterSpacing: "-0.025em", lineHeight: 1 }}>
-                      Mark as complete
+                      {t.markAsComplete}
                     </p>
                     <p style={{ fontSize: 11, color: "var(--text-3)", marginTop: 2 }}>
-                      Log outcome for your records
+                      {t.logOutcomeForRecords}
                     </p>
                   </div>
                 </div>
@@ -139,7 +141,7 @@ export default function GorevTamamlaButton({ gorevId }: { gorevId: string }) {
                     textTransform: "uppercase", color: "var(--text-3)", marginBottom: 6,
                   }}>
                     <CalendarBlank size={10} />
-                    Completed on
+                    {t.completedOn}
                   </label>
                   <input
                     ref={firstRef}
@@ -159,16 +161,16 @@ export default function GorevTamamlaButton({ gorevId }: { gorevId: string }) {
                     textTransform: "uppercase", color: "var(--text-3)", marginBottom: 6,
                   }}>
                     <Hash size={10} />
-                    Reference ID
+                    {t.referenceId}
                     <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "var(--border)", marginLeft: 2 }}>
-                      — optional
+                      — {t.optional}
                     </span>
                   </label>
                   <input
                     type="text"
                     value={ref}
                     onChange={e => setRef(e.target.value)}
-                    placeholder="e.g. HMRC 1234567890"
+                    placeholder={t.referenceIdPlaceholder}
                     className="input-base"
                     style={{ fontSize: 13, padding: "8px 12px" }}
                   />
@@ -182,15 +184,15 @@ export default function GorevTamamlaButton({ gorevId }: { gorevId: string }) {
                     textTransform: "uppercase", color: "var(--text-3)", marginBottom: 6,
                   }}>
                     <TextAlignLeft size={10} />
-                    Notes
+                    {t.notes}
                     <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "var(--border)", marginLeft: 2 }}>
-                      — optional
+                      — {t.optional}
                     </span>
                   </label>
                   <textarea
                     value={notes}
                     onChange={e => setNotes(e.target.value)}
-                    placeholder="Any relevant notes…"
+                    placeholder={t.notesPlaceholder}
                     rows={3}
                     className="input-base"
                     style={{ fontSize: 13, resize: "none", padding: "8px 12px", lineHeight: 1.55 }}
@@ -217,7 +219,7 @@ export default function GorevTamamlaButton({ gorevId }: { gorevId: string }) {
                     background: "var(--surface-2)", border: "1px solid var(--border)",
                     color: "var(--text-3)", fontFamily: "var(--font-mono)",
                   }}>↵</kbd>
-                  {" to confirm"}
+                  {" "}{t.toConfirm}
                 </span>
                 <div style={{ display: "flex", gap: 6 }}>
                   <button
@@ -229,7 +231,7 @@ export default function GorevTamamlaButton({ gorevId }: { gorevId: string }) {
                       border: "1px solid var(--border)", cursor: "pointer",
                     }}
                   >
-                    Cancel
+                    {t.cancel}
                   </button>
                   <button
                     onClick={submit}
@@ -245,12 +247,12 @@ export default function GorevTamamlaButton({ gorevId }: { gorevId: string }) {
                   >
                     {loading ? (
                       <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ repeat: Infinity, duration: 1 }}>
-                        Saving…
+                        {t.saving}
                       </motion.span>
                     ) : (
                       <>
                         <Check size={13} weight="bold" />
-                        Mark complete
+                        {t.markComplete}
                       </>
                     )}
                   </button>

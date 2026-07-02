@@ -1,10 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import BroadcastModal from "./BroadcastModal";
-import { calculateRAG, RAG_LABELS } from "@/lib/utils/rag";
+import { calculateRAG } from "@/lib/utils/rag";
 import type { RAGStatus } from "@/types";
 import { isToday, isThisWeek, isPast } from "date-fns";
 import { Plus, CaretRight, Users } from "@phosphor-icons/react/dist/ssr";
+import { getLocale } from "@/lib/i18n/server";
+import { getDict } from "@/lib/i18n/dictionaries";
 
 const RAG_CFG: Record<RAGStatus, { bg: string; color: string; border: string }> = {
   red:   { bg: "#fef2f2", color: "#dc2626", border: "#fecaca" },
@@ -13,6 +15,9 @@ const RAG_CFG: Record<RAGStatus, { bg: string; color: string; border: string }> 
 };
 
 export default async function MusterilerPage() {
+  const locale = await getLocale();
+  const t = getDict(locale).musteriler;
+  const RAG_LABELS: Record<RAGStatus, string> = { red: t.ragCritical, amber: t.ragAtRisk, green: t.ragGood };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const { data: accountant } = await supabase
@@ -45,9 +50,9 @@ export default async function MusterilerPage() {
     <div className="space-y-5 animate-fade-up">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Clients</h1>
+          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>{t.clientsTitle}</h1>
           <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>
-            {aktif} active{pasif > 0 ? ` · ${pasif} passive` : ""}
+            {aktif} {t.active}{pasif > 0 ? ` · ${pasif} ${t.passive}` : ""}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -56,7 +61,7 @@ export default async function MusterilerPage() {
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-semibold text-white transition-all active:scale-[0.98]"
             style={{ background: "var(--accent)", boxShadow: "0 2px 8px rgba(37,99,235,0.28)" }}>
             <Plus size={14} weight="bold" />
-            New Client
+            {t.newClient}
           </Link>
         </div>
       </div>
@@ -72,19 +77,19 @@ export default async function MusterilerPage() {
             >
               <Users size={22} weight="duotone" style={{ color: "var(--text-3)" }} />
             </div>
-            <p className="text-[13px] font-semibold mb-1" style={{ color: "var(--text-1)" }}>No clients yet</p>
-            <p className="text-[12px] mb-5" style={{ color: "var(--text-3)" }}>Add your first client to get started</p>
+            <p className="text-[13px] font-semibold mb-1" style={{ color: "var(--text-1)" }}>{t.noClientsYet}</p>
+            <p className="text-[12px] mb-5" style={{ color: "var(--text-3)" }}>{t.addFirstClient}</p>
             <Link href="/dashboard/musteriler/yeni"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-semibold text-white"
               style={{ background: "var(--accent)", boxShadow: "0 2px 8px rgba(37,99,235,0.28)" }}>
-              Add client
+              {t.addClient}
             </Link>
           </div>
         ) : (
           <table className="w-full">
             <thead style={{ borderBottom: "1px solid var(--border)" }}>
               <tr style={{ background: "var(--surface-2)" }}>
-                {["Client", "Company", "Contact", "Status", "RAG", ""].map((h, i) => (
+                {[t.colClient, t.colCompany, t.colContact, t.colStatus, t.colRAG, ""].map((h, i) => (
                   <th key={i}
                     className={`px-5 py-2.5 text-[10.5px] font-semibold uppercase tracking-[0.07em] ${i === 5 ? "text-right" : "text-left"}`}
                     style={{ color: "var(--text-3)" }}>
@@ -136,7 +141,7 @@ export default async function MusterilerPage() {
                         style={{ background: client.status === "active" ? "var(--green)" : "var(--text-3)" }}
                       />
                       <span className="text-[12px] font-medium" style={{ color: client.status === "active" ? "var(--green)" : "var(--text-3)" }}>
-                        {client.status === "active" ? "Active" : "Passive"}
+                        {client.status === "active" ? t.statusActive : t.statusPassive}
                       </span>
                     </div>
                   </td>
@@ -158,7 +163,7 @@ export default async function MusterilerPage() {
                     <Link href={`/dashboard/musteriler/${client.id}`}
                       className="inline-flex items-center gap-1 text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors"
                       style={{ color: "var(--accent)", background: "var(--accent-bg)" }}>
-                      View
+                      {t.view}
                       <CaretRight size={11} weight="bold" />
                     </Link>
                   </td>

@@ -1,14 +1,9 @@
 import { createServiceClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { format, isPast, isToday } from "date-fns";
-import { enUS } from "date-fns/locale";
-
-const DOC_STATUS: Record<string, { label: string; bg: string; color: string; border: string }> = {
-  pending:  { label: "Pending",  bg: "#fffbeb", color: "#d97706", border: "#fde68a" },
-  received: { label: "Received", bg: "#eff6ff", color: "#2563eb", border: "#bfdbfe" },
-  approved: { label: "Approved", bg: "#f0fdf4", color: "#15803d", border: "#bbf7d0" },
-  rejected: { label: "Rejected", bg: "#fef2f2", color: "#dc2626", border: "#fecaca" },
-};
+import { enUS, tr } from "date-fns/locale";
+import { getLocale } from "@/lib/i18n/server";
+import { getDict } from "@/lib/i18n/dictionaries";
 
 export default async function ClientPortalPage({
   params,
@@ -16,6 +11,17 @@ export default async function ClientPortalPage({
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
+  const locale = await getLocale();
+  const t = getDict(locale).portal;
+  const dateLocale = locale === "tr" ? tr : enUS;
+
+  const DOC_STATUS: Record<string, { label: string; bg: string; color: string; border: string }> = {
+    pending:  { label: t.docPending,  bg: "#fffbeb", color: "#d97706", border: "#fde68a" },
+    received: { label: t.docReceived, bg: "#eff6ff", color: "#2563eb", border: "#bfdbfe" },
+    approved: { label: t.docApproved, bg: "#f0fdf4", color: "#15803d", border: "#bbf7d0" },
+    rejected: { label: t.docRejected, bg: "#fef2f2", color: "#dc2626", border: "#fecaca" },
+  };
+
   const supabase  = await createServiceClient();
 
   const { data: client } = await supabase
@@ -53,12 +59,12 @@ export default async function ClientPortalPage({
             <div style={{ width: 28, height: 28, background: "#2563eb", borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>L</span>
             </div>
-            <span style={{ color: "#93c5fd", fontSize: 13, fontWeight: 600 }}>Ledger</span>
+            <span style={{ color: "#93c5fd", fontSize: 13, fontWeight: 600 }}>{t.brandName}</span>
           </div>
           {accountant?.email && (
             <a href={`mailto:${accountant.email}`}
               style={{ color: "#4b80b8", fontSize: 12, textDecoration: "none" }}>
-              Contact accountant
+              {t.contactAccountant}
             </a>
           )}
         </div>
@@ -76,7 +82,7 @@ export default async function ClientPortalPage({
           )}
           {accountant?.full_name && (
             <p style={{ margin: "6px 0 0", fontSize: 13, color: "#6b7280" }}>
-              Accountant: <strong style={{ color: "#374151" }}>{accountant.full_name}</strong>
+              {t.accountantLabel} <strong style={{ color: "#374151" }}>{accountant.full_name}</strong>
             </p>
           )}
         </div>
@@ -90,7 +96,7 @@ export default async function ClientPortalPage({
           }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#dc2626", flexShrink: 0 }} />
             <p style={{ margin: 0, fontSize: 13, color: "#b91c1c", fontWeight: 500 }}>
-              {overdueTasks.length} overdue item{overdueTasks.length > 1 ? "s" : ""} — please contact your accountant.
+              {overdueTasks.length} {overdueTasks.length > 1 ? t.overdueItemsPlural : t.overdueItems} {t.overdueContact}
             </p>
           </div>
         )}
@@ -99,7 +105,7 @@ export default async function ClientPortalPage({
         <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #e5e7eb", overflow: "hidden", marginBottom: 16 }}>
           <div style={{ padding: "14px 20px", borderBottom: "1px solid #f3f4f6" }}>
             <h2 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#111827" }}>
-              Documents
+              {t.documentsTitle}
               <span style={{ marginLeft: 8, fontSize: 12, color: "#9ca3af", fontWeight: 400 }}>
                 ({documents?.length ?? 0})
               </span>
@@ -107,7 +113,7 @@ export default async function ClientPortalPage({
           </div>
           {!documents?.length ? (
             <p style={{ margin: 0, padding: "24px 20px", fontSize: 13, color: "#9ca3af", textAlign: "center" }}>
-              No documents yet
+              {t.noDocumentsYet}
             </p>
           ) : documents.map((doc, i) => {
             const st = DOC_STATUS[doc.status] ?? DOC_STATUS.pending;
@@ -119,7 +125,7 @@ export default async function ClientPortalPage({
                 <div>
                   <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#1f2937" }}>{doc.file_name}</p>
                   <p style={{ margin: "2px 0 0", fontSize: 11, color: "#9ca3af" }}>
-                    {doc.document_type} · {format(new Date(doc.created_at), "d MMM yyyy", { locale: enUS })}
+                    {doc.document_type} · {format(new Date(doc.created_at), "d MMM yyyy", { locale: dateLocale })}
                   </p>
                 </div>
                 <span style={{
@@ -138,7 +144,7 @@ export default async function ClientPortalPage({
           <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #e5e7eb", overflow: "hidden" }}>
             <div style={{ padding: "14px 20px", borderBottom: "1px solid #f3f4f6" }}>
               <h2 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#111827" }}>
-                Open items
+                {t.openItemsTitle}
                 <span style={{ marginLeft: 8, fontSize: 12, color: "#9ca3af", fontWeight: 400 }}>
                   ({tasks.length})
                 </span>
@@ -163,8 +169,8 @@ export default async function ClientPortalPage({
                     fontSize: 12, fontWeight: 500,
                     color: overdue ? "#dc2626" : today ? "#d97706" : "#9ca3af",
                   }}>
-                    {format(new Date(task.due_date), "d MMM", { locale: enUS })}
-                    {overdue && " · Overdue"}
+                    {format(new Date(task.due_date), "d MMM", { locale: dateLocale })}
+                    {overdue && t.overdueSuffix}
                   </span>
                 </div>
               );
@@ -173,7 +179,7 @@ export default async function ClientPortalPage({
         )}
 
         <p style={{ marginTop: 32, fontSize: 11, color: "#d1d5db", textAlign: "center" }}>
-          This is a read-only view. Contact your accountant for changes.
+          {t.readOnlyNote}
         </p>
       </div>
     </div>

@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { EnvelopeSimple, ArrowLeft, CheckCircle } from "@phosphor-icons/react";
+import { useDict } from "@/lib/i18n/LocaleContext";
 
 export default function SifremiUnuttumPage() {
+  const t = useDict().auth;
   const [email,   setEmail]   = useState("");
   const [loading, setLoading] = useState(false);
   const [done,    setDone]    = useState(false);
@@ -22,7 +24,7 @@ export default function SifremiUnuttumPage() {
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
 
     if (error) {
-      setError("Could not send email. Check the address and try again.");
+      setError(t.forgotSendError);
     } else {
       setDone(true);
     }
@@ -64,31 +66,31 @@ export default function SifremiUnuttumPage() {
               <CheckCircle size={24} weight="fill" style={{ color: "var(--green)" }} />
             </div>
             <h2 className="text-[18px] font-semibold tracking-tight mb-2" style={{ color: "var(--text-1)" }}>
-              Check your inbox
+              {t.checkInboxTitle}
             </h2>
             <p className="text-[13px] leading-relaxed" style={{ color: "var(--text-3)" }}>
-              We sent a password reset link to{" "}
+              {t.checkInboxSentTo}{" "}
               <strong style={{ color: "var(--text-2)" }}>{email}</strong>.
             </p>
             <p className="text-[12px] mt-2" style={{ color: "var(--text-3)" }}>
-              Don&apos;t see it? Check your spam folder.
+              {t.checkSpam}
             </p>
             <div className="mt-6 pt-6" style={{ borderTop: "1px solid var(--border-2)" }}>
               <a href="/auth/giris"
                 className="inline-flex items-center gap-1.5 text-[13px] font-medium"
                 style={{ color: "var(--accent)" }}>
                 <ArrowLeft size={13} weight="bold" />
-                Back to sign in
+                {t.backToSignIn}
               </a>
             </div>
           </div>
         ) : (
           <>
             <h1 className="text-[22px] font-semibold tracking-tight mb-1" style={{ color: "var(--text-1)" }}>
-              Forgot password?
+              {t.forgotTitle}
             </h1>
             <p className="text-[13px] mb-7" style={{ color: "var(--text-3)" }}>
-              Enter your email and we&apos;ll send you a reset link.
+              {t.forgotSub}
             </p>
 
             <div className="rounded-xl p-5"
@@ -96,14 +98,14 @@ export default function SifremiUnuttumPage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
-                    Email address
+                    {t.forgotEmailLabel}
                   </label>
                   <div className="relative">
                     <EnvelopeSimple size={14}
                       style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--text-3)" }} />
                     <input type="email" required autoComplete="email"
                       value={email} onChange={e => setEmail(e.target.value)}
-                      placeholder="you@firm.com"
+                      placeholder={t.emailPlaceholder}
                       className="input-base" />
                   </div>
                 </div>
@@ -118,7 +120,7 @@ export default function SifremiUnuttumPage() {
                 <button type="submit" disabled={loading}
                   className="w-full flex items-center justify-center py-2.5 rounded-lg text-[13px] font-semibold text-white transition-all active:scale-[0.98] disabled:opacity-60"
                   style={{ background: "var(--accent)", boxShadow: "0 1px 3px rgba(37,99,235,0.3), 0 2px 10px rgba(37,99,235,0.15)" }}>
-                  {loading ? "Sending…" : "Send reset link"}
+                  {loading ? t.sending : t.sendResetLink}
                 </button>
               </form>
             </div>
@@ -128,7 +130,7 @@ export default function SifremiUnuttumPage() {
                 className="inline-flex items-center gap-1.5 text-[12px] font-medium"
                 style={{ color: "var(--text-3)" }}>
                 <ArrowLeft size={12} weight="bold" />
-                Back to sign in
+                {t.backToSignIn}
               </a>
             </div>
           </>

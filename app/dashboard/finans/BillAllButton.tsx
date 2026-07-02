@@ -3,13 +3,20 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { Users, Warning, CheckCircle, ArrowRight, X } from "@phosphor-icons/react";
+import { useDict, useLocale } from "@/lib/i18n/LocaleContext";
+import { formatMoney, moneySymbol } from "@/lib/utils/currency";
 
 type Client = { id: string; full_name: string; company_name?: string | null; monthly_fee?: number | null };
 
 const SPRING = { type: "spring" as const, stiffness: 380, damping: 32 };
-const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 export default function BillAllButton({ clients }: { clients: Client[] }) {
+  const t = useDict().finans;
+  const locale = useLocale();
+  const MONTHS = [
+    t.monthJan, t.monthFeb, t.monthMar, t.monthApr, t.monthMay, t.monthJun,
+    t.monthJul, t.monthAug, t.monthSep, t.monthOct, t.monthNov, t.monthDec,
+  ];
   const [open, setOpen]             = useState(false);
   const [loading, setLoading]       = useState(false);
   const [overdueLoading, setOL]     = useState(false);
@@ -77,7 +84,7 @@ export default function BillAllButton({ clients }: { clients: Client[] }) {
           style={{ background: "var(--red-bg)", color: "var(--red)", border: "1px solid var(--red-border)" }}
         >
           <Warning size={12} weight="fill" />
-          {overdueLoading ? "Updating…" : "Mark overdue"}
+          {overdueLoading ? t.updatingStatus : t.markOverdue}
         </motion.button>
 
         {/* Bill all */}
@@ -89,7 +96,7 @@ export default function BillAllButton({ clients }: { clients: Client[] }) {
           style={{ background: "var(--surface-2)", color: "var(--text-1)", border: "1px solid var(--border)" }}
         >
           <Users size={13} weight="bold" />
-          Bill all clients
+          {t.billAllClients}
         </motion.button>
       </div>
 
@@ -131,10 +138,10 @@ export default function BillAllButton({ clients }: { clients: Client[] }) {
                   <div className="flex items-start justify-between">
                     <div>
                       <h2 className="text-[15px] font-semibold tracking-tight" style={{ color: "var(--text-1)", letterSpacing: "-0.02em" }}>
-                        Bill all clients
+                        {t.billAllModalTitle}
                       </h2>
                       <p className="text-[12px] mt-1 leading-relaxed" style={{ color: "var(--text-3)" }}>
-                        Creates a pending fee per client. Already-billed clients are skipped.
+                        {t.billAllModalSub}
                       </p>
                     </div>
                     <motion.button
@@ -152,7 +159,7 @@ export default function BillAllButton({ clients }: { clients: Client[] }) {
                   <div className="grid grid-cols-3 gap-2 mt-4">
                     {[
                       {
-                        label: "Month",
+                        label: t.month,
                         el: (
                           <select value={month} onChange={e => setMonth(e.target.value)}
                             className="w-full px-2.5 py-1.5 rounded-lg text-[12.5px] focus:outline-none"
@@ -162,7 +169,7 @@ export default function BillAllButton({ clients }: { clients: Client[] }) {
                         ),
                       },
                       {
-                        label: "Year",
+                        label: t.year,
                         el: (
                           <input type="number" value={year} onChange={e => setYear(e.target.value)}
                             className="w-full px-2.5 py-1.5 rounded-lg text-[12.5px] focus:outline-none tabular-nums"
@@ -170,7 +177,7 @@ export default function BillAllButton({ clients }: { clients: Client[] }) {
                         ),
                       },
                       {
-                        label: "Due date",
+                        label: t.dueDate,
                         el: (
                           <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)}
                             className="w-full px-2.5 py-1.5 rounded-lg text-[12.5px] focus:outline-none"
@@ -190,14 +197,14 @@ export default function BillAllButton({ clients }: { clients: Client[] }) {
                 {/* Divider + column headers */}
                 <div className="px-6 py-2 shrink-0 flex items-center justify-between"
                   style={{ borderTop: "1px solid var(--border-2)", background: "var(--bg)" }}>
-                  <span className="text-[10.5px] font-medium" style={{ color: "var(--text-3)" }}>Client</span>
-                  <span className="text-[10.5px] font-medium" style={{ color: "var(--text-3)" }}>Amount (GBP)</span>
+                  <span className="text-[10.5px] font-medium" style={{ color: "var(--text-3)" }}>{t.colClient}</span>
+                  <span className="text-[10.5px] font-medium" style={{ color: "var(--text-3)" }}>{t.amountGbp}</span>
                 </div>
 
                 {/* Client list */}
                 <div className="flex-1 overflow-auto px-6 py-3 space-y-2">
                   {clients.length === 0 ? (
-                    <p className="text-[13px] text-center py-8" style={{ color: "var(--text-3)" }}>No active clients</p>
+                    <p className="text-[13px] text-center py-8" style={{ color: "var(--text-3)" }}>{t.noActiveClients}</p>
                   ) : clients.map((c, i) => (
                     <motion.div
                       key={c.id}
@@ -218,7 +225,7 @@ export default function BillAllButton({ clients }: { clients: Client[] }) {
                       </div>
                       <div className="relative shrink-0">
                         <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[12px] font-medium pointer-events-none"
-                          style={{ color: "var(--text-3)" }}>£</span>
+                          style={{ color: "var(--text-3)" }}>{moneySymbol(locale)}</span>
                         <input
                           type="number" min="0" step="0.01" placeholder="—"
                           value={amounts[c.id] ?? ""}
@@ -249,8 +256,8 @@ export default function BillAllButton({ clients }: { clients: Client[] }) {
                         style={{ background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
                         <CheckCircle size={14} weight="fill" className="shrink-0" style={{ color: "#16a34a" }} />
                         <p className="text-[12px] font-medium" style={{ color: "#15803d" }}>
-                          {result.created} fees created
-                          {result.skipped > 0 && `, ${result.skipped} already billed`}
+                          {t.feesCreated.replace("{count}", String(result.created))}
+                          {result.skipped > 0 && t.alreadyBilledSuffix.replace("{count}", String(result.skipped))}
                         </p>
                       </div>
                     </motion.div>
@@ -264,9 +271,9 @@ export default function BillAllButton({ clients }: { clients: Client[] }) {
                   <div className="flex-1">
                     {readyCount > 0 && (
                       <p className="text-[12px]" style={{ color: "var(--text-3)" }}>
-                        <span className="font-semibold tabular-nums" style={{ color: "var(--text-1)" }}>{readyCount}</span> clients ·{" "}
+                        <span className="font-semibold tabular-nums" style={{ color: "var(--text-1)" }}>{readyCount}</span> {t.clientsCountLabel} ·{" "}
                         <span className="font-semibold tabular-nums" style={{ color: "var(--text-1)" }}>
-                          {totalAmount.toLocaleString("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 })}
+                          {formatMoney(totalAmount, locale, { maximumFractionDigits: 0 })}
                         </span>
                       </p>
                     )}
@@ -277,7 +284,7 @@ export default function BillAllButton({ clients }: { clients: Client[] }) {
                     className="px-4 py-2 rounded-xl text-[13px] font-medium"
                     style={{ background: "var(--bg)", color: "var(--text-2)", border: "1px solid var(--border)" }}
                   >
-                    Cancel
+                    {t.cancel}
                   </motion.button>
                   <motion.button
                     onClick={handleBillAll}
@@ -289,11 +296,11 @@ export default function BillAllButton({ clients }: { clients: Client[] }) {
                   >
                     {loading ? (
                       <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ repeat: Infinity, duration: 1 }}>
-                        Creating…
+                        {t.creating}
                       </motion.span>
                     ) : (
                       <>
-                        Generate bills
+                        {t.generateBills}
                         <ArrowRight size={13} weight="bold" />
                       </>
                     )}

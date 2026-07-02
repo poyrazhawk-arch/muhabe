@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { format } from "date-fns";
-import { enUS } from "date-fns/locale";
+import { enUS, tr as trLocale } from "date-fns/locale";
 import {
   Files,
   FileText,
@@ -10,13 +10,8 @@ import {
   DownloadSimple,
 } from "@phosphor-icons/react/dist/ssr";
 import BelgeOnayButton from "./BelgeOnayButton";
-
-const DURUM: Record<string, { label: string; bg: string; color: string; border: string }> = {
-  pending:  { label: "Pending",  bg: "var(--amber-bg)", color: "var(--amber)", border: "var(--amber-lt)" },
-  received: { label: "Received", bg: "var(--accent-bg)", color: "var(--accent)", border: "var(--accent-lt)" },
-  approved: { label: "Approved", bg: "var(--green-bg)", color: "var(--green)", border: "var(--green-lt)" },
-  rejected: { label: "Rejected", bg: "var(--red-bg)", color: "var(--red)", border: "var(--red-lt)" },
-};
+import { getLocale } from "@/lib/i18n/server";
+import { getDict } from "@/lib/i18n/dictionaries";
 
 function DocIcon({ mime }: { mime: string }) {
   if (mime === "application/pdf") return <FilePdf size={14} weight="duotone" />;
@@ -43,6 +38,17 @@ export default async function BelgelerPage() {
     .eq("accountant_id", accountant!.id)
     .order("created_at", { ascending: false });
 
+  const locale = await getLocale();
+  const t = getDict(locale).belgeler;
+  const dateLocale = locale === "tr" ? trLocale : enUS;
+
+  const DURUM: Record<string, { label: string; bg: string; color: string; border: string }> = {
+    pending:  { label: t.statusPending,  bg: "var(--amber-bg)", color: "var(--amber)", border: "var(--amber-lt)" },
+    received: { label: t.statusReceived, bg: "var(--accent-bg)", color: "var(--accent)", border: "var(--accent-lt)" },
+    approved: { label: t.statusApproved, bg: "var(--green-bg)", color: "var(--green)", border: "var(--green-lt)" },
+    rejected: { label: t.statusRejected, bg: "var(--red-bg)", color: "var(--red)", border: "var(--red-lt)" },
+  };
+
   const bekleyen  = documents?.filter(d => d.status === "pending" || d.status === "received").length ?? 0;
   const onaylanan = documents?.filter(d => d.status === "approved").length ?? 0;
 
@@ -50,9 +56,12 @@ export default async function BelgelerPage() {
     <div className="space-y-5 animate-fade-up">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Documents</h1>
+          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>{t.title}</h1>
           <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>
-            {documents?.length ?? 0} documents · {bekleyen} pending · {onaylanan} approved
+            {t.summaryCount
+              .replace("{count}", String(documents?.length ?? 0))
+              .replace("{pending}", String(bekleyen))
+              .replace("{approved}", String(onaylanan))}
           </p>
         </div>
       </div>
@@ -69,14 +78,14 @@ export default async function BelgelerPage() {
             >
               <Files size={22} style={{ color: "var(--text-3)" }} weight="duotone" />
             </div>
-            <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>No documents uploaded yet</p>
-            <p className="text-[12px] mt-1" style={{ color: "var(--text-3)" }}>Create a document request from a client page</p>
+            <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>{t.noDocumentsYet}</p>
+            <p className="text-[12px] mt-1" style={{ color: "var(--text-3)" }}>{t.noDocumentsSub}</p>
           </div>
         ) : (
           <table className="w-full">
             <thead style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--border)" }}>
               <tr>
-                {["File", "Client", "Type", "Date", "Status", ""].map((h, i) => (
+                {[t.colFile, t.colClient, t.colType, t.colDate, t.colStatus, ""].map((h, i) => (
                   <th
                     key={i}
                     className={`px-5 py-3 text-[11px] font-semibold uppercase tracking-wider ${i === 5 ? "text-right" : "text-left"}`}
@@ -115,13 +124,13 @@ export default async function BelgelerPage() {
                       </div>
                     </td>
                     <td className="px-5 py-3 text-[13px]" style={{ color: "var(--text-2)" }}>
-                      {doc.clients ? (doc.clients as any).full_name : "-"}
+                      {doc.clients ? (doc.clients as any).full_name : t.noClient}
                     </td>
                     <td className="px-5 py-3 text-[13px]" style={{ color: "var(--text-2)" }}>
                       {doc.document_type}
                     </td>
                     <td className="px-5 py-3 text-[13px] tabular-nums" style={{ color: "var(--text-3)" }}>
-                      {format(new Date(doc.created_at), "d MMM yyyy", { locale: enUS })}
+                      {format(new Date(doc.created_at), "d MMM yyyy", { locale: dateLocale })}
                     </td>
                     <td className="px-5 py-3">
                       <span
@@ -141,7 +150,7 @@ export default async function BelgelerPage() {
                           style={{ color: "var(--accent)", background: "var(--accent-bg)", border: "1px solid var(--accent-lt)" }}
                         >
                           <DownloadSimple size={12} weight="bold" />
-                          Download
+                          {t.download}
                         </a>
                         {doc.status === "received" && <BelgeOnayButton belgeId={doc.id} />}
                       </div>

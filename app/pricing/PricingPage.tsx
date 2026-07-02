@@ -15,6 +15,7 @@ import {
   CaretDown,
   Notebook,
 } from "@phosphor-icons/react";
+import { useDict } from "@/lib/i18n/LocaleContext";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 const fadeUp = (delay = 0) => ({
@@ -37,122 +38,6 @@ type Plan = {
 
 type FAQ = { q: string; a: string };
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-
-const PLANS: Plan[] = [
-  {
-    id: "starter",
-    name: "Starter",
-    monthly: 29,
-    limits: "Up to 25 clients",
-    highlight: false,
-    features: [
-      "Client management (CRM)",
-      "Task and deadline tracking",
-      "UK tax calendar (VAT, PAYE, CT)",
-      "Document collection portal",
-      "Client upload links",
-      "Service fee tracking",
-      "RAG status dashboard",
-      "Email support",
-    ],
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    monthly: 59,
-    limits: "Unlimited clients",
-    highlight: true,
-    badge: "Most popular",
-    features: [
-      "Everything in Starter",
-      "Bulk client email broadcasts",
-      "Automated payment reminders",
-      "Monthly client summary emails",
-      "Task templates and automation",
-      "Client activity reports",
-      "Engagement letter templates",
-      "Priority support",
-    ],
-  },
-  {
-    id: "office",
-    name: "Office",
-    monthly: 99,
-    limits: "Up to 5 team members",
-    highlight: false,
-    features: [
-      "Everything in Pro",
-      "Team roles and permissions",
-      "Companies House API lookup",
-      "WhatsApp and SMS notifications",
-      "Custom reporting",
-      "Advanced audit log",
-      "Custom onboarding session",
-      "Priority phone support",
-    ],
-  },
-];
-
-const FAQS: FAQ[] = [
-  {
-    q: "Do I need a credit card for the free trial?",
-    a: "No. The 14-day trial starts the moment you sign up. No payment details are required until you decide to continue.",
-  },
-  {
-    q: "Can I switch plans later?",
-    a: "Yes. Upgrades take effect immediately. Downgrades apply at the start of your next billing cycle. No lock-in.",
-  },
-  {
-    q: "Is my client data secure?",
-    a: "All data is stored with row-level security on Supabase. Documents are encrypted at rest. We do not share data with third parties.",
-  },
-  {
-    q: "Does Ledger work for non-UK accountants?",
-    a: "The document, task, and client features are jurisdiction-agnostic. The default tax calendar targets UK deadlines. AU and CA calendars are on our roadmap.",
-  },
-  {
-    q: "What happens when the trial ends?",
-    a: "You get a reminder 3 days before the trial closes. If you do not subscribe, your account becomes read-only. No data is deleted for 30 days.",
-  },
-];
-
-const TESTIMONIALS = [
-  {
-    quote:
-      "We tracked everything in a shared spreadsheet. Ledger replaced it in a week and we have not looked back. The RAG dashboard alone is worth the price.",
-    name: "Sarah Okoye",
-    role: "Director, Okoye & Partners",
-    city: "London",
-    initial: "S",
-    color: "#3b82f6",
-    bg: "rgba(59,130,246,0.1)",
-    featured: true,
-  },
-  {
-    quote:
-      "Automatic payment reminders saved us roughly four hours a month of awkward follow-up calls.",
-    name: "James Whitfield",
-    role: "Whitfield Accounting",
-    city: "Manchester",
-    initial: "J",
-    color: "#22c55e",
-    bg: "rgba(34,197,94,0.08)",
-    featured: false,
-  },
-  {
-    quote:
-      "My clients use the upload portal without instructions. That has never happened with any tool before.",
-    name: "Priya Mehta",
-    role: "Sole Practitioner",
-    city: "Birmingham",
-    initial: "P",
-    color: "#a78bfa",
-    bg: "rgba(167,139,250,0.08)",
-    featured: false,
-  },
-];
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function annualPrice(monthly: number) {
@@ -162,10 +47,77 @@ function annualPrice(monthly: number) {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function PricingPage() {
+  const t = useDict().pricing;
   const [annual, setAnnual]       = useState(false);
   const [openFaq, setOpenFaq]     = useState<number | null>(null);
   const [loading, setLoading]     = useState<string | null>(null);
   const router                    = useRouter();
+
+  const PLANS: Plan[] = [
+    {
+      id: "starter",
+      name: t.planStarterName,
+      monthly: 29,
+      limits: t.planStarterLimits,
+      highlight: false,
+      features: t.planStarterFeatures as string[],
+    },
+    {
+      id: "pro",
+      name: t.planProName,
+      monthly: 59,
+      limits: t.planProLimits,
+      highlight: true,
+      badge: t.planProBadge as string,
+      features: t.planProFeatures as string[],
+    },
+    {
+      id: "office",
+      name: t.planOfficeName,
+      monthly: 99,
+      limits: t.planOfficeLimits,
+      highlight: false,
+      features: t.planOfficeFeatures as string[],
+    },
+  ];
+
+  const FAQS: FAQ[] = [
+    { q: t.faq1Q, a: t.faq1A },
+    { q: t.faq2Q, a: t.faq2A },
+    { q: t.faq3Q, a: t.faq3A },
+    { q: t.faq4Q, a: t.faq4A },
+    { q: t.faq5Q, a: t.faq5A },
+  ];
+
+  const TESTIMONIALS = [
+    {
+      quote: t.testimonial1Quote,
+      name: t.testimonial1Name,
+      role: t.testimonial1Role,
+      initial: t.testimonial1Name.charAt(0),
+      color: "#3b82f6",
+      bg: "rgba(59,130,246,0.1)",
+      featured: true,
+    },
+    {
+      quote: t.testimonial2Quote,
+      name: t.testimonial2Name,
+      role: t.testimonial2Role,
+      initial: t.testimonial2Name.charAt(0),
+      color: "#22c55e",
+      bg: "rgba(34,197,94,0.08)",
+      featured: false,
+    },
+    {
+      quote: t.testimonial3Quote,
+      name: t.testimonial3Name,
+      role: t.testimonial3Role,
+      initial: t.testimonial3Name.charAt(0),
+      color: "#a78bfa",
+      bg: "rgba(167,139,250,0.08)",
+      featured: false,
+    },
+  ];
 
   const displayPrice = (monthly: number) =>
     annual ? annualPrice(monthly) : monthly;
@@ -263,7 +215,7 @@ export default function PricingPage() {
               ((e.target as HTMLElement).style.color = "#6b829e")
             }
           >
-            Sign in
+            {t.navSignIn}
           </Link>
           <Link
             href="/auth/kayit"
@@ -290,7 +242,7 @@ export default function PricingPage() {
               (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
             }}
           >
-            Start free trial
+            {t.navStartTrial}
             <ArrowRight size={12} weight="bold" />
           </Link>
         </div>
@@ -327,7 +279,7 @@ export default function PricingPage() {
               borderRadius: "50%", background: "#3b82f6", flexShrink: 0,
             }}
           />
-          Accounting workflow
+          {t.eyebrow}
         </motion.p>
 
         <motion.h1
@@ -342,7 +294,7 @@ export default function PricingPage() {
             maxWidth: 520,
           }}
         >
-          Simple pricing for serious practices
+          {t.heroTitle}
         </motion.h1>
 
         <motion.p
@@ -355,7 +307,7 @@ export default function PricingPage() {
             maxWidth: 380,
           }}
         >
-          14-day free trial. No credit card. Cancel anytime.
+          {t.heroSub}
         </motion.p>
 
         {/* Billing toggle - left-aligned */}
@@ -385,7 +337,7 @@ export default function PricingPage() {
               boxShadow: !annual ? "0 1px 3px rgba(0,0,0,0.18)" : "none",
             }}
           >
-            Monthly
+            {t.billingMonthly}
           </button>
           <button
             onClick={() => setAnnual(true)}
@@ -405,7 +357,7 @@ export default function PricingPage() {
               boxShadow: annual ? "0 1px 3px rgba(0,0,0,0.18)" : "none",
             }}
           >
-            Annual
+            {t.billingAnnual}
             <span
               style={{
                 fontSize: 10,
@@ -417,7 +369,7 @@ export default function PricingPage() {
                 letterSpacing: "0.02em",
               }}
             >
-              -20%
+              {t.billingDiscount}
             </span>
           </button>
         </motion.div>
@@ -517,7 +469,7 @@ export default function PricingPage() {
                     marginLeft: 4,
                   }}
                 >
-                  /mo
+                  {t.perMonthShort}
                 </span>
               </div>
 
@@ -525,14 +477,14 @@ export default function PricingPage() {
               <div style={{ minHeight: 36, marginBottom: 18 }}>
                 {annual ? (
                   <p style={{ fontSize: 12, color: "#4b6080" }}>
-                    Billed £{price * 12}/yr{" "}
+                    {t.billedYearly.replace("{price}", String(price * 12))}{" "}
                     <span style={{ color: "#4ade80" }}>
-                      save £{yearlySave}
+                      {t.saveAmount.replace("{amount}", String(yearlySave))}
                     </span>
                   </p>
                 ) : (
                   <p style={{ fontSize: 12, color: "#4b6080" }}>
-                    or £{annualPrice(plan.monthly)}/mo billed annually
+                    {t.orPerMonthAnnual.replace("{price}", String(annualPrice(plan.monthly)))}
                   </p>
                 )}
                 <p
@@ -583,7 +535,7 @@ export default function PricingPage() {
                     plan.highlight ? "#2563eb" : "rgba(255,255,255,0.06)";
                 }}
               >
-                {loading === plan.id ? "Redirecting…" : "Get started"}
+                {loading === plan.id ? t.redirecting : t.getStarted}
                 {loading !== plan.id && <ArrowRight size={12} weight="bold" />}
               </button>
 
@@ -657,7 +609,7 @@ export default function PricingPage() {
             marginBottom: 8,
           }}
         >
-          Everything in one place
+          {t.bentoTitle}
         </h2>
         <p
           style={{
@@ -667,7 +619,7 @@ export default function PricingPage() {
             maxWidth: 360,
           }}
         >
-          No integrations needed. No third-party tools. One login.
+          {t.bentoSub}
         </p>
 
         {/* Bento: row 1 = 2fr + 1fr, row 2 = 1fr + 2fr */}
@@ -736,11 +688,10 @@ export default function PricingPage() {
                   letterSpacing: "-0.02em",
                 }}
               >
-                Document collection
+                {t.bentoDocsTitle}
               </h3>
               <p style={{ fontSize: 13, color: "#93a8be", lineHeight: 1.65, maxWidth: 320 }}>
-                Send clients a secure upload link. No login on their end. You get
-                notified, review, approve.
+                {t.bentoDocsDesc}
               </p>
             </div>
           </div>
@@ -784,11 +735,10 @@ export default function PricingPage() {
                   letterSpacing: "-0.02em",
                 }}
               >
-                UK tax calendar
+                {t.bentoCalendarTitle}
               </h3>
               <p style={{ fontSize: 13, color: "#93a8be", lineHeight: 1.6 }}>
-                VAT, PAYE, Corporation Tax, Self Assessment. All deadlines
-                pre-loaded.
+                {t.bentoCalendarDesc}
               </p>
             </div>
             <p
@@ -800,7 +750,7 @@ export default function PricingPage() {
                 letterSpacing: "0.04em",
               }}
             >
-              Updated for {new Date().getFullYear()}
+              {t.bentoCalendarUpdated.replace("{year}", String(new Date().getFullYear()))}
             </p>
           </div>
 
@@ -842,11 +792,10 @@ export default function PricingPage() {
                   letterSpacing: "-0.02em",
                 }}
               >
-                Task automation
+                {t.bentoTasksTitle}
               </h3>
               <p style={{ fontSize: 13, color: "#93a8be", lineHeight: 1.6 }}>
-                Reusable templates. At the start of each month, tasks generate
-                for every client automatically.
+                {t.bentoTasksDesc}
               </p>
             </div>
             <p
@@ -858,7 +807,7 @@ export default function PricingPage() {
                 letterSpacing: "0.04em",
               }}
             >
-              Runs on the 1st of every month
+              {t.bentoTasksRuns}
             </p>
           </div>
 
@@ -918,11 +867,10 @@ export default function PricingPage() {
                   letterSpacing: "-0.02em",
                 }}
               >
-                Bulk client broadcast
+                {t.bentoBroadcastTitle}
               </h3>
               <p style={{ fontSize: 13, color: "#93a8be", lineHeight: 1.65 }}>
-                Document reminder or filing deadline notice to all your clients
-                in one click. No BCC, no mail-merge.
+                {t.bentoBroadcastDesc}
               </p>
             </div>
           </div>
@@ -1078,7 +1026,7 @@ export default function PricingPage() {
             marginBottom: 28,
           }}
         >
-          Common questions
+          {t.faqTitle}
         </h2>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -1190,11 +1138,10 @@ export default function PricingPage() {
                 lineHeight: 1.15,
               }}
             >
-              Ready to get organised?
+              {t.ctaTitle}
             </h2>
             <p style={{ fontSize: 14, color: "#6b829e", margin: 0 }}>
-              14 days free. No card needed. Practices up and running in under an
-              hour.
+              {t.ctaSub}
             </p>
           </div>
           <button
@@ -1229,7 +1176,7 @@ export default function PricingPage() {
               (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
             }}
           >
-            {loading === "pro" ? "Redirecting…" : "Start free trial"}
+            {loading === "pro" ? t.redirecting : t.ctaButton}
             {loading !== "pro" && <ArrowRight size={15} weight="bold" />}
           </button>
         </div>
@@ -1273,11 +1220,11 @@ export default function PricingPage() {
         </div>
 
         <p style={{ fontSize: 12, color: "#2e4a66", margin: 0 }}>
-          Built for UK accounting practices.
+          {t.footerTagline}
         </p>
 
         <div style={{ display: "flex", gap: 20 }}>
-          {["Privacy", "Terms", "Contact"].map((label) => (
+          {[t.footerPrivacy, t.footerTerms, t.footerContact].map((label) => (
             <Link
               key={label}
               href="#"

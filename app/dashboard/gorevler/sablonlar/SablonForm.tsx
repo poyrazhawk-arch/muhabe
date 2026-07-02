@@ -3,14 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "@phosphor-icons/react";
-
-const RECURRENCE = [
-  { value: "monthly",   label: "Monthly" },
-  { value: "quarterly", label: "Quarterly" },
-  { value: "yearly",    label: "Yearly" },
-];
+import { useDict } from "@/lib/i18n/LocaleContext";
 
 export default function SablonForm() {
+  const t = useDict().gorevler;
+  const RECURRENCE = [
+    { value: "monthly",   label: t.recurrenceMonthly },
+    { value: "quarterly", label: t.recurrenceQuarterly },
+    { value: "yearly",    label: t.recurrenceYearly },
+  ];
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -49,7 +50,7 @@ export default function SablonForm() {
         style={{ background: "var(--accent)", boxShadow: "0 2px 8px rgba(37,99,235,0.28)" }}
       >
         <Plus size={14} weight="bold" />
-        Add Template
+        {t.addTemplate}
       </button>
 
       {open && (
@@ -58,36 +59,36 @@ export default function SablonForm() {
           <div className="w-full max-w-md rounded-2xl p-6"
             style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
             <h2 className="text-[15px] font-semibold mb-4" style={{ color: "var(--text-1)" }}>
-              Add Task Template
+              {t.addTaskTemplate}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
-                <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Template name</label>
+                <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>{t.templateName}</label>
                 <input required value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
-                  placeholder="VAT Return Preparation" style={inputStyle}/>
+                  placeholder={t.templateNamePlaceholder} style={inputStyle}/>
               </div>
               <div>
-                <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Description (optional)</label>
+                <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>{t.descriptionOptional}</label>
                 <input value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                  placeholder="Short description…" style={inputStyle}/>
+                  placeholder={t.descriptionPlaceholder} style={inputStyle}/>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Recurrence</label>
+                  <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>{t.recurrence}</label>
                   <select value={form.recurrence_type} onChange={e => setForm(p => ({ ...p, recurrence_type: e.target.value }))}
                     style={inputStyle}>
                     {RECURRENCE.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Due day of month</label>
+                  <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>{t.dueDayOfMonth}</label>
                   <input type="number" min="1" max="31" value={form.due_day}
                     onChange={e => setForm(p => ({ ...p, due_day: e.target.value }))}
                     placeholder="26" style={inputStyle}/>
                 </div>
               </div>
               <div>
-                <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>Days in advance to create</label>
+                <label className="block text-[12px] font-medium mb-1" style={{ color: "var(--text-2)" }}>{t.daysInAdvanceToCreate}</label>
                 <input type="number" min="1" max="30" value={form.advance_days}
                   onChange={e => setForm(p => ({ ...p, advance_days: e.target.value }))}
                   style={inputStyle}/>
@@ -96,12 +97,12 @@ export default function SablonForm() {
                 <button type="button" onClick={() => setOpen(false)}
                   className="flex-1 py-2 rounded-lg text-[13px] font-medium"
                   style={{ background: "var(--bg)", color: "var(--text-2)", border: "1px solid var(--border)" }}>
-                  Cancel
+                  {t.cancel}
                 </button>
                 <button type="submit" disabled={loading}
                   className="flex-1 py-2 rounded-lg text-[13px] font-semibold text-white disabled:opacity-50"
                   style={{ background: "var(--accent)" }}>
-                  {loading ? "Saving…" : "Save"}
+                  {loading ? t.saving : t.save}
                 </button>
               </div>
             </form>

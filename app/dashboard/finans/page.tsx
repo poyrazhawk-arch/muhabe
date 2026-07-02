@@ -1,19 +1,26 @@
 import { createClient } from "@/lib/supabase/server";
 import { format } from "date-fns";
-import { enUS } from "date-fns/locale";
+import { enUS, tr as trLocale } from "date-fns/locale";
 import OdemeButon from "./OdemeButon";
 import YeniFeeForm from "./YeniFeeForm";
 import BillAllButton from "./BillAllButton";
 import SendInvoiceButton from "./SendInvoiceButton";
 import RemindOverdueButton from "./RemindOverdueButton";
-
-const S: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  pending: { label: "Pending", color: "#d97706", bg: "#fffbeb", border: "#fde68a" },
-  paid:    { label: "Paid",    color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0" },
-  overdue: { label: "Overdue", color: "#dc2626", bg: "#fef2f2", border: "#fecaca" },
-};
+import { getLocale } from "@/lib/i18n/server";
+import { getDict } from "@/lib/i18n/dictionaries";
+import { formatMoney } from "@/lib/utils/currency";
 
 export default async function FinansPage() {
+  const locale = await getLocale();
+  const t = getDict(locale).finans;
+  const dateLocale = locale === "tr" ? trLocale : enUS;
+
+  const S: Record<string, { label: string; color: string; bg: string; border: string }> = {
+    pending: { label: t.statusPending, color: "#d97706", bg: "#fffbeb", border: "#fde68a" },
+    paid:    { label: t.statusPaid,    color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0" },
+    overdue: { label: t.statusOverdue, color: "#dc2626", bg: "#fef2f2", border: "#fecaca" },
+  };
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const { data: accountant } = await supabase
@@ -45,7 +52,7 @@ export default async function FinansPage() {
   const overdueFees = (fees ?? []).filter((f: any) => f.status === "overdue" && f.clients?.email)
     .map((f: any) => ({ id: f.id, email: f.clients.email }));
 
-  const fmt = (n: number) => n.toLocaleString("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 });
+  const fmt = (n: number) => formatMoney(n, locale, { maximumFractionDigits: 0 });
 
   return (
     <div className="space-y-5 animate-fade-up">
@@ -54,7 +61,7 @@ export default async function FinansPage() {
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
         <div>
           <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: 6 }}>
-            Finance · {format(now, "MMMM yyyy", { locale: enUS })}
+            {t.financeLabel} · {format(now, "MMMM yyyy", { locale: dateLocale })}
           </p>
           <p style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.055em", color: "var(--text-1)", lineHeight: 1 }}>
             {fmt(toplam)}
@@ -74,9 +81,9 @@ export default async function FinansPage() {
         borderRadius: 12, overflow: "hidden",
       }}>
         {[
-          { label: "Paid",    value: fmt(odenen),   color: "#15803d", pct: toplam > 0 ? (odened: number) => odened / toplam : null },
-          { label: "Pending", value: fmt(bekleyen), color: "#d97706" },
-          { label: "Overdue", value: fmt(gecikmiş), color: gecikmiş > 0 ? "#dc2626" : "var(--text-3)", alert: gecikmiş > 0 },
+          { label: t.statusPaid,    value: fmt(odenen),   color: "#15803d", pct: toplam > 0 ? (odened: number) => odened / toplam : null },
+          { label: t.statusPending, value: fmt(bekleyen), color: "#d97706" },
+          { label: t.statusOverdue, value: fmt(gecikmiş), color: gecikmiş > 0 ? "#dc2626" : "var(--text-3)", alert: gecikmiş > 0 },
         ].map(({ label, value, color, alert }, i) => (
           <div key={label} style={{
             flex: 1, padding: "16px 20px",
@@ -115,16 +122,16 @@ export default async function FinansPage() {
       }}>
         {!fees || fees.length === 0 ? (
           <div style={{ padding: "56px 20px", textAlign: "center" }}>
-            <p style={{ fontSize: 13.5, fontWeight: 600, color: "var(--text-1)" }}>No service fees yet</p>
+            <p style={{ fontSize: 13.5, fontWeight: 600, color: "var(--text-1)" }}>{t.noServiceFeesYet}</p>
             <p style={{ fontSize: 12.5, marginTop: 4, color: "var(--text-3)" }}>
-              Use &quot;Add fee&quot; above to get started
+              {t.addFeeToStart}
             </p>
           </div>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--border)" }}>
-                {["", "Client", "Period", "Amount", "Status", ""].map((h, i) => (
+                {["", t.colClient, t.colPeriod, t.colAmount, t.colStatus, ""].map((h, i) => (
                   <th key={i}
                     style={{
                       padding: "9px 14px",
@@ -180,7 +187,7 @@ export default async function FinansPage() {
 
                     {/* Period */}
                     <td style={{ padding: "11px 14px", fontSize: 12.5, color: "var(--text-3)", fontVariantNumeric: "tabular-nums" }}>
-                      {format(ay, "MMM yyyy", { locale: enUS })}
+                      {format(ay, "MMM yyyy", { locale: dateLocale })}
                     </td>
 
                     {/* Amount */}
@@ -189,7 +196,7 @@ export default async function FinansPage() {
                       fontSize: 13.5, fontWeight: 700, letterSpacing: "-0.03em",
                       color: "var(--text-1)", fontVariantNumeric: "tabular-nums",
                     }}>
-                      {Number(fee.amount).toLocaleString("en-GB", { style: "currency", currency: "GBP" })}
+                      {formatMoney(Number(fee.amount), locale)}
                     </td>
 
                     {/* Status */}
@@ -218,7 +225,7 @@ export default async function FinansPage() {
                       >
                         {fee.status === "paid" && fee.paid_at && (
                           <span style={{ fontSize: 11, color: "var(--text-3)", fontVariantNumeric: "tabular-nums" }}>
-                            {format(new Date(fee.paid_at), "d MMM", { locale: enUS })}
+                            {format(new Date(fee.paid_at), "d MMM", { locale: dateLocale })}
                           </span>
                         )}
                         {fee.status !== "paid" && (
