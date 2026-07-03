@@ -1,59 +1,64 @@
 import Link from "next/link";
 import OtomasyonTetikle from "./OtomasyonTetikle";
 import { Clock } from "@phosphor-icons/react/dist/ssr";
+import { getLocale } from "@/lib/i18n/server";
+import { getDict } from "@/lib/i18n/dictionaries";
 
-const OTOMASYONLAR = [
-  {
-    id: "hatirlatmalar",
-    baslik: "Task Reminders",
-    aciklama: "Sends an email to the accountant for upcoming task deadlines.",
-    zamanlama: "Daily at 09:00",
-    endpoint: "/api/cron/hatirlatmalar",
-    renk: "#2563eb",
-    bg: "#eff6ff",
-    border: "#bfdbfe",
-  },
-  {
-    id: "gorev-olustur",
-    baslik: "Auto Task Creation",
-    aciklama: "Generates monthly tasks for each client from active templates. Also creates tax calendar tasks.",
-    zamanlama: "1st of every month, 08:00",
-    endpoint: "/api/cron/gorev-olustur",
-    renk: "#7c3aed",
-    bg: "#f5f3ff",
-    border: "#ddd6fe",
-  },
-  {
-    id: "tahsilat-hatirlatma",
-    baslik: "Overdue Payment Reminder",
-    aciklama: "Detects overdue service fees and sends a polite reminder email to the client. Triggered on days 3, 7, and 14.",
-    zamanlama: "Every Monday at 09:00",
-    endpoint: "/api/cron/tahsilat-hatirlatma",
-    renk: "#dc2626",
-    bg: "#fef2f2",
-    border: "#fecaca",
-  },
-  {
-    id: "aylik-ozet",
-    baslik: "Monthly Summary Email",
-    aciklama: "Sends each client a summary of completed tasks, approved documents, and pending items for the month.",
-    zamanlama: "28th of every month, 09:00",
-    endpoint: "/api/cron/aylik-ozet",
-    renk: "#15803d",
-    bg: "#f0fdf4",
-    border: "#bbf7d0",
-  },
-];
+export default async function OtomasyonlarPage() {
+  const locale = await getLocale();
+  const t = getDict(locale).otomasyonlar;
 
-export default function OtomasyonlarPage() {
+  const OTOMASYONLAR = [
+    {
+      id: "hatirlatmalar",
+      baslik: t.remindersTitle,
+      aciklama: t.remindersDesc,
+      zamanlama: t.remindersSchedule,
+      endpoint: "/api/cron/hatirlatmalar",
+      renk: "#2563eb",
+      bg: "#eff6ff",
+      border: "#bfdbfe",
+    },
+    {
+      id: "gorev-olustur",
+      baslik: t.taskCreateTitle,
+      aciklama: t.taskCreateDesc,
+      zamanlama: t.taskCreateSchedule,
+      endpoint: "/api/cron/gorev-olustur",
+      renk: "#7c3aed",
+      bg: "#f5f3ff",
+      border: "#ddd6fe",
+    },
+    {
+      id: "tahsilat-hatirlatma",
+      baslik: t.overdueReminderTitle,
+      aciklama: t.overdueReminderDesc,
+      zamanlama: t.overdueReminderSchedule,
+      endpoint: "/api/cron/tahsilat-hatirlatma",
+      renk: "#dc2626",
+      bg: "#fef2f2",
+      border: "#fecaca",
+    },
+    {
+      id: "aylik-ozet",
+      baslik: t.monthlySummaryTitle,
+      aciklama: t.monthlySummaryDesc,
+      zamanlama: t.monthlySummarySchedule,
+      endpoint: "/api/cron/aylik-ozet",
+      renk: "#15803d",
+      bg: "#f0fdf4",
+      border: "#bbf7d0",
+    },
+  ];
+
   return (
     <div className="space-y-6 animate-fade-up">
       <div>
         <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>
-          Automations
+          {t.pageTitle}
         </h1>
         <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>
-          Scheduled jobs — run manually or let them fire automatically
+          {t.pageSub}
         </p>
       </div>
 
@@ -85,7 +90,7 @@ export default function OtomasyonlarPage() {
                       className="text-[10px] font-semibold px-2 py-0.5 rounded-md"
                       style={{ background: o.bg, color: o.renk, border: `1px solid ${o.border}` }}
                     >
-                      Active
+                      {t.active}
                     </span>
                   </div>
                   <p className="text-[13px] mt-1 leading-relaxed" style={{ color: "var(--text-3)" }}>
@@ -108,20 +113,18 @@ export default function OtomasyonlarPage() {
         style={{ background: "var(--accent-bg)", border: "1px solid var(--accent-lt)" }}
       >
         <p className="text-[12px] font-semibold mb-1" style={{ color: "var(--accent)" }}>
-          How it works
+          {t.howItWorksTitle}
         </p>
         <p className="text-[12px] leading-relaxed" style={{ color: "var(--text-2)" }}>
-          Automations are triggered automatically by Vercel Cron at the scheduled times.
-          Use the &quot;Run now&quot; button to test them instantly.
-          For email delivery,{" "}
+          {t.howItWorksBody}{" "}
           <code style={{ background: "rgba(0,0,0,0.06)", padding: "1px 5px", borderRadius: "4px", fontSize: "11px" }}>
             RESEND_API_KEY
           </code>{" "}
-          and{" "}
+          {t.andEnvVar}{" "}
           <code style={{ background: "rgba(0,0,0,0.06)", padding: "1px 5px", borderRadius: "4px", fontSize: "11px" }}>
             CRON_SECRET
           </code>{" "}
-          env variables must be defined.
+          {t.envVarsRequired}
         </p>
       </div>
     </div>

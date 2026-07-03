@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useDict } from "@/lib/i18n/LocaleContext";
 
 export default function OtomasyonTetikle({
   endpoint,
@@ -9,6 +10,7 @@ export default function OtomasyonTetikle({
   endpoint: string;
   baslik: string;
 }) {
+  const t = useDict().otomasyonlar;
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [sonuc, setSonuc] = useState<string>("");
 
@@ -44,14 +46,14 @@ export default function OtomasyonTetikle({
         {status === "loading" ? (
           <>
             <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            Running…
+            {t.running}
           </>
         ) : status === "done" ? (
-          "✓ Done"
+          `✓ ${t.done}`
         ) : status === "error" ? (
-          "Error occurred"
+          t.errorOccurred
         ) : (
-          "Run now"
+          t.runNow
         )}
       </button>
       {sonuc && status === "done" && (

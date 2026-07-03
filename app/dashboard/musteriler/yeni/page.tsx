@@ -3,7 +3,9 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CaretLeft, UploadSimple, UserPlus, CheckCircle, Warning, X, DownloadSimple } from "@phosphor-icons/react";
+import { CaretLeft, UploadSimple, UserPlus, CheckCircle, Warning, X, DownloadSimple, SealCheck } from "@phosphor-icons/react";
+import { useDict, useIsTurkey } from "@/lib/i18n/LocaleContext";
+import { classifyTaxId } from "@/lib/utils/gib";
 
 // ── Shared field component ───────────────────────────────────────
 function Field({ name, label, required, placeholder, type = "text" }: {
@@ -67,12 +69,16 @@ function normalizeRow(raw: Record<string, string>) {
 
 // ── Main page ───────────────────────────────────────────────────
 export default function YeniMusteriPage() {
+  const t = useDict().musteriler;
   const router = useRouter();
   const [tab, setTab] = useState<"single" | "bulk">("single");
 
   // Single form state
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState("");
+  const [taxNo, setTaxNo]     = useState("");
+  const isTurkey = useIsTurkey();
+  const taxKind = isTurkey && taxNo.replace(/\D/g, "").length >= 10 ? classifyTaxId(taxNo) : null;
 
   // Bulk import state
   const fileRef = useRef<HTMLInputElement>(null);
@@ -93,7 +99,7 @@ export default function YeniMusteriPage() {
     if (res.ok) { router.push("/dashboard/musteriler"); router.refresh(); }
     else {
       const json = await res.json();
-      setError(json.hata ?? "Something went wrong.");
+      setError(json.hata ?? t.errSomethingWrong);
       setLoading(false);
     }
   }
@@ -102,14 +108,14 @@ export default function YeniMusteriPage() {
     setFileError(""); setPreview([]); setImportResult(null);
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.name.endsWith(".csv")) { setFileError("Please upload a .csv file."); return; }
+    if (!file.name.endsWith(".csv")) { setFileError(t.errCsvOnly); return; }
 
     const reader = new FileReader();
     reader.onload = ev => {
       const text = ev.target?.result as string;
       const rows = parseCSV(text).map(normalizeRow);
       const valid = rows.filter(r => r.full_name);
-      if (valid.length === 0) { setFileError("No valid rows found. Make sure there's a 'full_name' or 'name' column."); return; }
+      if (valid.length === 0) { setFileError(t.errNoValidRows); return; }
       setPreview(valid);
     };
     reader.readAsText(file, "utf-8");
@@ -146,18 +152,18 @@ export default function YeniMusteriPage() {
       <div className="mb-5">
         <Link href="/dashboard/musteriler" className="inline-flex items-center gap-1 text-[12px] font-medium mb-3"
           style={{ color: "var(--text-3)" }}>
-          <CaretLeft size={12} weight="bold" /> Clients
+          <CaretLeft size={12} weight="bold" /> {t.backToClients}
         </Link>
-        <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Add Clients</h1>
-        <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>Add one client or import many at once from a CSV file</p>
+        <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>{t.addClientsTitle}</h1>
+        <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>{t.addClientsSub}</p>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-1 mb-4 p-1 rounded-xl w-fit"
         style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
         {([
-          { key: "single", label: "Single client", Icon: UserPlus },
-          { key: "bulk",   label: "Import from CSV", Icon: UploadSimple },
+          { key: "single", label: t.tabSingle, Icon: UserPlus },
+          { key: "bulk",   label: t.tabBulk, Icon: UploadSimple },
         ] as const).map(({ key, label, Icon }) => (
           <button key={key} onClick={() => setTab(key)}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-all"
@@ -176,14 +182,36 @@ export default function YeniMusteriPage() {
         <div className="rounded-xl p-6"
           style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
           <form onSubmit={handleSingleSubmit} className="space-y-4">
-            <Field name="full_name"    label="Full name"     required placeholder="Jane Smith" />
-            <Field name="company_name" label="Company name"           placeholder="ABC Ltd." />
-            <Field name="tax_number"   label="Tax number"             placeholder="1234567890" />
-            <Field name="email"        label="Email"         type="email" placeholder="jane@company.com" />
-            <Field name="phone"        label="Phone"                  placeholder="+44 7700 900000" />
+            <Field name="full_name"    label={t.fullName}     required placeholder="Jane Smith" />
+            <Field name="company_name" label={t.companyName}           placeholder="ABC Ltd." />
             <div>
-              <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>Notes</label>
-              <textarea name="notes" rows={3} placeholder="Optional notes..."
+              <label htmlFor="tax_number" className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
+                {t.taxNumber}
+              </label>
+              <input id="tax_number" name="tax_number" inputMode="numeric"
+                placeholder={isTurkey ? "VKN (10) veya TCKN (11)" : "1234567890"}
+                value={taxNo} onChange={e => setTaxNo(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-lg text-[13px] focus:outline-none transition-colors"
+                style={{
+                  background: "var(--bg)", color: "var(--text-1)",
+                  border: `1px solid ${taxKind === "invalid" ? "var(--red)" : taxKind ? "#16a34a" : "var(--border)"}`,
+                }} />
+              {taxKind === "invalid" && (
+                <p className="flex items-center gap-1 text-[11px] mt-1" style={{ color: "var(--red)" }}>
+                  <Warning size={12} weight="fill" /> Geçersiz VKN/TCKN — kontrol edin.
+                </p>
+              )}
+              {taxKind && taxKind !== "invalid" && (
+                <p className="flex items-center gap-1 text-[11px] mt-1" style={{ color: "#16a34a" }}>
+                  <SealCheck size={12} weight="fill" /> Geçerli {taxKind === "vkn" ? "VKN" : "TCKN"}
+                </p>
+              )}
+            </div>
+            <Field name="email"        label={t.email}         type="email" placeholder="jane@company.com" />
+            <Field name="phone"        label={t.phone}                  placeholder="+44 7700 900000" />
+            <div>
+              <label className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>{t.notes}</label>
+              <textarea name="notes" rows={3} placeholder={t.notesPlaceholder}
                 className="w-full px-3 py-2.5 rounded-lg text-[13px] focus:outline-none resize-none transition-colors"
                 style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text-1)" }}
                 onFocus={e => { e.target.style.borderColor = "var(--accent)"; }}
@@ -200,12 +228,12 @@ export default function YeniMusteriPage() {
               <button type="submit" disabled={loading}
                 className="px-5 py-2 rounded-lg text-[13px] font-semibold text-white disabled:opacity-50"
                 style={{ background: "var(--accent)" }}>
-                {loading ? "Saving…" : "Save client"}
+                {loading ? t.saving : t.saveClient}
               </button>
               <button type="button" onClick={() => router.back()}
                 className="px-5 py-2 rounded-lg text-[13px] font-medium transition-colors"
                 style={{ color: "var(--text-2)", background: "var(--bg)", border: "1px solid var(--border)" }}>
-                Cancel
+                {t.cancel}
               </button>
             </div>
           </form>
@@ -220,16 +248,16 @@ export default function YeniMusteriPage() {
             style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>Upload CSV file</p>
+                <p className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>{t.uploadCsvFile}</p>
                 <p className="text-[12px] mt-0.5" style={{ color: "var(--text-3)" }}>
-                  Columns: full_name, company_name, email, phone, tax_number
+                  {t.uploadCsvColumns}
                 </p>
               </div>
               <button onClick={downloadTemplate}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium"
                 style={{ color: "var(--accent)", background: "var(--accent-bg)", border: "1px solid var(--accent-bg)" }}>
                 <DownloadSimple size={12} weight="bold" />
-                Template
+                {t.template}
               </button>
             </div>
 
@@ -253,9 +281,9 @@ export default function YeniMusteriPage() {
             >
               <UploadSimple size={24} weight="duotone" style={{ color: "var(--text-3)" }} />
               <p className="text-[13px] font-medium" style={{ color: "var(--text-2)" }}>
-                Click to upload or drag & drop
+                {t.clickToUploadOrDrop}
               </p>
-              <p className="text-[11px]" style={{ color: "var(--text-3)" }}>CSV files only</p>
+              <p className="text-[11px]" style={{ color: "var(--text-3)" }}>{t.csvFilesOnly}</p>
             </button>
             <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleFileChange} />
 
@@ -275,10 +303,10 @@ export default function YeniMusteriPage() {
                 style={{ borderBottom: "1px solid var(--border-2)" }}>
                 <div>
                   <p className="text-[13px] font-semibold" style={{ color: "var(--text-1)" }}>
-                    Preview — {preview.length} clients
+                    {t.previewCount.replace("{count}", String(preview.length))}
                   </p>
                   <p className="text-[11px] mt-0.5" style={{ color: "var(--text-3)" }}>
-                    Review before importing
+                    {t.reviewBeforeImport}
                   </p>
                 </div>
                 <button onClick={() => { setPreview([]); if (fileRef.current) fileRef.current.value = ""; }}
@@ -292,7 +320,7 @@ export default function YeniMusteriPage() {
                 <table className="w-full text-[12px]">
                   <thead>
                     <tr style={{ borderBottom: "1px solid var(--border-2)", background: "var(--bg)" }}>
-                      {["Name", "Company", "Email", "Phone", "Tax No"].map(h => (
+                      {[t.colName, t.colCompany, t.colEmail, t.colPhone, t.colTaxNo].map(h => (
                         <th key={h} className="px-4 py-2.5 text-left font-semibold" style={{ color: "var(--text-3)" }}>{h}</th>
                       ))}
                     </tr>
@@ -311,7 +339,7 @@ export default function YeniMusteriPage() {
                 </table>
                 {preview.length > 50 && (
                   <p className="px-4 py-2 text-[11px]" style={{ color: "var(--text-3)" }}>
-                    +{preview.length - 50} more rows not shown
+                    {t.moreRowsNotShown.replace("{count}", String(preview.length - 50))}
                   </p>
                 )}
               </div>
@@ -321,7 +349,7 @@ export default function YeniMusteriPage() {
                   className="flex items-center gap-2 px-5 py-2 rounded-lg text-[13px] font-semibold text-white disabled:opacity-50"
                   style={{ background: "var(--accent)" }}>
                   <UploadSimple size={13} weight="bold" />
-                  {importing ? "Importing…" : `Import ${preview.length} clients`}
+                  {importing ? t.importing : t.importClients.replace("{count}", String(preview.length))}
                 </button>
               </div>
             </div>
@@ -337,16 +365,16 @@ export default function YeniMusteriPage() {
               <div className="flex items-center gap-2 mb-2">
                 <CheckCircle size={16} weight="fill" style={{ color: importResult.imported > 0 ? "#16a34a" : "var(--red)" }} />
                 <p className="text-[13px] font-semibold" style={{ color: importResult.imported > 0 ? "#15803d" : "var(--red)" }}>
-                  {importResult.imported} client{importResult.imported !== 1 ? "s" : ""} imported successfully
+                  {t.clientsImportedSuccessfully.replace("{count}", String(importResult.imported)).replace("{plural}", importResult.imported !== 1 ? "s" : "")}
                 </p>
               </div>
               {importResult.errors.length > 0 && (
                 <p className="text-[12px]" style={{ color: "var(--text-3)" }}>
-                  {importResult.errors.length} rows skipped (missing name or invalid email)
+                  {t.rowsSkipped.replace("{count}", String(importResult.errors.length))}
                 </p>
               )}
               {importResult.imported > 0 && (
-                <p className="text-[12px] mt-1" style={{ color: "var(--text-3)" }}>Redirecting to clients list…</p>
+                <p className="text-[12px] mt-1" style={{ color: "var(--text-3)" }}>{t.redirectingToClients}</p>
               )}
             </div>
           )}

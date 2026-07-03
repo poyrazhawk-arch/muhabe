@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
+import { useDict } from "@/lib/i18n/LocaleContext";
 
 export default function CopyButton({ url }: { url: string }) {
+  const t = useDict().musteriler;
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -16,7 +18,7 @@ export default function CopyButton({ url }: { url: string }) {
       style={copied
         ? { color: "#15803d", background: "#f0fdf4", border: "1px solid #bbf7d0" }
         : { color: "var(--accent)", background: "var(--accent-bg)", border: "1px solid var(--accent-lt)" }}>
-      {copied ? "Kopyalandı" : "Linki kopyala"}
+      {copied ? t.linkCopied : t.copyLink}
     </button>
   );
 }

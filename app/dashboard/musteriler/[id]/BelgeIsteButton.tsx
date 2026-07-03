@@ -6,13 +6,9 @@ import {
   PaperPlaneTilt, Link as LinkIcon, CheckCircle,
   X, ClipboardText, CaretDown,
 } from "@phosphor-icons/react";
+import { useDict } from "@/lib/i18n/LocaleContext";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const DOC_TYPES = [
-  "Invoice", "Bank Statement", "Payroll", "Contract",
-  "Tax Certificate", "HMRC Document", "Expenses", "Other",
-];
 
 type Props = {
   clientId:    string;
@@ -24,8 +20,13 @@ type Step = "idle" | "form" | "sending" | "done";
 type DonePayload = { url: string; emailSent: boolean; to?: string };
 
 export default function BelgeIsteButton({ clientId, clientName, clientEmail }: Props) {
+  const t = useDict().musteriler;
+  const DOC_TYPES = [
+    t.docInvoice, t.docBankStatement, t.docPayroll, t.docContract,
+    t.docTaxCertificate, t.docHmrcDocument, t.docExpenses, t.docOther,
+  ];
   const [step,     setStep]     = useState<Step>("idle");
-  const [selected, setSelected] = useState<string[]>(["Invoice"]);
+  const [selected, setSelected] = useState<string[]>([t.docInvoice]);
   const [message,  setMessage]  = useState("");
   const [sendEmail, setSendEmail] = useState(!!clientEmail);
   const [done,     setDone]     = useState<DonePayload | null>(null);
@@ -42,7 +43,7 @@ export default function BelgeIsteButton({ clientId, clientName, clientEmail }: P
   function close() {
     setStep("idle");
     setDone(null);
-    setSelected(["Invoice"]);
+    setSelected([t.docInvoice]);
     setMessage("");
     setSendEmail(!!clientEmail);
     setCopied(false);
@@ -98,7 +99,7 @@ export default function BelgeIsteButton({ clientId, clientName, clientEmail }: P
         }}
       >
         <PaperPlaneTilt size={12} weight="bold" />
-        Request docs
+        {t.requestDocs}
       </button>
 
       {/* Backdrop + modal */}
@@ -155,7 +156,7 @@ export default function BelgeIsteButton({ clientId, clientName, clientEmail }: P
                         </div>
                         <div>
                           <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)", letterSpacing: "-0.025em", lineHeight: 1 }}>
-                            Request documents
+                            {t.requestDocuments}
                           </p>
                           <p style={{ fontSize: 11, color: "var(--text-3)", marginTop: 2 }}>
                             {clientName}
@@ -172,7 +173,7 @@ export default function BelgeIsteButton({ clientId, clientName, clientEmail }: P
                       {/* Doc type chips */}
                       <div>
                         <p style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: 8 }}>
-                          Document types
+                          {t.documentTypes}
                         </p>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
                           {DOC_TYPES.map(t => {
@@ -199,12 +200,12 @@ export default function BelgeIsteButton({ clientId, clientName, clientEmail }: P
                       {/* Message */}
                       <div>
                         <p style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: 6 }}>
-                          Note to client <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "var(--border)" }}>— optional</span>
+                          {t.noteToClient} <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "var(--border)" }}>— {t.optionalLabel}</span>
                         </p>
                         <textarea
                           value={message}
                           onChange={e => setMessage(e.target.value)}
-                          placeholder={`e.g. Please upload your ${new Date().toLocaleString("en-GB", { month: "long" })} invoices`}
+                          placeholder={t.notePlaceholder.replace("{month}", new Date().toLocaleString("en-GB", { month: "long" }))}
                           rows={2}
                           className="input-base"
                           style={{ fontSize: 12.5, resize: "none", padding: "8px 12px", lineHeight: 1.55 }}
@@ -234,7 +235,7 @@ export default function BelgeIsteButton({ clientId, clientName, clientEmail }: P
                           </div>
                           <div>
                             <p style={{ fontSize: 12.5, fontWeight: 600, color: sendEmail ? "var(--accent)" : "var(--text-2)", lineHeight: 1 }}>
-                              Send email to client
+                              {t.sendEmailToClient}
                             </p>
                             <p style={{ fontSize: 11, color: "var(--text-3)", marginTop: 2 }}>
                               {clientEmail}
@@ -249,7 +250,7 @@ export default function BelgeIsteButton({ clientId, clientName, clientEmail }: P
                         }}>
                           <ClipboardText size={14} style={{ color: "var(--text-3)", flexShrink: 0 }} />
                           <p style={{ fontSize: 12, color: "var(--text-3)" }}>
-                            No email on file — link will be generated to copy manually
+                            {t.noEmailOnFile}
                           </p>
                         </div>
                       )}
@@ -262,7 +263,7 @@ export default function BelgeIsteButton({ clientId, clientName, clientEmail }: P
                       display: "flex", gap: 6, justifyContent: "flex-end",
                     }}>
                       <button onClick={close} style={{ fontSize: 12.5, fontWeight: 500, padding: "7px 14px", borderRadius: 8, background: "var(--surface-2)", color: "var(--text-2)", border: "1px solid var(--border)", cursor: "pointer" }}>
-                        Cancel
+                        {t.cancel}
                       </button>
                       <button
                         onClick={send}
@@ -284,17 +285,17 @@ export default function BelgeIsteButton({ clientId, clientName, clientEmail }: P
                               animate={{ rotate: 360 }}
                               transition={{ repeat: Infinity, duration: 0.7, ease: "linear" }}
                             />
-                            Sending…
+                            {t.sending}
                           </>
                         ) : sendEmail && clientEmail ? (
                           <>
                             <PaperPlaneTilt size={13} weight="bold" />
-                            Send request
+                            {t.sendRequest}
                           </>
                         ) : (
                           <>
                             <LinkIcon size={13} weight="bold" />
-                            Create link
+                            {t.createLink}
                           </>
                         )}
                       </button>
@@ -329,12 +330,12 @@ export default function BelgeIsteButton({ clientId, clientName, clientEmail }: P
                       </motion.div>
 
                       <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)", letterSpacing: "-0.025em", marginBottom: 6 }}>
-                        {done.emailSent ? "Request sent" : "Link ready"}
+                        {done.emailSent ? t.requestSent : t.linkReady}
                       </p>
                       <p style={{ fontSize: 12.5, color: "var(--text-3)", marginBottom: 20 }}>
                         {done.emailSent && done.to
-                          ? `Email delivered to ${done.to}`
-                          : "Copy the link below and send it to your client"}
+                          ? t.emailDeliveredTo.replace("{email}", done.to)
+                          : t.copyLinkBelow}
                       </p>
 
                       {/* URL row */}
@@ -357,7 +358,7 @@ export default function BelgeIsteButton({ clientId, clientName, clientEmail }: P
                             border: "1px solid var(--border)", cursor: "pointer", transition: "all 0.15s",
                           }}
                         >
-                          {copied ? <><CheckCircle size={11} weight="fill" /> Copied</> : "Copy"}
+                          {copied ? <><CheckCircle size={11} weight="fill" /> {t.copied}</> : t.copy}
                         </button>
                       </div>
 
@@ -365,7 +366,7 @@ export default function BelgeIsteButton({ clientId, clientName, clientEmail }: P
                         onClick={close}
                         style={{ fontSize: 12.5, fontWeight: 500, padding: "8px 20px", borderRadius: 8, background: "var(--surface-2)", color: "var(--text-2)", border: "1px solid var(--border)", cursor: "pointer", width: "100%" }}
                       >
-                        Done
+                        {t.done}
                       </button>
                     </div>
                   </motion.div>

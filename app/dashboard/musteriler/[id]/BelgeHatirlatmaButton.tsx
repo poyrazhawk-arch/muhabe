@@ -2,12 +2,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { PaperPlaneTilt, CheckCircle } from "@phosphor-icons/react";
+import { useDict } from "@/lib/i18n/LocaleContext";
 
 export default function BelgeHatirlatmaButton({ tokenId, clientEmail }: { tokenId: string; clientEmail?: string | null }) {
+  const t = useDict().musteriler;
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
   if (!clientEmail) return (
-    <span className="text-[11px]" style={{ color: "var(--text-3)" }}>No email</span>
+    <span className="text-[11px]" style={{ color: "var(--text-3)" }}>{t.noEmail}</span>
   );
 
   async function send() {
@@ -31,24 +33,24 @@ export default function BelgeHatirlatmaButton({ tokenId, clientEmail }: { tokenI
           className="inline-flex items-center gap-1.5 text-[11.5px] font-medium px-2.5 py-1 rounded-lg transition-all"
           style={{ color: "var(--accent)", background: "var(--accent-bg)", border: "1px solid var(--border)" }}>
           <PaperPlaneTilt size={12} />
-          Send reminder
+          {t.sendReminder}
         </motion.button>
       )}
       {state === "sending" && (
         <motion.span key="sending" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          className="text-[11px]" style={{ color: "var(--text-3)" }}>Sending…</motion.span>
+          className="text-[11px]" style={{ color: "var(--text-3)" }}>{t.sending}</motion.span>
       )}
       {state === "sent" && (
         <motion.span key="sent" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
           className="inline-flex items-center gap-1 text-[11.5px] font-medium" style={{ color: "#15803d" }}>
-          <CheckCircle size={12} weight="fill" /> Sent to {clientEmail}
+          <CheckCircle size={12} weight="fill" /> {t.sentTo.replace("{email}", clientEmail)}
         </motion.span>
       )}
       {state === "error" && (
         <motion.button key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           onClick={() => setState("idle")}
           className="text-[11px] font-medium" style={{ color: "#dc2626" }}>
-          Failed — retry
+          {t.failedRetry}
         </motion.button>
       )}
     </AnimatePresence>

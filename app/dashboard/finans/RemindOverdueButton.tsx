@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { BellRinging, CheckCircle, Warning } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "motion/react";
+import { useDict } from "@/lib/i18n/LocaleContext";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 type OverdueFee = { id: string; email: string };
 
 export default function RemindOverdueButton({ overdueFees }: { overdueFees: OverdueFee[] }) {
+  const t = useDict().finans;
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
   async function remindAll() {
@@ -49,7 +51,7 @@ export default function RemindOverdueButton({ overdueFees }: { overdueFees: Over
           }}
         >
           <BellRinging size={13} weight="bold" />
-          Remind overdue · {overdueFees.length}
+          {t.remindOverdue} · {overdueFees.length}
         </motion.button>
       )}
 
@@ -63,7 +65,7 @@ export default function RemindOverdueButton({ overdueFees }: { overdueFees: Over
             style={{ display: "inline-block", width: 12, height: 12, borderRadius: "50%", borderWidth: 2, borderStyle: "solid", borderColor: "var(--text-3) var(--text-3) var(--text-3) transparent" }}
             animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.7, ease: "linear" }}
           />
-          Sending {overdueFees.length} reminders…
+          {t.sendingReminders.replace("{count}", String(overdueFees.length))}
         </motion.div>
       )}
 
@@ -75,7 +77,7 @@ export default function RemindOverdueButton({ overdueFees }: { overdueFees: Over
           style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 2px", fontSize: 12.5, fontWeight: 600, color: "#15803d" }}
         >
           <CheckCircle size={14} weight="fill" />
-          {overdueFees.length} sent
+          {t.remindersSent.replace("{count}", String(overdueFees.length))}
         </motion.div>
       )}
 
@@ -86,7 +88,7 @@ export default function RemindOverdueButton({ overdueFees }: { overdueFees: Over
           style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 2px", fontSize: 12.5, color: "var(--red)" }}
         >
           <Warning size={13} weight="fill" />
-          Failed
+          {t.remindersFailed}
         </motion.div>
       )}
     </AnimatePresence>

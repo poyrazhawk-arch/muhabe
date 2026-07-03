@@ -1,8 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { format, differenceInDays } from "date-fns";
 import { enUS } from "date-fns/locale";
+import { formatMoney } from "@/lib/utils/currency";
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
@@ -11,13 +12,13 @@ export async function GET(req: NextRequest) {
   if (secret !== process.env.CRON_SECRET)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
 
   const { data: fees } = await supabase
     .from("service_fees")
-    .select("*, clients(full_name, email, company_name), accountants(full_name)")
+    .select("*, clients(full_name, email, company_name), accountants(full_name, locale)")
     .in("status", ["pending", "overdue"])
     .lte("due_date", todayStr)
     .not("due_date", "is", null);
@@ -41,7 +42,7 @@ export async function GET(req: NextRequest) {
     if (![3, 7, 14].includes(daysLate) && daysLate !== 0) { skipped++; continue; }
 
     const period = format(new Date(fee.period_year, fee.period_month - 1, 1), "MMMM yyyy", { locale: enUS });
-    const amount = Number(fee.amount).toLocaleString("en-GB", { style: "currency", currency: "GBP" });
+    const amount = formatMoney(Number(fee.amount), accountant?.locale === "en" ? "en" : "tr");
 
     try {
       await resend.emails.send({

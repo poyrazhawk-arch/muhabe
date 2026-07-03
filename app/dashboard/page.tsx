@@ -2,37 +2,34 @@ import { createClient } from "@/lib/supabase/server";
 import { calculateRAG } from "@/lib/utils/rag";
 import { format, isToday, isThisWeek, isPast, isBefore } from "date-fns";
 import { enUS } from "date-fns/locale";
+import { tr } from "date-fns/locale";
 import Link from "next/link";
 import { Plus } from "@phosphor-icons/react/dist/ssr";
 import MetricStrip from "@/components/dashboard/MetricStrip";
 import CollectionWidget from "@/components/dashboard/CollectionWidget";
-
-const RAG_CFG: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  red:   { label: "Critical", color: "#dc2626", bg: "#fef2f2", border: "#fecaca" },
-  amber: { label: "Warning",  color: "#d97706", bg: "#fffbeb", border: "#fde68a" },
-  green: { label: "OK",       color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
-};
+import { getLocale } from "@/lib/i18n/server";
+import { getDict } from "@/lib/i18n/dictionaries";
+import { formatMoney } from "@/lib/utils/currency";
 
 type StatKey = "clients" | "today" | "overdue" | "docs";
 
-const STAT_DEFS: Array<{
-  key: StatKey;
-  label: string;
-  dotColor: string;
-}> = [
-  { key: "clients", label: "Active clients",  dotColor: "#3b82f6" },
-  { key: "today",   label: "Due today",       dotColor: "#f59e0b" },
-  { key: "overdue", label: "Overdue tasks",   dotColor: "#ef4444" },
-  { key: "docs",    label: "Pending docs",    dotColor: "#8b5cf6" },
-];
-
 export default async function DashboardPage() {
+  const locale = await getLocale();
+  const t = getDict(locale).dashboardHome;
+  const dateLocale = locale === "tr" ? tr : enUS;
+
+  const RAG_CFG: Record<string, { label: string; color: string; bg: string; border: string }> = {
+    red:   { label: locale === "tr" ? "Kritik" : "Critical", color: "#dc2626", bg: "#fef2f2", border: "#fecaca" },
+    amber: { label: locale === "tr" ? "Uyarı"   : "Warning",  color: "#d97706", bg: "#fffbeb", border: "#fde68a" },
+    green: { label: "OK",       color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
+  };
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   const { data: accountant } = await supabase
     .from("accountants").select("id, full_name").eq("user_id", user!.id).single();
-  if (!accountant) return <div>Account not found.</div>;
+  if (!accountant) return <div>{t.accountNotFound}</div>;
 
   const now2   = new Date();
   const month2 = now2.getMonth() + 1;
@@ -94,7 +91,7 @@ export default async function DashboardPage() {
   const feeBekleyen = thisMonthFees?.filter(f => f.status === "pending").reduce((s, f) => s + Number(f.amount), 0) ?? 0;
   const feeGecikmiş = thisMonthFees?.filter(f => f.status === "overdue").reduce((s, f) => s + Number(f.amount), 0) ?? 0;
   const feeToplam   = feeOdenen + feeBekleyen + feeGecikmiş;
-  const fmtTL = (n: number) => n.toLocaleString("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 });
+  const fmtTL = (n: number) => formatMoney(n, locale, { maximumFractionDigits: 0 });
 
   return (
     <div className="space-y-6 animate-fade-up">
@@ -115,13 +112,13 @@ export default async function DashboardPage() {
               marginBottom: 14,
             }}
           >
-            {format(today, "EEEE, d MMMM yyyy", { locale: enUS })}
+            {format(today, "EEEE, d MMMM yyyy", { locale: dateLocale })}
           </p>
           <MetricStrip metrics={[
-            { key: "clients", label: "Active clients", value: stats.clients },
-            { key: "today",   label: "Due today",      value: stats.today,   isWarning: stats.today > 0 },
-            { key: "overdue", label: "Overdue tasks",  value: stats.overdue, isDanger:  stats.overdue > 0 },
-            { key: "docs",    label: "Pending docs",   value: stats.docs },
+            { key: "clients", label: t.activeClients, value: stats.clients },
+            { key: "today",   label: t.dueToday,      value: stats.today,   isWarning: stats.today > 0 },
+            { key: "overdue", label: t.overdueTasksLabel,  value: stats.overdue, isDanger:  stats.overdue > 0 },
+            { key: "docs",    label: t.pendingDocs,   value: stats.docs },
           ]} />
         </div>
         <Link
@@ -134,7 +131,7 @@ export default async function DashboardPage() {
           }}
         >
           <Plus size={13} weight="bold" />
-          New Task
+          {t.newTask}
         </Link>
       </div>
 
@@ -144,7 +141,8 @@ export default async function DashboardPage() {
         paid={feeOdenen}
         pending={feeBekleyen}
         overdue={feeGecikmiş}
-        monthLabel={format(today, "MMMM yyyy", { locale: enUS })}
+        monthLabel={format(today, "MMMM yyyy", { locale: dateLocale })}
+        locale={locale}
       />
 
       {/* Content row */}
@@ -160,23 +158,23 @@ export default async function DashboardPage() {
             style={{ borderBottom: "1px solid var(--border-2)" }}
           >
             <p style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-3)", letterSpacing: "0.07em", textTransform: "uppercase" }}>
-              Clients · {clients?.length ?? 0} active
+              {t.clientsHeader} · {clients?.length ?? 0} {t.active}
             </p>
             <Link
               href="/dashboard/musteriler"
               style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-3)", textDecoration: "none" }}
             >
-              View all →
+              {t.viewAll}
             </Link>
           </div>
 
           <div className="max-h-[280px] overflow-auto">
             {clientsWithRAG.length === 0 ? (
               <div className="px-5 py-10 text-center">
-                <p className="text-[13px]" style={{ color: "var(--text-3)" }}>No clients yet</p>
+                <p className="text-[13px]" style={{ color: "var(--text-3)" }}>{t.noClientsYet}</p>
                 <Link href="/dashboard/musteriler/yeni"
                   className="text-[12px] mt-2 inline-block font-medium" style={{ color: "var(--accent)" }}>
-                  Add client
+                  {t.addClient}
                 </Link>
               </div>
             ) : clientsWithRAG.map(client => {
@@ -211,7 +209,7 @@ export default async function DashboardPage() {
                   <div className="flex items-center gap-2 shrink-0 ml-3">
                     {client.overdueCount > 0 && (
                       <span className="text-[11px] font-medium tabular-nums" style={{ color: "var(--red)" }}>
-                        {client.overdueCount} overdue
+                        {client.overdueCount} {t.overdueCount}
                       </span>
                     )}
                     <span
@@ -234,16 +232,16 @@ export default async function DashboardPage() {
         >
           <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border-2)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <p style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-3)", letterSpacing: "0.07em", textTransform: "uppercase" }}>
-              This week
+              {t.thisWeek}
             </p>
             <span style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 500 }}>
-              {tasksDueWeek.length} tasks
+              {tasksDueWeek.length} {t.tasksCount}
             </span>
           </div>
           <div className="max-h-[280px] overflow-auto">
             {tasksDueWeek.length === 0 ? (
               <p style={{ padding: "40px 16px", textAlign: "center", fontSize: 12.5, color: "var(--text-3)" }}>
-                Clear week ahead
+                {t.clearWeek}
               </p>
             ) : tasksDueWeek.map((task: any, ti: number) => {
               const overdue   = isPast(new Date(task.due_date)) && !isToday(new Date(task.due_date));
@@ -288,14 +286,14 @@ export default async function DashboardPage() {
                         fontSize: 9.5, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
                         background: "var(--red-bg)", color: "var(--red)", letterSpacing: "0.04em",
                       }}>
-                        LATE
+                        {t.late}
                       </span>
                     )}
                     <span style={{
                       fontSize: 11, fontWeight: 500, color: overdue ? "var(--red)" : todayTask ? "var(--amber)" : "var(--text-3)",
                       fontVariantNumeric: "tabular-nums",
                     }}>
-                      {format(new Date(task.due_date), "d MMM", { locale: enUS })}
+                      {format(new Date(task.due_date), "d MMM", { locale: dateLocale })}
                     </span>
                   </div>
                 </div>

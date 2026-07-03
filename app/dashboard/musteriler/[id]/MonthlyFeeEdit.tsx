@@ -3,10 +3,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { PencilSimple, Check, X } from "@phosphor-icons/react";
+import { useDict, useLocale } from "@/lib/i18n/LocaleContext";
+import { formatMoney, moneySymbol } from "@/lib/utils/currency";
 
 export default function MonthlyFeeEdit({
   clientId, current,
 }: { clientId: string; current: number | null }) {
+  const t = useDict().musteriler;
+  const locale = useLocale();
   const [editing, setEditing] = useState(false);
   const [value, setValue]     = useState(current != null ? String(current) : "");
   const [saving, setSaving]   = useState(false);
@@ -37,8 +41,8 @@ export default function MonthlyFeeEdit({
         >
           <p className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--text-1)" }}>
             {current != null
-              ? current.toLocaleString("en-GB", { style: "currency", currency: "GBP" }) + "/mo"
-              : <span style={{ color: "var(--text-3)" }}>Not set</span>
+              ? formatMoney(current, locale) + t.perMonthSuffix
+              : <span style={{ color: "var(--text-3)" }}>{t.notSet}</span>
             }
           </p>
           <motion.button
@@ -62,7 +66,7 @@ export default function MonthlyFeeEdit({
         >
           <div className="relative">
             <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[11px] font-medium pointer-events-none"
-              style={{ color: "var(--text-3)" }}>£</span>
+              style={{ color: "var(--text-3)" }}>{moneySymbol(locale)}</span>
             <input
               autoFocus type="number" min="0" step="0.01"
               value={value}

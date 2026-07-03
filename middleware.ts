@@ -25,12 +25,29 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
+  // Browser dilini otomatik tespit et (sadece ilk ziyarette)
+  const existingLocale = request.cookies.get("locale")?.value;
+  let activeLocale: "tr" | "en" = existingLocale === "tr" ? "tr" : existingLocale === "en" ? "en" : "en";
+  if (!existingLocale) {
+    const acceptLanguage = request.headers.get("accept-language") ?? "";
+    activeLocale = acceptLanguage.toLowerCase().startsWith("tr") ? "tr" : "en";
+    supabaseResponse.cookies.set("locale", activeLocale, { maxAge: 60 * 60 * 24 * 365, path: "/" });
+  }
+
+  // Ülke tespiti (IP konumu) — GİB gibi Türkiye'ye özel özellikleri kapılamak için.
+  // İlk ziyarette Vercel geo header'ından yazılır; header yoksa (localhost) varsayılan TR.
+  if (!request.cookies.get("country")) {
+    const country = (request.headers.get("x-vercel-ip-country") || "TR").toUpperCase();
+    supabaseResponse.cookies.set("country", country, { maxAge: 60 * 60 * 24 * 365, path: "/" });
+  }
+
   const path = request.nextUrl.pathname;
   const isAuthPage      = path.startsWith("/auth");
   const isUploadPage    = path.startsWith("/yukle");
   const isApiRoute      = path.startsWith("/api");
   const isPricingPage   = path === "/pricing";
-  const isPublicPage    = isAuthPage || isUploadPage || isApiRoute || isPricingPage || path === "/";
+  const isPortalPage    = path.startsWith("/portal");
+  const isPublicPage    = isAuthPage || isUploadPage || isApiRoute || isPricingPage || isPortalPage || path === "/";
   const isPasswordReset = path === "/auth/sifremi-guncelle";
 
   // Not logged in → login page
@@ -51,11 +68,17 @@ export async function middleware(request: NextRequest) {
   if (user && path.startsWith("/dashboard")) {
     const { data: accountant } = await supabase
       .from("accountants")
-      .select("plan, trial_ends_at")
+      .select("plan, trial_ends_at, locale")
       .eq("user_id", user.id)
       .single();
 
     if (accountant) {
+      // Muhasebecinin kalıcı dil tercihini tarayıcı diline eşitle
+      // (cron/e-posta gibi istek bağlamı olmayan yerler bunu kullanır)
+      if (accountant.locale !== activeLocale) {
+        await supabase.from("accountants").update({ locale: activeLocale }).eq("user_id", user.id);
+      }
+
       const hasPaidPlan  = accountant.plan && accountant.plan !== "free";
       const trialActive  = accountant.trial_ends_at
         ? new Date(accountant.trial_ends_at) > new Date()

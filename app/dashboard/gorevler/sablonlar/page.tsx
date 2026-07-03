@@ -1,15 +1,20 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import SablonForm from "./SablonForm";
-
-const RECURRENCE: Record<string, string> = {
-  monthly:   "Monthly",
-  quarterly: "Quarterly",
-  yearly:    "Yearly",
-  custom:    "Custom",
-};
+import { getLocale } from "@/lib/i18n/server";
+import { getDict } from "@/lib/i18n/dictionaries";
 
 export default async function GorevSablonlariPage() {
+  const locale = await getLocale();
+  const t = getDict(locale).gorevler;
+
+  const RECURRENCE: Record<string, string> = {
+    monthly:   t.recurrenceMonthly,
+    quarterly: t.recurrenceQuarterly,
+    yearly:    t.recurrenceYearly,
+    custom:    t.recurrenceCustom,
+  };
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const { data: accountant } = await supabase
@@ -27,14 +32,14 @@ export default async function GorevSablonlariPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Link href="/dashboard/gorevler" className="text-[12px] font-medium" style={{ color: "var(--text-3)" }}>
-              Tasks
+              {t.tasks}
             </Link>
             <span style={{ color: "var(--text-3)" }}>/</span>
-            <span className="text-[12px] font-medium" style={{ color: "var(--text-2)" }}>Templates</span>
+            <span className="text-[12px] font-medium" style={{ color: "var(--text-2)" }}>{t.templates}</span>
           </div>
-          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>Task Templates</h1>
+          <h1 className="text-xl font-semibold tracking-tight" style={{ color: "var(--text-1)" }}>{t.taskTemplates}</h1>
           <p className="text-[13px] mt-0.5" style={{ color: "var(--text-3)" }}>
-            Recurring task templates generated automatically each month
+            {t.recurringTemplatesSub}
           </p>
         </div>
         <SablonForm />
@@ -55,16 +60,16 @@ export default async function GorevSablonlariPage() {
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
               </svg>
             </div>
-            <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>No templates yet</p>
+            <p className="text-[13px] font-medium" style={{ color: "var(--text-1)" }}>{t.noTemplatesYet}</p>
             <p className="text-[12px] mt-1" style={{ color: "var(--text-3)" }}>
-              Add a template — tasks will be auto-created each month
+              {t.addTemplateAutoCreate}
             </p>
           </div>
         ) : (
           <table className="w-full">
             <thead style={{ background: "#fafbfc", borderBottom: "1px solid var(--border)" }}>
               <tr>
-                {["Template Name", "Recurrence", "Due Day", "Advance (days)", "Status"].map((h, i) => (
+                {[t.colTemplateName, t.colRecurrence, t.colDueDay, t.colAdvanceDays, t.colStatus].map((h, i) => (
                   <th key={i} className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
                     style={{ color: "var(--text-3)", letterSpacing: "0.06em" }}>{h}</th>
                 ))}
@@ -87,17 +92,17 @@ export default async function GorevSablonlariPage() {
                     </span>
                   </td>
                   <td className="px-5 py-3 text-[13px] tabular-nums" style={{ color: "var(--text-2)" }}>
-                    {s.due_day ? `Day ${s.due_day}` : s.due_month ? `Month ${s.due_month}` : "—"}
+                    {s.due_day ? t.day.replace("{n}", String(s.due_day)) : s.due_month ? t.month.replace("{n}", String(s.due_month)) : "—"}
                   </td>
                   <td className="px-5 py-3 text-[13px] tabular-nums" style={{ color: "var(--text-2)" }}>
-                    {s.advance_days}d before
+                    {t.daysBefore.replace("{n}", String(s.advance_days))}
                   </td>
                   <td className="px-5 py-3">
                     <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md"
                       style={s.is_active
                         ? { background: "#f0fdf4", color: "#15803d", border: "1px solid #bbf7d0" }
                         : { background: "var(--surface-2)", color: "var(--text-3)", border: "1px solid var(--border)" }}>
-                      {s.is_active ? "Active" : "Inactive"}
+                      {s.is_active ? t.statusActive : t.statusInactive}
                     </span>
                   </td>
                 </tr>
@@ -111,10 +116,9 @@ export default async function GorevSablonlariPage() {
         className="rounded-xl px-5 py-4"
         style={{ background: "var(--amber-bg)", border: "1px solid var(--amber-lt)" }}
       >
-        <p className="text-[12px] font-semibold mb-1" style={{ color: "var(--amber)" }}>Auto-scheduling</p>
+        <p className="text-[12px] font-semibold mb-1" style={{ color: "var(--amber)" }}>{t.autoScheduling}</p>
         <p className="text-[12px] leading-relaxed" style={{ color: "var(--text-2)" }}>
-          Templates run automatically on the 1st of each month at 08:00 and create tasks for all active clients.
-          Manual trigger: <code style={{ background: "rgba(0,0,0,0.05)", padding: "1px 5px", borderRadius: "4px", fontSize: "11px" }}>/api/cron/gorev-olustur</code>
+          {t.autoSchedulingNote} <code style={{ background: "rgba(0,0,0,0.05)", padding: "1px 5px", borderRadius: "4px", fontSize: "11px" }}>/api/cron/gorev-olustur</code>
         </p>
       </div>
     </div>

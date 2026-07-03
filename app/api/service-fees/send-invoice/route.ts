@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendFeeInvoiceEmail } from "@/lib/utils/email";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
+import { getLocale } from "@/lib/i18n/server";
+import { formatMoney } from "@/lib/utils/currency";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -29,8 +31,9 @@ export async function POST(req: NextRequest) {
   if (!client?.email)
     return NextResponse.json({ error: "Client has no email address" }, { status: 400 });
 
+  const locale = await getLocale();
   const period = format(new Date(fee.period_year, fee.period_month - 1, 1), "MMMM yyyy", { locale: enUS });
-  const amount = Number(fee.amount).toLocaleString("en-GB", { style: "currency", currency: "GBP" });
+  const amount = formatMoney(Number(fee.amount), locale);
   const dueDate = fee.due_date
     ? format(new Date(fee.due_date), "d MMMM yyyy", { locale: enUS })
     : undefined;

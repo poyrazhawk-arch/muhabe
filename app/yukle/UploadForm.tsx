@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useDict } from "@/lib/i18n/LocaleContext";
 
 export default function UploadForm({
   token,
@@ -11,15 +12,16 @@ export default function UploadForm({
   documentTypes: string[];
   message: string | null;
 }) {
+  const t = useDict().yukle;
   const [files, setFiles] = useState<File[]>([]);
-  const [selectedType, setSelectedType] = useState(documentTypes[0] ?? "Genel Belge");
+  const [selectedType, setSelectedType] = useState(documentTypes[0] ?? t.genericDocument);
   const [loading, setLoading] = useState(false);
   const [uploaded, setUploaded] = useState(false);
   const [error, setError] = useState("");
 
   async function handleUpload() {
     if (files.length === 0) {
-      setError("Lütfen en az bir dosya seçin");
+      setError(t.selectAtLeastOneFile);
       return;
     }
     setLoading(true);
@@ -37,7 +39,7 @@ export default function UploadForm({
 
       if (!res.ok) {
         const json = await res.json();
-        setError(json.hata ?? "Yükleme başarısız");
+        setError(json.hata ?? t.uploadFailed);
         setLoading(false);
         return;
       }
@@ -55,9 +57,9 @@ export default function UploadForm({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h3 className="font-semibold text-slate-900 mb-1">Belgeler yüklendi!</h3>
+        <h3 className="font-semibold text-slate-900 mb-1">{t.documentsUploaded}</h3>
         <p className="text-slate-500 text-sm">
-          {files.length} belge başarıyla muhasebeciye iletildi.
+          {files.length} {t.docsDeliveredSuccessfully}
         </p>
       </div>
     );
@@ -73,19 +75,19 @@ export default function UploadForm({
 
       {documentTypes.length > 1 && (
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Belge türü</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1">{t.documentTypeLabel}</label>
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
             className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {documentTypes.map((t) => <option key={t} value={t}>{t}</option>)}
+            {documentTypes.map((dt) => <option key={dt} value={dt}>{dt}</option>)}
           </select>
         </div>
       )}
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Dosyalar</label>
+        <label className="block text-sm font-medium text-slate-700 mb-1">{t.filesLabel}</label>
         <div
           className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-400 transition-colors"
           onClick={() => document.getElementById("file-input")?.click()}
@@ -103,12 +105,12 @@ export default function UploadForm({
               {files.map((f, i) => (
                 <p key={i} className="text-sm text-slate-700 font-medium">{f.name}</p>
               ))}
-              <p className="text-xs text-slate-400 mt-2">Değiştirmek için tıklayın</p>
+              <p className="text-xs text-slate-400 mt-2">{t.clickToChange}</p>
             </div>
           ) : (
             <>
-              <p className="text-slate-500 text-sm">Dosyaları buraya sürükleyin veya tıklayın</p>
-              <p className="text-slate-400 text-xs mt-1">PDF, Excel, JPG, PNG — maks. 10MB</p>
+              <p className="text-slate-500 text-sm">{t.dragOrClickFiles}</p>
+              <p className="text-slate-400 text-xs mt-1">{t.fileFormatsNote}</p>
             </>
           )}
         </div>
@@ -125,7 +127,7 @@ export default function UploadForm({
         disabled={loading || files.length === 0}
         className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        {loading ? "Yükleniyor..." : `${files.length > 0 ? files.length + " dosya yükle" : "Dosya seç"}`}
+        {loading ? t.uploading : files.length > 0 ? t.uploadFilesCount.replace("{count}", String(files.length)).replace("{plural}", "") : t.selectFile}
       </button>
     </div>
   );

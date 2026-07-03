@@ -2,11 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import { enUS } from "date-fns/locale";
+import { tr as trLocale } from "date-fns/locale";
 import PrintButton from "./PrintButton";
-
-const DOC_DURUM: Record<string, string> = {
-  pending: "Pending", received: "Received", approved: "Approved", rejected: "Rejected"
-};
+import { getLocale } from "@/lib/i18n/server";
+import { getDict } from "@/lib/i18n/dictionaries";
 
 export default async function MusteriRaporPage({
   params,
@@ -17,6 +16,14 @@ export default async function MusteriRaporPage({
 }) {
   const { id } = await params;
   const { tip = "aylik", ay } = await searchParams;
+
+  const locale = await getLocale();
+  const t = getDict(locale).raporlar;
+  const dfLocale = locale === "tr" ? trLocale : enUS;
+
+  const DOC_DURUM: Record<string, string> = {
+    pending: t.docStatusPending, received: t.docStatusReceived, approved: t.docStatusApproved, rejected: t.docStatusRejected
+  };
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -31,7 +38,7 @@ export default async function MusteriRaporPage({
   const referenceDate = ay ? new Date(ay) : subMonths(new Date(), 0);
   const monthStart = startOfMonth(referenceDate);
   const monthEnd = endOfMonth(referenceDate);
-  const ayAdi = format(referenceDate, "MMMM yyyy", { locale: enUS });
+  const ayAdi = format(referenceDate, "MMMM yyyy", { locale: dfLocale });
 
   const [{ data: documents }, { data: tasks }, { data: allTasks }] = await Promise.all([
     supabase.from("documents").select("*")
@@ -51,14 +58,14 @@ export default async function MusteriRaporPage({
   const pendingTasks = tasks?.filter(t => t.status !== "completed" && t.status !== "cancelled") ?? [];
 
   const kapanisListesi = [
-    { baslik: "VAT Return", tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("vat") && t.status === "completed") ?? false },
-    { baslik: "PAYE / Payroll Filing", tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("paye") && t.status === "completed") ?? false },
-    { baslik: "Corporation Tax Return", tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("corporation tax") && t.status === "completed") ?? false },
-    { baslik: "Company Accounts Filing", tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("accounts") && t.status === "completed") ?? false },
-    { baslik: "Bank Statements Received", tamamlandi: documents?.some(d => d.document_type.toLowerCase().includes("bank") && d.status !== "pending") ?? false },
-    { baslik: "Invoices Received", tamamlandi: documents?.some(d => d.document_type.toLowerCase().includes("invoice") && d.status !== "pending") ?? false },
-    { baslik: "Payroll Processed", tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("payroll") && t.status === "completed") ?? false },
-    { baslik: "Trial Balance Extracted", tamamlandi: false },
+    { baslik: t.checklistVatReturn, tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("vat") && t.status === "completed") ?? false },
+    { baslik: t.checklistPayeFiling, tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("paye") && t.status === "completed") ?? false },
+    { baslik: t.checklistCorporationTax, tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("corporation tax") && t.status === "completed") ?? false },
+    { baslik: t.checklistCompanyAccounts, tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("accounts") && t.status === "completed") ?? false },
+    { baslik: t.checklistBankStatements, tamamlandi: documents?.some(d => d.document_type.toLowerCase().includes("bank") && d.status !== "pending") ?? false },
+    { baslik: t.checklistInvoicesReceived, tamamlandi: documents?.some(d => d.document_type.toLowerCase().includes("invoice") && d.status !== "pending") ?? false },
+    { baslik: t.checklistPayrollProcessed, tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("payroll") && t.status === "completed") ?? false },
+    { baslik: t.checklistTrialBalance, tamamlandi: false },
   ];
 
   const tamamlananSayisi = kapanisListesi.filter(i => i.tamamlandi).length;
@@ -69,7 +76,7 @@ export default async function MusteriRaporPage({
       <div className="flex items-center justify-between mb-6 print:hidden">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
-            {tip === "kapanis" ? "Period Close Checklist" : `Monthly Activity Summary — ${ayAdi}`}
+            {tip === "kapanis" ? t.periodCloseChecklistTitle : t.monthlySummaryTitle.replace("{month}", ayAdi)}
           </h1>
           <p className="text-slate-500 text-sm mt-1">{client.full_name} {client.company_name ? `· ${client.company_name}` : ""}</p>
         </div>
@@ -83,13 +90,13 @@ export default async function MusteriRaporPage({
           <div className="flex items-start justify-between">
             <div>
               <h2 className="text-xl font-bold text-slate-900">
-                {tip === "kapanis" ? "Period Close Checklist" : "Monthly Activity Summary"}
+                {tip === "kapanis" ? t.periodCloseChecklistTitle : t.monthlySummaryTitle.replace(" — {month}", "")}
               </h2>
               <p className="text-slate-500 mt-1">{client.full_name} {client.company_name ? `· ${client.company_name}` : ""}</p>
             </div>
             <div className="text-right text-sm text-slate-400">
               <p>{accountant?.office_name ?? accountant?.full_name}</p>
-              <p>{format(new Date(), "d MMMM yyyy", { locale: enUS })}</p>
+              <p>{format(new Date(), "d MMMM yyyy", { locale: dfLocale })}</p>
             </div>
           </div>
           {tip === "aylik" && (
@@ -103,8 +110,8 @@ export default async function MusteriRaporPage({
           /* ─── DÖNEM KAPANIS ─── */
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-slate-800">Checklist</h3>
-              <span className="text-sm text-slate-500">{tamamlananSayisi}/{kapanisListesi.length} completed</span>
+              <h3 className="font-semibold text-slate-800">{t.checklist}</h3>
+              <span className="text-sm text-slate-500">{t.completedCount.replace("{completed}", String(tamamlananSayisi)).replace("{total}", String(kapanisListesi.length))}</span>
             </div>
             <div className="space-y-2">
               {kapanisListesi.map((item, i) => (
@@ -126,7 +133,7 @@ export default async function MusteriRaporPage({
             {/* İlerleme */}
             <div className="mt-6 p-4 bg-slate-50 rounded-lg">
               <div className="flex justify-between text-sm text-slate-600 mb-2">
-                <span>Overall Progress</span>
+                <span>{t.overallProgress}</span>
                 <span>{Math.round((tamamlananSayisi / kapanisListesi.length) * 100)}%</span>
               </div>
               <div className="w-full bg-slate-200 rounded-full h-2">
@@ -144,29 +151,29 @@ export default async function MusteriRaporPage({
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-slate-50 rounded-lg p-4 text-center border border-slate-200">
                 <p className="text-2xl font-bold text-slate-900">{documents?.length ?? 0}</p>
-                <p className="text-xs text-slate-500 mt-1">Documents</p>
+                <p className="text-xs text-slate-500 mt-1">{t.documents}</p>
               </div>
               <div className="bg-slate-50 rounded-lg p-4 text-center border border-slate-200">
                 <p className="text-2xl font-bold text-green-600">{completedTasks.length}</p>
-                <p className="text-xs text-slate-500 mt-1">Completed Tasks</p>
+                <p className="text-xs text-slate-500 mt-1">{t.completedTasks}</p>
               </div>
               <div className={`rounded-lg p-4 text-center border ${pendingTasks.length > 0 ? "bg-orange-50 border-orange-200" : "bg-slate-50 border-slate-200"}`}>
                 <p className={`text-2xl font-bold ${pendingTasks.length > 0 ? "text-orange-600" : "text-slate-900"}`}>{pendingTasks.length}</p>
-                <p className="text-xs text-slate-500 mt-1">Pending Tasks</p>
+                <p className="text-xs text-slate-500 mt-1">{t.pendingTasks}</p>
               </div>
             </div>
 
             {/* Belgeler */}
             {documents && documents.length > 0 && (
               <div>
-                <h3 className="font-semibold text-slate-800 mb-3">This Month&apos;s Documents</h3>
+                <h3 className="font-semibold text-slate-800 mb-3">{t.thisMonthsDocuments}</h3>
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-slate-200">
-                      <th className="text-left py-2 text-slate-500 font-medium">File</th>
-                      <th className="text-left py-2 text-slate-500 font-medium">Type</th>
-                      <th className="text-left py-2 text-slate-500 font-medium">Date</th>
-                      <th className="text-left py-2 text-slate-500 font-medium">Status</th>
+                      <th className="text-left py-2 text-slate-500 font-medium">{t.colFile}</th>
+                      <th className="text-left py-2 text-slate-500 font-medium">{t.colType}</th>
+                      <th className="text-left py-2 text-slate-500 font-medium">{t.colDate}</th>
+                      <th className="text-left py-2 text-slate-500 font-medium">{t.colStatus}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -174,7 +181,7 @@ export default async function MusteriRaporPage({
                       <tr key={doc.id} className="border-b border-slate-100">
                         <td className="py-2 text-slate-700">{doc.file_name}</td>
                         <td className="py-2 text-slate-500">{doc.document_type}</td>
-                        <td className="py-2 text-slate-500">{format(new Date(doc.created_at), "d MMM", { locale: enUS })}</td>
+                        <td className="py-2 text-slate-500">{format(new Date(doc.created_at), "d MMM", { locale: dfLocale })}</td>
                         <td className="py-2">
                           <span className={`text-xs px-2 py-0.5 rounded-full ${doc.status === "approved" ? "bg-green-100 text-green-700" : doc.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-blue-100 text-blue-700"}`}>
                             {DOC_DURUM[doc.status]}
@@ -203,7 +210,7 @@ export default async function MusteriRaporPage({
                     {tasks.map((task) => (
                       <tr key={task.id} className="border-b border-slate-100">
                         <td className="py-2 text-slate-700">{task.title}</td>
-                        <td className="py-2 text-slate-500">{format(new Date(task.due_date), "d MMM yyyy", { locale: enUS })}</td>
+                        <td className="py-2 text-slate-500">{format(new Date(task.due_date), "d MMM yyyy", { locale: dfLocale })}</td>
                         <td className="py-2">
                           <span className={`text-xs px-2 py-0.5 rounded-full ${task.status === "completed" ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"}`}>
                             {task.status === "completed" ? "Completed" : "Pending"}

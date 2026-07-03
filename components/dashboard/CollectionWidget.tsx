@@ -2,6 +2,8 @@
 
 import { motion } from "motion/react";
 import Link from "next/link";
+import { formatMoney } from "@/lib/utils/currency";
+import type { Locale } from "@/lib/i18n/dictionaries";
 
 interface Props {
   total: number;
@@ -9,13 +11,11 @@ interface Props {
   pending: number;
   overdue: number;
   monthLabel: string;
+  locale: Locale;
 }
 
-function fmtGBP(n: number) {
-  return n.toLocaleString("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 });
-}
-
-export default function CollectionWidget({ total, paid, pending, overdue, monthLabel }: Props) {
+export default function CollectionWidget({ total, paid, pending, overdue, monthLabel, locale }: Props) {
+  const fmtGBP = (n: number) => formatMoney(n, locale, { maximumFractionDigits: 0 });
   if (total === 0) return null;
 
   const paidPct    = total > 0 ? (paid    / total) * 100 : 0;

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { format } from "date-fns";
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
   if (secret !== process.env.CRON_SECRET)
     return NextResponse.json({ error: "Yetkisiz" }, { status: 401 });
 
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
   const now = new Date();
   const year  = now.getFullYear();
   const month = now.getMonth() + 1;

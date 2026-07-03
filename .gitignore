@@ -28,3 +28,16 @@ Thumbs.db
 next-env.d.ts
 
 .vercel
+
+# Lead-gen / cold-email local tooling (PII — must not be committed)
+*.csv
+email_extractor.py
+extract_new_leads.py
+lead_scraper.py
+maps_scrapling.py
+scrapling_email_extractor.py
+sigorta_scraper.py
+turmob_odalar.py
+turmob_scraper.py
+test_sites.py
+test_sites2.py

@@ -2,8 +2,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { PaperPlaneTilt, CheckCircle } from "@phosphor-icons/react";
+import { useDict } from "@/lib/i18n/LocaleContext";
 
 export default function SendInvoiceButton({ feeId, clientEmail, isOverdue }: { feeId: string; clientEmail?: string | null; isOverdue?: boolean }) {
+  const t = useDict().finans;
   const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
 
   if (!clientEmail) return null;
@@ -32,20 +34,20 @@ export default function SendInvoiceButton({ feeId, clientEmail, isOverdue }: { f
             : { color: "var(--text-3)", background: "var(--surface-2)", border: "1px solid var(--border)" }
           }>
           <PaperPlaneTilt size={12} />
-          Invoice
+          {t.invoice}
         </motion.button>
       )}
       {state === "sending" && (
         <motion.span key="sending" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           className="text-[11px] font-medium" style={{ color: "var(--text-3)" }}>
-          Sending…
+          {t.sendingInvoice}
         </motion.span>
       )}
       {state === "sent" && (
         <motion.span key="sent" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
           className="inline-flex items-center gap-1 text-[11.5px] font-medium"
           style={{ color: "#15803d" }}>
-          <CheckCircle size={12} weight="fill" /> Sent
+          <CheckCircle size={12} weight="fill" /> {t.invoiceSent}
         </motion.span>
       )}
     </AnimatePresence>

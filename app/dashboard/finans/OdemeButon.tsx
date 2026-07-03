@@ -3,10 +3,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { CheckCircle, X } from "@phosphor-icons/react";
+import { useDict } from "@/lib/i18n/LocaleContext";
 
 type State = "idle" | "confirming" | "loading";
 
 export default function OdemeButon({ feeId }: { feeId: string }) {
+  const t = useDict().finans;
   const [state, setState] = useState<State>("idle");
   const router = useRouter();
 
@@ -36,7 +38,7 @@ export default function OdemeButon({ feeId }: { feeId: string }) {
           style={{ color: "#15803d", background: "#f0fdf4", border: "1px solid #bbf7d0" }}
         >
           <CheckCircle size={13} weight="fill" />
-          Mark paid
+          {t.markPaid}
         </motion.button>
       )}
 
@@ -49,13 +51,13 @@ export default function OdemeButon({ feeId }: { feeId: string }) {
           transition={{ type: "spring", stiffness: 420, damping: 28 }}
           className="inline-flex items-center gap-1.5"
         >
-          <span className="text-[11px] font-medium" style={{ color: "var(--text-3)" }}>Confirm?</span>
+          <span className="text-[11px] font-medium" style={{ color: "var(--text-3)" }}>{t.confirmQuestion}</span>
           <motion.button onClick={confirm}
             whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.93 }}
             transition={{ type: "spring", stiffness: 420, damping: 26 }}
             className="inline-flex items-center gap-1 text-[11.5px] font-semibold px-2.5 py-1 rounded-lg"
             style={{ color: "#fff", background: "#16a34a" }}>
-            <CheckCircle size={12} weight="fill" /> Yes
+            <CheckCircle size={12} weight="fill" /> {t.yes}
           </motion.button>
           <motion.button onClick={() => setState("idle")}
             whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.92 }}
@@ -79,7 +81,7 @@ export default function OdemeButon({ feeId }: { feeId: string }) {
             animate={{ opacity: [1, 0.3, 1] }}
             transition={{ repeat: Infinity, duration: 1.2 }}
           >
-            Saving…
+            {t.saving}
           </motion.span>
         </motion.div>
       )}
