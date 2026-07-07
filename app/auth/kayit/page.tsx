@@ -14,6 +14,7 @@ export default function KayitPage() {
   const [showPw,  setShowPw]  = useState(false);
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState("");
+  const [confirmSent, setConfirmSent] = useState(false);
 
   const supabase = createClient();
   const router   = useRouter();
@@ -54,6 +55,14 @@ export default function KayitPage() {
       return;
     }
 
+    const json = await res.json();
+    if (json.needsConfirmation) {
+      // Service key olmadan anon kayıt — kullanıcı e-postasını onaylayacak
+      setConfirmSent(true);
+      setLoading(false);
+      return;
+    }
+
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: form.email,
       password: form.password,
@@ -74,6 +83,34 @@ export default function KayitPage() {
     { id: "officeName", label: t.officeName,  Icon: Buildings,       type: "text",     placeholder: t.officeNamePlaceholder,  autoComplete: "organization", optional: true },
     { id: "email",      label: t.email,       Icon: EnvelopeSimple,  type: "email",    placeholder: t.emailPlaceholder,       autoComplete: "email"        },
   ] as const;
+
+  if (confirmSent) {
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center p-8" style={{ background: "#f6f5f2" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: EASE }}
+          className="w-full max-w-[400px] text-center"
+        >
+          <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-5"
+            style={{ background: "#0d1b2e" }}>
+            <EnvelopeSimple size={22} weight="fill" style={{ color: "#9db8d9" }} />
+          </div>
+          <h1 className="text-[22px] font-bold tracking-[-0.03em] mb-2" style={{ color: "var(--text-1)" }}>
+            {t.confirmTitle}
+          </h1>
+          <p className="text-[13.5px] leading-relaxed" style={{ color: "var(--text-3)" }}>
+            {t.confirmBody.replace("{email}", form.email)}
+          </p>
+          <a href="/auth/giris" className="inline-block mt-6 text-[13px] font-medium underline underline-offset-4"
+            style={{ color: "var(--text-1)", textDecorationColor: "#c85460" }}>
+            {t.signInLink}
+          </a>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[100dvh] flex">

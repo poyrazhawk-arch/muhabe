@@ -8,29 +8,50 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  const admin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const metadata = { full_name: fullName, office_name: officeName || null };
 
-  // Create user with email already confirmed — no verification email sent
+  // 1) Tercih edilen yol: service key ile onaysız kullanıcı (tek adımda giriş)
+  const admin = createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
   const { data, error } = await admin.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
-    user_metadata: {
-      full_name: fullName,
-      office_name: officeName || null,
-    },
+    user_metadata: metadata,
   });
 
-  if (error) {
-    if (error.message.includes("already been registered") || error.message.includes("already exists")) {
-      return NextResponse.json({ error: "This email is already registered. Sign in instead." }, { status: 409 });
-    }
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!error) {
+    return NextResponse.json({ success: true, needsConfirmation: false, userId: data.user?.id });
   }
 
-  return NextResponse.json({ success: true, userId: data.user?.id });
+  if (error.message.includes("already been registered") || error.message.includes("already exists")) {
+    return NextResponse.json({ error: "This email is already registered. Sign in instead." }, { status: 409 });
+  }
+
+  // 2) Service key geçersizse (ör. env hatası) kayıt kapısını kapatma:
+  //    anon signUp ile devam et — kullanıcı e-postasını onaylayıp girer.
+  const anon = createClient(url, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.ledgerapp.online";
+
+  const { data: anonData, error: anonError } = await anon.auth.signUp({
+    email,
+    password,
+    options: { data: metadata, emailRedirectTo: appUrl },
+  });
+
+  if (anonError) {
+    if (anonError.message.includes("already registered")) {
+      return NextResponse.json({ error: "This email is already registered. Sign in instead." }, { status: 409 });
+    }
+    return NextResponse.json({ error: anonError.message }, { status: 500 });
+  }
+
+  return NextResponse.json({
+    success: true,
+    needsConfirmation: !anonData.session,
+    userId: anonData.user?.id,
+  });
 }
