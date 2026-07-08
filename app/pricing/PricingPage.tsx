@@ -15,7 +15,7 @@ import {
   CaretDown,
   Notebook,
 } from "@phosphor-icons/react";
-import { useDict } from "@/lib/i18n/LocaleContext";
+import { useDict, useLocale } from "@/lib/i18n/LocaleContext";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 const fadeUp = (delay = 0) => ({
@@ -48,6 +48,11 @@ function annualPrice(monthly: number) {
 
 export default function PricingPage() {
   const t = useDict().pricing;
+  const locale = useLocale();
+  // Bölgesel fiyatlandırma — Türkiye piyasasına göre ₺, yurt dışına €
+  const PRICES = locale === "tr"
+    ? { sym: "₺", starter: 300, pro: 600, office: 900 }
+    : { sym: "€", starter: 20,  pro: 40,  office: 70  };
   const [annual, setAnnual]       = useState(false);
   const [openFaq, setOpenFaq]     = useState<number | null>(null);
   const [loading, setLoading]     = useState<string | null>(null);
@@ -57,7 +62,7 @@ export default function PricingPage() {
     {
       id: "starter",
       name: t.planStarterName,
-      monthly: 29,
+      monthly: PRICES.starter,
       limits: t.planStarterLimits,
       highlight: false,
       features: t.planStarterFeatures as string[],
@@ -65,7 +70,7 @@ export default function PricingPage() {
     {
       id: "pro",
       name: t.planProName,
-      monthly: 59,
+      monthly: PRICES.pro,
       limits: t.planProLimits,
       highlight: true,
       badge: t.planProBadge as string,
@@ -74,7 +79,7 @@ export default function PricingPage() {
     {
       id: "office",
       name: t.planOfficeName,
-      monthly: 99,
+      monthly: PRICES.office,
       limits: t.planOfficeLimits,
       highlight: false,
       features: t.planOfficeFeatures as string[],
@@ -460,7 +465,7 @@ export default function PricingPage() {
                     lineHeight: 1,
                   }}
                 >
-                  £{price}
+                  {PRICES.sym}{price}
                 </span>
                 <span
                   style={{

@@ -78,7 +78,7 @@ function buildColdEmailHtml(lead: Lead, template: string): string {
           <li>Bulk client email notifications</li>
         </ul>
         <p>
-          Plans start from <strong>£29/month</strong> — with a free 14-day trial.
+          Plans start from <strong>€20/month</strong> — with a free 14-day trial.
         </p>
         <p>
           Would you like to see a demo? Just reply to this email.
