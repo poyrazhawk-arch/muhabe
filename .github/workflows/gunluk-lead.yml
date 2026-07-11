@@ -1,0 +1,43 @@
+name: Daily lead scrape
+
+# Scrapes ~100 accountant leads each morning and pushes them to the app's
+# ingest endpoint. A few hours later the Vercel cron (/api/cron/gunluk-lead)
+# emails them. Runs daily at 07:00 UTC; also runnable on demand.
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      # Only needed when USE_STEALTH=1 (JS-heavy sources). Harmless otherwise.
+      - name: Install browser (stealth mode)
+        if: ${{ vars.USE_STEALTH == '1' }}
+        run: scrapling install
+
+      - name: Scrape and ingest leads
+        env:
+          APP_URL: ${{ vars.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          LEADS_SOURCE_URL: ${{ vars.LEADS_SOURCE_URL }}
+          SEL_ITEM: ${{ vars.SEL_ITEM }}
+          SEL_NAME: ${{ vars.SEL_NAME }}
+          SEL_EMAIL: ${{ vars.SEL_EMAIL }}
+          SEL_PHONE: ${{ vars.SEL_PHONE }}
+          SEL_CITY: ${{ vars.SEL_CITY }}
+          SEL_RATING: ${{ vars.SEL_RATING }}
+          TARGET_LEADS: ${{ vars.TARGET_LEADS }}
+          MAX_PAGES: ${{ vars.MAX_PAGES }}
+          USE_STEALTH: ${{ vars.USE_STEALTH }}
+        run: python scripts/scrape_leads.py

@@ -41,3 +41,7 @@ turmob_odalar.py
 turmob_scraper.py
 test_sites.py
 test_sites2.py
+
+# Python
+__pycache__/
+*.pyc

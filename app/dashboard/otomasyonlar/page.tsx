@@ -49,6 +49,16 @@ export default async function OtomasyonlarPage() {
       bg: "#f0fdf4",
       border: "#bbf7d0",
     },
+    {
+      id: "gunluk-lead",
+      baslik: t.dailyLeadTitle,
+      aciklama: t.dailyLeadDesc,
+      zamanlama: t.dailyLeadSchedule,
+      endpoint: "/api/cron/gunluk-lead",
+      renk: "#ea580c",
+      bg: "#fff7ed",
+      border: "#fed7aa",
+    },
   ];
 
   return (

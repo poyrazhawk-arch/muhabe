@@ -652,6 +652,9 @@ export const dictionaries = {
       monthlySummaryTitle: "Monthly Summary Email",
       monthlySummaryDesc: "Sends each client a summary of completed tasks, approved documents, and pending items for the month.",
       monthlySummarySchedule: "28th of every month, 09:00",
+      dailyLeadTitle: "Daily Lead Outreach",
+      dailyLeadDesc: "Pulls up to 100 freshly scraped accountant leads and sends each a cold outreach email via Resend, then marks them contacted so none are emailed twice.",
+      dailyLeadSchedule: "Daily at 10:00",
       // OtomasyonTetikle
       running: "Running…",
       done: "Done",
@@ -1340,6 +1343,9 @@ export const dictionaries = {
       monthlySummaryTitle: "Aylık Özet E-postası",
       monthlySummaryDesc: "Her müşteriye tamamlanan görevler, onaylanan belgeler ve bekleyen öğelerin aylık özetini gönderir.",
       monthlySummarySchedule: "Her ayın 28'i, 09:00",
+      dailyLeadTitle: "Günlük Lead Kampanyası",
+      dailyLeadDesc: "Scrapling ile toplanan 100 muhasebeci lead'ini çekip her birine Resend ile tanıtım e-postası gönderir, ardından tekrar gönderilmemesi için iletişim kuruldu olarak işaretler.",
+      dailyLeadSchedule: "Her gün 10:00",
       // OtomasyonTetikle
       running: "Çalışıyor…",
       done: "Tamamlandı",
