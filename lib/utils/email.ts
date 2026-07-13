@@ -120,9 +120,14 @@ export async function sendFeeInvoiceEmail(p: {
 
 // ── 5. Accountant: upcoming deadline digest ──────────────────────────────────
 export async function sendDeadlineDigest(p: {
-  to: string; accountantName: string;
+  to: string; accountantName: string; locale?: "tr" | "en";
   deadlines: { title: string; dueDate: string; daysLeft: number }[];
 }) {
+  const tr = p.locale === "tr";
+  const daysLabel = (n: number) =>
+    tr ? (n === 0 ? "Bugün" : n === 1 ? "Yarın" : `${n} gün`)
+       : (n === 0 ? "Today" : n === 1 ? "Tomorrow" : `${n} days`);
+
   const rows = p.deadlines.map(d => {
     const color = d.daysLeft <= 3 ? "#dc2626" : d.daysLeft <= 7 ? "#d97706" : "#2563eb";
     return `
@@ -132,17 +137,19 @@ export async function sendDeadlineDigest(p: {
           <p style="margin:2px 0 0;font-size:12px;color:#6b7280">${d.dueDate}</p>
         </div>
         <span style="font-size:12px;font-weight:700;color:${color};white-space:nowrap;margin-left:12px">
-          ${d.daysLeft === 0 ? "Today" : d.daysLeft === 1 ? "Tomorrow" : `${d.daysLeft} days`}
+          ${daysLabel(d.daysLeft)}
         </span>
       </div>`;
   }).join("");
 
   return resend().emails.send({
     from: FROM, to: p.to,
-    subject: `${p.deadlines.length} upcoming UK tax deadline${p.deadlines.length === 1 ? "" : "s"}`,
+    subject: tr
+      ? `Önümüzdeki 14 günde ${p.deadlines.length} son tarih`
+      : `${p.deadlines.length} deadline${p.deadlines.length === 1 ? "" : "s"} in the next 14 days`,
     html: layout(`
-      <h2 style="color:#111827;font-size:17px;font-weight:700;margin:0 0 6px">Upcoming deadlines</h2>
-      <p style="color:#6b7280;font-size:13px;margin:0 0 20px">Next 14 days · UK tax calendar</p>
+      <h2 style="color:#111827;font-size:17px;font-weight:700;margin:0 0 6px">${tr ? "Yaklaşan son tarihler" : "Upcoming deadlines"}</h2>
+      <p style="color:#6b7280;font-size:13px;margin:0 0 20px">${tr ? "Önümüzdeki 14 gün" : "Next 14 days"}</p>
       ${rows}
     `, p.accountantName),
   });

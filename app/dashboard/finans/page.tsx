@@ -9,6 +9,7 @@ import RemindOverdueButton from "./RemindOverdueButton";
 import { getLocale } from "@/lib/i18n/server";
 import { getDict } from "@/lib/i18n/dictionaries";
 import { formatMoney } from "@/lib/utils/currency";
+import WhatsAppLink from "@/components/WhatsAppLink";
 
 export default async function FinansPage() {
   const locale = await getLocale();
@@ -32,7 +33,7 @@ export default async function FinansPage() {
 
   const [{ data: fees }, { data: clients }] = await Promise.all([
     supabase.from("service_fees")
-      .select("*, clients(full_name, company_name, email, portal_token)")
+      .select("*, clients(full_name, company_name, email, phone, portal_token)")
       .eq("accountant_id", accountant!.id)
       .order("status")
       .order("period_year", { ascending: false })
@@ -230,6 +231,10 @@ export default async function FinansPage() {
                         )}
                         {fee.status !== "paid" && (
                           <>
+                            <WhatsAppLink
+                              phone={client?.phone}
+                              message={`Merhaba ${client?.full_name ?? ""}, ${format(ay, "MMMM yyyy", { locale: dateLocale })} dönemi hizmet bedeliniz (${formatMoney(Number(fee.amount), locale)}) ödenmemiş görünüyor. Müsait olduğunuzda ödemenizi rica ederim. İyi çalışmalar.`}
+                            />
                             <SendInvoiceButton feeId={fee.id} clientEmail={client?.email} isOverdue={isOverdue} />
                             {fee.status === "pending" && <OdemeButon feeId={fee.id} />}
                           </>

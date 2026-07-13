@@ -151,6 +151,10 @@ export default async function MusteriDetayPage({ params }: { params: Promise<{ i
                     </div>
                     {!expired && (
                       <div className="flex items-center gap-2 shrink-0 ml-3">
+                        <WhatsAppLink
+                          phone={client.phone}
+                          message={`Merhaba ${client.full_name}, beyanname hazırlığı için belgelerinizi bekliyorum (${tok.document_types.join(", ")}). Şu bağlantıdan birkaç dakikada yükleyebilirsiniz: ${url}`}
+                        />
                         <BelgeHatirlatmaButton tokenId={tok.id} clientEmail={client.email} />
                         <CopyButton url={url} />
                       </div>
@@ -294,4 +298,5 @@ import PortalLinkButton from "./PortalLinkButton";
 import BelgeHatirlatmaButton from "./BelgeHatirlatmaButton";
 import CommsLog from "./CommsLog";
 import GibCard from "./GibCard";
+import WhatsAppLink from "@/components/WhatsAppLink";
 import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
