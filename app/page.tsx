@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import LandingPage from "@/components/LandingPage";
 
 // Supabase bazen magic link kodunu root URL'e atar — buradan yakalıyoruz
 export default async function Home({
@@ -20,5 +21,7 @@ export default async function Home({
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (user) redirect("/dashboard");
-  else redirect("/auth/giris");
+
+  // Çıkış yapmış ziyaretçi: login'e atmak yerine ürünü anlatan vitrin
+  return <LandingPage />;
 }

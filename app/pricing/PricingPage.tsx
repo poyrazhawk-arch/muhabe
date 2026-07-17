@@ -502,6 +502,10 @@ export default function PricingPage() {
                 >
                   {plan.limits}
                 </p>
+                {/* Framing: aylık ücreti günlük maliyete indir */}
+                <p style={{ fontSize: 11, color: plan.highlight ? "#7ca7e0" : "#4b6080", marginTop: 6, fontWeight: 500 }}>
+                  {`${PRICES.sym}${Math.round(price / 30)}${locale === "tr" ? "/gün — bir kahveden ucuz" : "/day"}`}
+                </p>
               </div>
 
               {/* CTA */}

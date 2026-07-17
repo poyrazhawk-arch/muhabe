@@ -47,7 +47,8 @@ export async function middleware(request: NextRequest) {
   const isApiRoute      = path.startsWith("/api");
   const isPricingPage   = path === "/pricing";
   const isPortalPage    = path.startsWith("/portal");
-  const isPublicPage    = isAuthPage || isUploadPage || isApiRoute || isPricingPage || isPortalPage || path === "/";
+  const isLegalPage     = path === "/gizlilik";
+  const isPublicPage    = isAuthPage || isUploadPage || isApiRoute || isPricingPage || isPortalPage || isLegalPage || path === "/";
   const isPasswordReset = path === "/auth/sifremi-guncelle";
 
   // Not logged in → login page
