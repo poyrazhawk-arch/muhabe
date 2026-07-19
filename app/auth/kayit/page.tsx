@@ -4,10 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
-import { useDict } from "@/lib/i18n/LocaleContext";
-import { EnvelopeSimple, Lock, Eye, EyeSlash, User, ArrowRight, Buildings, Notebook, CheckCircle } from "@phosphor-icons/react";
+import { useDict, useLocale } from "@/lib/i18n/LocaleContext";
+import { EnvelopeSimple, Lock, Eye, EyeSlash, User, ArrowRight, Buildings, Notebook, Check, EnvelopeOpen } from "@phosphor-icons/react";
 
 const EASE: [number,number,number,number] = [0.22, 1, 0.36, 1];
+const INK = "#081120";
+const RED = "#c85460";
 
 export default function KayitPage() {
   const [form, setForm] = useState({ fullName: "", email: "", password: "", officeName: "" });
@@ -19,12 +21,9 @@ export default function KayitPage() {
   const supabase = createClient();
   const router   = useRouter();
   const t = useDict().auth;
+  const locale = useLocale();
 
-  const PERKS = [
-    { Icon: CheckCircle, text: t.perk1 },
-    { Icon: CheckCircle, text: t.perk2 },
-    { Icon: CheckCircle, text: t.perk3 },
-  ];
+  const PERKS = [t.perk1, t.perk2, t.perk3];
 
   function set(field: string) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -57,7 +56,6 @@ export default function KayitPage() {
 
     const json = await res.json();
     if (json.needsConfirmation) {
-      // Service key olmadan anon kayıt — kullanıcı e-postasını onaylayacak
       setConfirmSent(true);
       setLoading(false);
       return;
@@ -78,34 +76,30 @@ export default function KayitPage() {
     router.refresh();
   }
 
-  const fields = [
-    { id: "fullName",   label: t.fullName,    Icon: User,            type: "text",     placeholder: t.fullNamePlaceholder,    autoComplete: "name"         },
-    { id: "officeName", label: t.officeName,  Icon: Buildings,       type: "text",     placeholder: t.officeNamePlaceholder,  autoComplete: "organization", optional: true },
-    { id: "email",      label: t.email,       Icon: EnvelopeSimple,  type: "email",    placeholder: t.emailPlaceholder,       autoComplete: "email"        },
-  ] as const;
-
+  // ── E-posta onayı bekleniyor ekranı ───────────────────────
   if (confirmSent) {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center p-8" style={{ background: "#f6f5f2" }}>
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: EASE }}
-          className="w-full max-w-[400px] text-center"
+          className="w-full max-w-[420px] text-center"
         >
-          <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-5"
-            style={{ background: "#0d1b2e" }}>
-            <EnvelopeSimple size={22} weight="fill" style={{ color: "#9db8d9" }} />
+          <div className="mx-auto mb-6 flex items-center justify-center"
+            style={{ width: 52, height: 52, borderRadius: 14, background: INK }}>
+            <EnvelopeOpen size={24} weight="fill" style={{ color: "#9db8d9" }} />
           </div>
-          <h1 className="text-[22px] font-bold tracking-[-0.03em] mb-2" style={{ color: "var(--text-1)" }}>
+          <h1 className="text-[24px] font-bold tracking-[-0.035em] mb-3" style={{ color: INK }}>
             {t.confirmTitle}
           </h1>
-          <p className="text-[13.5px] leading-relaxed" style={{ color: "var(--text-3)" }}>
-            {t.confirmBody.replace("{email}", form.email)}
+          <p className="text-[14px] leading-relaxed mb-2" style={{ color: "#5a6577" }}>
+            {t.confirmBody}
           </p>
-          <a href="/auth/giris" className="inline-block mt-6 text-[13px] font-medium underline underline-offset-4"
-            style={{ color: "var(--text-1)", textDecorationColor: "#c85460" }}>
-            {t.signInLink}
+          <p className="text-[13px] font-semibold mb-8" style={{ color: INK }}>{form.email}</p>
+          <a href="/auth/giris"
+            className="inline-flex items-center gap-2 text-[13px] font-semibold px-5 py-2.5 rounded-lg transition-opacity hover:opacity-85"
+            style={{ background: INK, color: "#f2f5f9" }}>
+            {t.signInLink} <ArrowRight size={14} weight="bold" />
           </a>
         </motion.div>
       </div>
@@ -115,186 +109,205 @@ export default function KayitPage() {
   return (
     <div className="min-h-[100dvh] flex">
 
-      {/* ── Left — Brand panel ──────────────────────────────────── */}
-      <div className="hidden lg:flex flex-col w-[52%] relative overflow-hidden noise"
-        style={{ background: "linear-gradient(160deg, #07101d 0%, #0b1629 50%, #07111e 100%)" }}>
+      {/* ── Sol — Defter paneli ─────────────────────────────── */}
+      <div className="hidden lg:flex flex-col w-[55%] relative overflow-hidden noise" style={{ background: INK }}>
+        {/* Defter satır çizgileri */}
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: "repeating-linear-gradient(to bottom, transparent 0px, transparent 31px, rgba(139,168,204,0.055) 31px, rgba(139,168,204,0.055) 32px)" }} />
+        {/* Cilt payı */}
+        <div className="absolute top-0 bottom-0 pointer-events-none" style={{ left: 76, width: 1, background: "rgba(200,84,96,0.32)" }} />
+        <div className="absolute top-0 bottom-0 pointer-events-none" style={{ left: 81, width: 1, background: "rgba(200,84,96,0.16)" }} />
+        {/* Delgeç delikleri */}
+        {[18, 46, 82].map(top => (
+          <div key={top} className="absolute pointer-events-none rounded-full"
+            style={{
+              left: 34, top: `${top}%`, width: 11, height: 11, background: "#040a14",
+              boxShadow: "inset 0 1px 2px rgba(0,0,0,0.8), 0 1px 0 rgba(139,168,204,0.07)",
+            }} />
+        ))}
 
-        <div className="absolute inset-0 pointer-events-none dot-grid" />
+        <motion.span
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 1, ease: EASE }}
+          className="absolute top-8 right-10 text-[10.5px] tabular-nums select-none"
+          style={{ fontFamily: "var(--font-mono)", color: "#31465e", letterSpacing: "0.14em" }}
+        >
+          {locale === "tr" ? "YENİ KAYIT · 2026" : "NEW ACCOUNT · 2026"}
+        </motion.span>
 
-        {/* Accent glows */}
-        <div className="absolute pointer-events-none" style={{
-          top: "20%", left: "30%", width: 360, height: 360,
-          background: "radial-gradient(circle, rgba(37,99,235,0.1) 0%, transparent 70%)",
-          borderRadius: "50%",
-        }} />
-        <div className="absolute pointer-events-none" style={{
-          bottom: "15%", right: "10%", width: 260, height: 260,
-          background: "radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 70%)",
-          borderRadius: "50%",
-        }} />
-
-        <div className="absolute bottom-0 inset-x-0 h-48 pointer-events-none"
-          style={{ background: "linear-gradient(to top, #07101d 0%, transparent 100%)" }} />
-
-        <div className="relative flex flex-col h-full px-12 py-10">
+        <div className="relative flex flex-col h-full py-10" style={{ paddingLeft: 108, paddingRight: 56 }}>
           {/* Logo */}
           <motion.div
-            initial={{ opacity: 0, x: -12 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, ease: EASE }}
             className="flex items-center gap-2.5"
           >
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-              style={{
-                background: "linear-gradient(135deg, #3b82f6, #2563eb)",
-                boxShadow: "0 2px 12px rgba(37,99,235,0.5), inset 0 1px 0 rgba(255,255,255,0.18)",
-              }}>
-              <Notebook size={14} weight="fill" style={{ color: "#fff" }} />
+            <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0"
+              style={{ background: "#16283f", border: "1px solid rgba(139,168,204,0.18)" }}>
+              <Notebook size={14} weight="fill" style={{ color: "#9db8d9" }} />
             </div>
-            <span className="text-[14px] font-bold text-white tracking-tight">Ledger</span>
+            <span className="text-[14px] font-bold tracking-tight" style={{ color: "#dce6f2" }}>Ledger</span>
           </motion.div>
 
-          {/* Headline */}
-          <div className="flex-1 flex flex-col justify-center">
+          {/* Başlık */}
+          <div className="flex-1 flex flex-col justify-center" style={{ marginTop: -20 }}>
             {[t.signupHero1, t.signupHero2, t.signupHero3].map((line, i) => (
               <motion.span
                 key={line}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.15 + i * 0.1, ease: EASE }}
-                className="block font-bold leading-[1.08] tracking-[-0.035em]"
-                style={{ fontSize: "clamp(28px,3.5vw,40px)", color: i === 2 ? "#93c5fd" : "#dde5f0" }}
+                initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: 0.12 + i * 0.09, ease: EASE }}
+                className="block font-bold"
+                style={{ fontSize: "clamp(28px,3.4vw,42px)", lineHeight: 1.35, letterSpacing: "-0.04em", color: "#e6edf6" }}
               >
-                {line}
+                {i === 2 ? (
+                  <span className="relative inline-block">
+                    {line}
+                    <svg viewBox="0 0 200 8" fill="none" preserveAspectRatio="none"
+                      className="absolute left-0 -bottom-1 w-full pointer-events-none" style={{ height: 8 }}>
+                      <motion.path
+                        d="M2 5.5 C40 2.5, 90 6.5, 198 3.5"
+                        stroke={RED} strokeWidth="2.5" strokeLinecap="round"
+                        initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
+                        transition={{ duration: 0.55, delay: 0.8, ease: EASE }}
+                      />
+                    </svg>
+                  </span>
+                ) : line}
               </motion.span>
             ))}
 
             <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.5, ease: EASE }}
-              className="text-[14px] leading-relaxed mt-5 max-w-[340px]"
-              style={{ color: "#4a6480" }}
+              className="text-[13.5px] mt-6 max-w-[380px]"
+              style={{ color: "#54708e", lineHeight: "32px" }}
             >
               {t.signupHeroSub}
             </motion.p>
 
-            {/* Perks list */}
-            <div className="mt-8 space-y-3">
-              {PERKS.map(({ Icon, text }, i) => (
+            {/* Kazanımlar — defter maddeleri */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.62, ease: EASE }}
+              className="mt-9 max-w-[400px]"
+              style={{ fontFamily: "var(--font-mono)" }}
+            >
+              <p className="text-[10px] font-medium pb-2"
+                style={{ color: "#42607f", letterSpacing: "0.16em", borderBottom: "1px solid rgba(139,168,204,0.16)" }}>
+                {locale === "tr" ? "PAKETE DAHİL" : "INCLUDED"}
+              </p>
+              {PERKS.map((text, i) => (
                 <motion.div
                   key={text}
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.45, delay: 0.6 + i * 0.08, ease: EASE }}
-                  className="flex items-center gap-2.5"
+                  initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: 0.74 + i * 0.07, ease: EASE }}
+                  className="flex items-center gap-2.5 text-[12px]"
+                  style={{ height: 32, lineHeight: "32px" }}
                 >
-                  <Icon size={14} weight="fill" style={{ color: "#3b82f6", flexShrink: 0 }} />
-                  <span className="text-[12.5px]" style={{ color: "#5a7a96" }}>{text}</span>
+                  <Check size={12} weight="bold" style={{ color: RED, flexShrink: 0 }} />
+                  <span style={{ color: "#8fa9c7" }}>{text}</span>
                 </motion.div>
               ))}
-            </div>
-
+            </motion.div>
           </div>
 
-          {/* Bottom metrics */}
+          {/* Alt metrikler */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.9, ease: EASE }}
-            className="flex items-center gap-8 pt-6"
-            style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.95, ease: EASE }}
+            className="flex items-center gap-9 pt-5"
+            style={{ borderTop: "1px solid rgba(139,168,204,0.14)", fontFamily: "var(--font-mono)" }}
           >
             {[
-              { val: "14 days", label: t.metricTrial },
-              { val: "< 2 min", label: t.metricSetup },
-              { val: "EU",      label: t.metricData  },
-            ].map(({ val, label }, i) => (
-              <motion.div
-                key={label}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.95 + i * 0.07, ease: EASE }}
-              >
-                <p className="text-[15px] font-bold text-white tabular-nums">{val}</p>
-                <p className="text-[10px] mt-0.5 uppercase tracking-[0.08em]" style={{ color: "#2d4861" }}>{label}</p>
-              </motion.div>
+              { val: locale === "tr" ? "14 gün" : "14 days", label: t.metricTrial },
+              { val: "< 2 dk",  label: t.metricSetup },
+              { val: "AB",      label: t.metricData  },
+            ].map(({ val, label }) => (
+              <div key={label}>
+                <p className="text-[14px] font-bold tabular-nums" style={{ color: "#dce6f2" }}>{val}</p>
+                <p className="text-[9.5px] mt-0.5 uppercase" style={{ color: "#31465e", letterSpacing: "0.1em" }}>{label}</p>
+              </div>
             ))}
           </motion.div>
         </div>
       </div>
 
-      {/* ── Right — Form panel ──────────────────────────────────── */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8"
-        style={{ background: "#f4f5f7" }}>
+      {/* ── Sağ — Form paneli ───────────────────────────────── */}
+      <div className="flex-1 flex flex-col items-center justify-center p-8" style={{ background: "#f6f5f2" }}>
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: EASE }}
           className="w-full max-w-[360px]"
         >
-          {/* Mobile logo */}
+          {/* Mobil logo */}
           <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #3b82f6, #2563eb)", boxShadow: "0 2px 8px rgba(37,99,235,0.4)" }}>
-              <Notebook size={14} weight="fill" style={{ color: "#fff" }} />
+            <div className="w-7 h-7 rounded-md flex items-center justify-center" style={{ background: INK }}>
+              <Notebook size={14} weight="fill" style={{ color: "#9db8d9" }} />
             </div>
             <span className="text-[14px] font-bold tracking-tight" style={{ color: "var(--text-1)" }}>Ledger</span>
           </div>
 
-          <motion.h2
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
+          <motion.p
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, ease: EASE }}
+            className="text-[10px] font-medium mb-3"
+            style={{ fontFamily: "var(--font-mono)", color: "#a09a8c", letterSpacing: "0.18em" }}
+          >
+            {locale === "tr" ? "HESAP OLUŞTUR" : "CREATE ACCOUNT"}
+          </motion.p>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.05, ease: EASE }}
-            className="text-[24px] font-bold tracking-[-0.035em] mb-1"
+            className="text-[26px] font-bold tracking-[-0.04em] mb-1"
             style={{ color: "var(--text-1)" }}
           >
             {t.createAccountTitle}
-          </motion.h2>
+          </motion.h1>
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             transition={{ duration: 0.4, delay: 0.1, ease: EASE }}
             className="text-[13px] mb-7"
             style={{ color: "var(--text-3)" }}
           >
             {t.haveAccount}{" "}
-            <a href="/auth/giris" className="font-medium" style={{ color: "var(--accent)" }}>{t.signInLink}</a>
+            <a href="/auth/giris" className="font-medium underline underline-offset-4 decoration-1 transition-opacity hover:opacity-70"
+              style={{ color: "var(--text-1)", textDecorationColor: RED }}>
+              {t.signInLink}
+            </a>
           </motion.p>
 
           <form onSubmit={handleSubmit} className="space-y-3.5">
-            {fields.map(({ id, label, Icon, type, placeholder, autoComplete, ...rest }, i) => (
+            {([
+              { id: "fullName",   label: t.fullName,   Icon: User,           type: "text",  placeholder: t.fullNamePlaceholder,   autoComplete: "name",         optional: false },
+              { id: "officeName", label: t.officeName, Icon: Buildings,      type: "text",  placeholder: t.officeNamePlaceholder, autoComplete: "organization", optional: true  },
+              { id: "email",      label: t.email,      Icon: EnvelopeSimple, type: "email", placeholder: t.emailPlaceholder,      autoComplete: "email",        optional: false },
+            ] as const).map(({ id, label, Icon, type, placeholder, autoComplete, optional }, i) => (
               <motion.div
                 key={id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.15 + i * 0.07, ease: EASE }}
               >
                 <label htmlFor={id} className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
                   {label}{" "}
-                  {"optional" in rest && rest.optional && (
-                    <span style={{ color: "var(--text-3)", fontWeight: 400 }}>{t.optional}</span>
-                  )}
+                  {optional && <span style={{ color: "var(--text-3)", fontWeight: 400 }}>{t.optional}</span>}
                 </label>
                 <div className="relative">
                   <Icon size={14} style={{ color: "var(--text-3)", position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)" }} />
                   <input
-                    id={id} type={type} autoComplete={autoComplete}
-                    required={"optional" in rest ? !rest.optional : true}
-                    value={form[id as keyof typeof form]}
-                    onChange={set(id)}
+                    id={id} type={type} autoComplete={autoComplete} required={!optional}
+                    value={form[id as keyof typeof form]} onChange={set(id)}
                     placeholder={placeholder}
-                    className="input-base" style={{ paddingLeft: "34px" }}
+                    className="input-base" style={{ paddingLeft: "34px", background: "#fff" }}
                   />
                 </div>
               </motion.div>
             ))}
 
-            {/* Password field */}
+            {/* Şifre */}
             <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.15 + fields.length * 0.07, ease: EASE }}
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.36, ease: EASE }}
             >
               <label htmlFor="password" className="block text-[12px] font-medium mb-1.5" style={{ color: "var(--text-2)" }}>
                 {t.password}
@@ -306,18 +319,17 @@ export default function KayitPage() {
                   required minLength={8} autoComplete="new-password"
                   value={form.password} onChange={set("password")}
                   placeholder={t.passwordPlaceholder}
-                  className="input-base" style={{ paddingLeft: "34px", paddingRight: "40px" }}
+                  className="input-base" style={{ paddingLeft: "34px", paddingRight: "40px", background: "#fff" }}
                 />
                 <button type="button" onClick={() => setShowPw(v => !v)}
+                  aria-label={showPw ? "Şifreyi gizle" : "Şifreyi göster"}
                   style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--text-3)", background: "none", border: "none", cursor: "pointer", padding: "2px" }}>
                   {showPw ? <EyeSlash size={15} /> : <Eye size={15} />}
                 </button>
               </div>
-              {/* Password strength hint */}
               {form.password.length > 0 && (
                 <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                   className="text-[11px] mt-1"
                   style={{ color: form.password.length < 8 ? "var(--red)" : "#16a34a" }}
                 >
@@ -329,9 +341,7 @@ export default function KayitPage() {
             <AnimatePresence>
               {error && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.97 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.97 }}
+                  initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }}
                   className="px-3.5 py-2.5 rounded-lg text-[12px]"
                   style={{ background: "var(--red-bg)", border: "1px solid var(--red-lt)", color: "var(--red)" }}
                 >
@@ -341,16 +351,14 @@ export default function KayitPage() {
             </AnimatePresence>
 
             <motion.button
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.15 + (fields.length + 1) * 0.07, ease: EASE }}
-              whileHover={{ y: -1 }}
-              whileTap={{ scale: 0.985 }}
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.44, ease: EASE }}
+              whileHover={{ y: -1 }} whileTap={{ scale: 0.985, y: 0 }}
               type="submit" disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-[13px] font-semibold text-white disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-[13px] font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
               style={{
-                background: "var(--accent)",
-                boxShadow: "0 1px 3px rgba(37,99,235,0.35), 0 4px 16px rgba(37,99,235,0.18), inset 0 1px 0 rgba(255,255,255,0.12)",
+                background: INK, color: "#f2f5f9",
+                boxShadow: "0 1px 2px rgba(8,17,32,0.4), 0 6px 20px rgba(8,17,32,0.18)",
               }}
             >
               {loading ? t.creatingAccount : <> {t.createAccount} <ArrowRight size={14} weight="bold" /> </>}
@@ -358,14 +366,13 @@ export default function KayitPage() {
           </form>
 
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             transition={{ duration: 0.4, delay: 0.55, ease: EASE }}
-            className="text-[11px] mt-6 text-center"
+            className="text-[11px] mt-7 text-center"
             style={{ color: "var(--text-3)" }}
           >
             {t.signupTerms}{" "}
-            <span className="underline underline-offset-2 cursor-pointer">{t.termsLink}</span>.
+            <a href="/gizlilik" className="underline underline-offset-2">{t.termsLink}</a>.
           </motion.p>
         </motion.div>
       </div>
