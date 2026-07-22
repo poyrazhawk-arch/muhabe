@@ -57,15 +57,22 @@ export default async function MusteriRaporPage({
   const completedTasks = tasks?.filter(t => t.status === "completed") ?? [];
   const pendingTasks = tasks?.filter(t => t.status !== "completed" && t.status !== "cancelled") ?? [];
 
+  // Görev başlığı verilen anahtarlardan herhangi birini içeriyor ve tamamlanmışsa true
+  // (TR ve EN başlıkları birlikte eşleşir — Türk takvimi "KDV/Muhtasar/..." üretir)
+  const taskDone = (...keys: string[]) =>
+    allTasks?.some(t => t.status === "completed" && keys.some(k => t.title.toLowerCase().includes(k))) ?? false;
+  const docReceived = (...keys: string[]) =>
+    documents?.some(d => d.status !== "pending" && keys.some(k => d.document_type.toLowerCase().includes(k))) ?? false;
+
   const kapanisListesi = [
-    { baslik: t.checklistVatReturn, tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("vat") && t.status === "completed") ?? false },
-    { baslik: t.checklistPayeFiling, tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("paye") && t.status === "completed") ?? false },
-    { baslik: t.checklistCorporationTax, tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("corporation tax") && t.status === "completed") ?? false },
-    { baslik: t.checklistCompanyAccounts, tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("accounts") && t.status === "completed") ?? false },
-    { baslik: t.checklistBankStatements, tamamlandi: documents?.some(d => d.document_type.toLowerCase().includes("bank") && d.status !== "pending") ?? false },
-    { baslik: t.checklistInvoicesReceived, tamamlandi: documents?.some(d => d.document_type.toLowerCase().includes("invoice") && d.status !== "pending") ?? false },
-    { baslik: t.checklistPayrollProcessed, tamamlandi: allTasks?.some(t => t.title.toLowerCase().includes("payroll") && t.status === "completed") ?? false },
-    { baslik: t.checklistTrialBalance, tamamlandi: false },
+    { baslik: t.checklistVatReturn,       tamamlandi: taskDone("kdv", "vat") },
+    { baslik: t.checklistPayeFiling,      tamamlandi: taskDone("muhtasar", "prim hizmet", "paye", "bordro") },
+    { baslik: t.checklistCorporationTax,  tamamlandi: taskDone("kurumlar", "geçici vergi", "gecici vergi", "corporation tax") },
+    { baslik: t.checklistCompanyAccounts, tamamlandi: taskDone("ba-bs", "ba/bs", "form ba", "yıllık", "yillik", "accounts") },
+    { baslik: t.checklistBankStatements,  tamamlandi: docReceived("banka", "ekstre", "hesap", "bank") },
+    { baslik: t.checklistInvoicesReceived, tamamlandi: docReceived("fatura", "invoice") },
+    { baslik: t.checklistPayrollProcessed, tamamlandi: taskDone("sgk", "bordro", "puantaj", "payroll") },
+    { baslik: t.checklistTrialBalance,    tamamlandi: taskDone("mizan", "trial balance") },
   ];
 
   const tamamlananSayisi = kapanisListesi.filter(i => i.tamamlandi).length;

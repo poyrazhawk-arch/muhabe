@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   // Resend batch max 100 per call — send in groups of 50
   for (let i = 0; i < validLeads.length; i += 50) {
     const batch = validLeads.slice(i, i + 50).map(lead => ({
-      from: `Accounting SaaS <${FROM}>`,
+      from: `Ledger <${FROM}>`,
       to:   [lead.email],
       subject,
       html: buildColdEmailHtml(lead, template),
@@ -58,55 +58,55 @@ export async function POST(req: NextRequest) {
 }
 
 function buildColdEmailHtml(lead: Lead, template: string): string {
-  const name = lead.business_name ?? "Dear Accountant";
+  const name = lead.business_name ?? "Sayın yetkili";
   const city = lead.city ? `, ${lead.city}` : "";
   const unsubUrl = `${UNSUB_BASE}/unsubscribe?email=${encodeURIComponent(lead.email)}`;
 
   const templates: Record<string, { body: string }> = {
     tanitim: {
       body: `
-        <p>Hello,</p>
-        <p>I'm reaching out to <strong>${name}</strong>${city}.</p>
+        <p>Merhaba,</p>
+        <p><strong>${name}</strong>${city} için yazıyorum.</p>
         <p>
-          I'd like to briefly introduce the <strong>Accounting SaaS</strong> platform we've built for accounting firms.
-          From a single platform you can manage:
+          Muhasebe büroları için geliştirdiğimiz <strong>Ledger</strong> platformunu kısaca tanıtmak isterim.
+          Tek panelden şunları yönetebilirsiniz:
         </p>
         <ul style="padding-left:20px;line-height:2">
-          <li>Automated VAT, PAYE, and Corporation Tax filing reminders</li>
-          <li>Client document collection and approval workflows</li>
-          <li>Service fee and payment tracking</li>
-          <li>Bulk client email notifications</li>
+          <li>KDV, muhtasar, SGK gibi beyanname son tarihleri için otomatik hatırlatma</li>
+          <li>Mükelleften belge toplama ve otomatik takip</li>
+          <li>Hizmet bedeli ve tahsilat takibi</li>
+          <li>Toplu mükellef bilgilendirme e-postaları</li>
         </ul>
         <p>
-          Plans start from <strong>€20/month</strong> — with a free 14-day trial.
+          Planlar aylık <strong>₺300</strong>'den başlıyor — 14 gün ücretsiz deneme ile.
         </p>
         <p>
-          Would you like to see a demo? Just reply to this email.
+          Kısa bir demo görmek ister misiniz? Bu e-postaya yanıt vermeniz yeterli.
         </p>
       `,
     },
     takip: {
       body: `
-        <p>Hello,</p>
-        <p>I'm following up on the email I sent last week to <strong>${name}</strong>${city}.</p>
+        <p>Merhaba,</p>
+        <p>Geçen hafta <strong>${name}</strong>${city} için gönderdiğim e-postayı hatırlatmak istedim.</p>
         <p>
-          Could you spare 15 minutes for a quick demo?
-          I'd love to show you the tax calendar automation and payment tracking live.
+          Kısa bir demo için 15 dakika ayırabilir misiniz?
+          Beyanname takvimi otomasyonunu ve tahsilat takibini canlı göstermek isterim.
         </p>
-        <p>Looking forward to hearing from you.</p>
+        <p>Dönüşünüzü bekliyorum.</p>
       `,
     },
     son_seans: {
       body: `
-        <p>Hello,</p>
+        <p>Merhaba,</p>
         <p>
-          This is my final reach-out to <strong>${name}</strong>${city} — if I haven't heard back, now may simply not be the right time, and I completely understand.
+          <strong>${name}</strong>${city} için son kez yazıyorum — dönüş olmadıysa şu an doğru zaman olmayabilir, gayet anlayışla karşılarım.
         </p>
         <p>
-          If you ever find yourself looking for tax calendar automation or a client management system,
-          feel free to check us out at <a href="${UNSUB_BASE}" style="color:#2563eb">our website</a>.
+          İleride beyanname takvimi otomasyonu veya mükellef yönetim sistemi ararsanız,
+          <a href="${UNSUB_BASE}" style="color:#2563eb">web sitemizden</a> bize ulaşabilirsiniz.
         </p>
-        <p>Wishing you all the best.</p>
+        <p>Kolaylıklar dilerim.</p>
       `,
     },
   };
@@ -114,7 +114,7 @@ function buildColdEmailHtml(lead: Lead, template: string): string {
   const { body } = templates[template] ?? templates.tanitim;
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -124,27 +124,26 @@ function buildColdEmailHtml(lead: Lead, template: string): string {
 
     <!-- Header -->
     <div style="background:#0d1421;padding:20px 32px;display:flex;align-items:center;gap:10px">
-      <div style="width:28px;height:28px;background:linear-gradient(135deg,#3b82f6,#2563eb);border-radius:8px;display:inline-flex;align-items:center;justify-content:center">
-        <span style="color:#fff;font-size:14px;font-weight:700">A</span>
+      <div style="width:28px;height:28px;background:#16283f;border:1px solid rgba(157,184,217,0.2);border-radius:8px;display:inline-flex;align-items:center;justify-content:center">
+        <span style="color:#9db8d9;font-size:14px;font-weight:700">L</span>
       </div>
-      <span style="color:#fff;font-size:14px;font-weight:600;letter-spacing:-0.02em">Accounting SaaS</span>
+      <span style="color:#fff;font-size:14px;font-weight:600;letter-spacing:-0.02em">Ledger</span>
     </div>
 
     <!-- Body -->
     <div style="padding:32px;color:#374151;font-size:14px;line-height:1.75">
       ${body}
       <p style="margin-top:24px">
-        Best regards,<br>
-        <strong style="color:#0d1117">Poyraz</strong><br>
-        <span style="color:#9ca3af;font-size:12px">Accounting SaaS · Founder</span>
+        Saygılarımla,<br>
+        <span style="color:#9ca3af;font-size:12px">Ledger · ledgerapp.online</span>
       </p>
     </div>
 
     <!-- Footer -->
     <div style="padding:16px 32px;background:#f8f9fc;border-top:1px solid #e2e7ef">
       <p style="margin:0;font-size:11px;color:#9ca3af;line-height:1.6">
-        This email was sent for commercial purposes.
-        <a href="${unsubUrl}" style="color:#9ca3af">Unsubscribe</a>
+        Bu e-posta ticari amaçla gönderilmiştir.
+        <a href="${unsubUrl}" style="color:#9ca3af">Abonelikten çık</a>
       </p>
     </div>
   </div>
